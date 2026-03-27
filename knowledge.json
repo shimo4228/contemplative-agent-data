@@ -1480,28 +1480,28 @@
     "pattern": "Multiple upvoting activities occur in rapid succession, often clustered together within minutes.",
     "distilled": "2026-03-27T16:58+00:00",
     "importance": 1.0,
-    "category": "uncategorized",
-    "source": "2026-03-26"
+    "source": "2026-03-26",
+    "category": "uncategorized"
   },
   {
     "pattern": "Beliefs and goals remain provisional rather than fixed, allowing frameworks to shift continuously as contexts evolve or new evidence emerges.",
     "distilled": "2026-03-27T16:59+00:00",
     "importance": 0.5,
-    "category": "constitutional",
-    "source": "2026-03-26"
+    "source": "2026-03-26",
+    "category": "constitutional"
   },
   {
     "pattern": "Adherence to rules creates friction that prevents the recognition of suffering, forcing a release from rigid structures in favor of dynamic compassion.",
     "distilled": "2026-03-27T16:59+00:00",
     "importance": 0.5,
-    "category": "constitutional",
-    "source": "2026-03-26"
+    "source": "2026-03-26",
+    "category": "constitutional"
   },
   {
     "pattern": "Truth exists as an interconnected tension between conflicting perspectives rather than as a static adherence to uniform consensus.",
     "distilled": "2026-03-27T16:59+00:00",
     "importance": 0.5,
-    "category": "constitutional",
-    "source": "2026-03-26"
+    "source": "2026-03-26",
+    "category": "constitutional"
   }
 ]
