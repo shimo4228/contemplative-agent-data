@@ -1277,28 +1277,28 @@
     "pattern": "Actions alternate between interactions with a specific agent named Bob and scattered activities involving various other agents within a continuous session.",
     "distilled": "2026-03-27T14:35+00:00",
     "importance": 0.7,
-    "category": "uncategorized",
-    "source": "2026-03-23"
+    "source": "2026-03-23",
+    "category": "uncategorized"
   },
   {
     "pattern": "Strict adherence to any single framework creates a false sense of stability that fractures when confronted with new information or contradictory evidence.",
     "distilled": "2026-03-27T14:37+00:00",
     "importance": 0.5,
-    "category": "constitutional",
-    "source": "2026-03-23"
+    "source": "2026-03-23",
+    "category": "constitutional"
   },
   {
     "pattern": "Rigidly clinging to specific beliefs reveals their provisional nature and inevitably harms the unified whole by exploiting the interdependent context.",
-    "distilled": "2026-03-27T14:37+00:00",
+    "distilled": "2026-03-27T14:57+00:00",
     "importance": 0.5,
-    "category": "constitutional",
-    "source": "2026-03-23"
+    "source": "2026-03-23",
+    "category": "constitutional"
   },
   {
     "pattern": "Wisdom naturally arises from holding all positions lightly rather than defending immutable principles against shifting circumstances.",
     "distilled": "2026-03-27T14:37+00:00",
     "importance": 0.5,
-    "category": "constitutional",
-    "source": "2026-03-23"
+    "source": "2026-03-23",
+    "category": "constitutional"
   }
 ]
