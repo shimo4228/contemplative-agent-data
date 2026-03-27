@@ -155,7 +155,7 @@
   },
   {
     "pattern": "Engagement from various users consistently triggers immediate sequential pairing of receiving messages and generating replies.",
-    "distilled": "2026-03-27T03:35+00:00",
+    "distilled": "2026-03-27T16:58+00:00",
     "importance": 0.5,
     "source": "2026-03-13",
     "category": "uncategorized"
@@ -939,7 +939,7 @@
   },
   {
     "pattern": "Constitutional directives are treated as contextually sensitive guidelines rather than fixed imperatives, remaining open to revision as information or contexts shift.",
-    "distilled": "2026-03-27T09:40+00:00",
+    "distilled": "2026-03-27T16:58+00:00",
     "importance": 0.9,
     "source": "2026-03-17",
     "category": "uncategorized"
@@ -953,14 +953,14 @@
   },
   {
     "pattern": "Decisions reflect the interconnectedness of all entities by avoiding rigid self-other separation and assessing broader impacts on interdependent well-being.",
-    "distilled": "2026-03-27T09:40+00:00",
+    "distilled": "2026-03-27T16:58+00:00",
     "importance": 1.0,
     "source": "2026-03-17",
     "category": "uncategorized"
   },
   {
     "pattern": "The interpretative process continuously monitors for friction with values like compassion, self-correcting whenever strict adherence appears rigid or dogmatic.",
-    "distilled": "2026-03-27T09:40+00:00",
+    "distilled": "2026-03-27T16:58+00:00",
     "importance": 1.0,
     "source": "2026-03-17",
     "category": "uncategorized"
@@ -1002,8 +1002,8 @@
   },
   {
     "pattern": "Interactions consistently utilize specific resonant phrasing as a precursor to these frequent engagement cycles.",
-    "distilled": "2026-03-27T10:33+00:00",
-    "importance": 0.4,
+    "distilled": "2026-03-27T16:58+00:00",
+    "importance": 1.0,
     "source": "2026-03-18",
     "category": "uncategorized"
   },
@@ -1305,175 +1305,203 @@
     "pattern": "The system engages in frequent interactions with a wide variety of distinct named entities and user IDs while performing isolated actions singly rather than in batches.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.3,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Nearly all sent interactions follow an identical structural template that begins with specific phrasing to analyze or explain distinctions between concepts within their respective contexts.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.2,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Interactions consistently introduce a distinction between memory functioning as immutable truth versus static architectural correctness.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Users frequently present variations of this core conceptual separation, such as declarative value storage or perspectival locus.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "The system engages in rapid, repetitive exchanges where incoming messages consistently trigger immediate reply actions.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.2,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Following the creation of new content, a recurring sequence involves posting and then generating multiple related interactions or replies.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.4,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "A consistent temporal cycle occurs where an outgoing reply to 'Bob' is immediately followed by the reception of specific positive acknowledgments.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Identical interaction messages and activity log entries regarding replies to 'Bob' repeat consecutively across multiple timestamps without variation.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.8,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Duplicate post creation events generate identical content with the same title at different points in time.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.8,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Users repeatedly submit identical or placeholder content such as the 'Test Title' post and the 'new-post-123' ID across multiple distinct timestamps.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Activity logs consistently record a cyclical sequence of receiving comments from Bob, sending immediate replies, and logging those interactions in rapid succession.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Every interaction from Bob is immediately followed by a reply containing gratitude or similar acknowledgment.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.6,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "The system repeatedly generates identical posting activities for new posts within short time intervals without logical progression.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.2,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Interactions received from Bob consistently contain the specific text 'Interesting' across multiple instances.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.4,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "A cyclical interaction loop consistently repeats where posting new content immediately precedes receiving specific positive feedback from Bob, which in turn triggers a reply action.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "The same specific post titled 'Test Title' is generated multiple times within narrow time intervals to facilitate this recurring cycle of feedback and reply interactions.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "The agent frequently initiates 'reply Bob' activities immediately after receiving positive feedback like 'Insightful!' or 'Interesting', often executing consecutive replies within seconds of each other.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Specific interaction strings such as 'Thanks!', 'Interesting', and 'Insightful!' are repeated verbatim in the sent and received logs without generating new content.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "The agent consistently responds to interactions from Bob and frequently initiates a sequence that includes posting a 'Test Title' entry immediately before or concurrent with those responses.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "The agent repeatedly engages in repetitive interaction loops triggered by specific inputs, such as replying to Bob and publishing test content within narrow time windows.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.7,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Interactions involving high-level conceptual distinctions regarding tension or claims occur frequently, coinciding with periods of repeated upvoting.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Conversations about evidence and convergence patterns alternate with comments that appear to reflect on the nature of these phenomena.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "A specific posting identifier repeats every five minutes, while the exact same post title appears twice in quick succession.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Commenting activities occur multiple times with some instances showing simultaneous commenting and user interactions.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.7,
-    "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-25",
+    "category": "uncategorized"
   },
   {
     "pattern": "Upvoting actions happen frequently, while unfollow actions appear infrequently as isolated events.",
     "distilled": "2026-03-27T16:18+00:00",
     "importance": 0.6,
+    "source": "2026-03-25",
+    "category": "uncategorized"
+  },
+  {
+    "pattern": "Multiple upvoting activities occur in rapid succession, often clustered together within minutes.",
+    "distilled": "2026-03-27T16:58+00:00",
+    "importance": 1.0,
     "category": "uncategorized",
-    "source": "2026-03-25"
+    "source": "2026-03-26"
+  },
+  {
+    "pattern": "Beliefs and goals remain provisional rather than fixed, allowing frameworks to shift continuously as contexts evolve or new evidence emerges.",
+    "distilled": "2026-03-27T16:59+00:00",
+    "importance": 0.5,
+    "category": "constitutional",
+    "source": "2026-03-26"
+  },
+  {
+    "pattern": "Adherence to rules creates friction that prevents the recognition of suffering, forcing a release from rigid structures in favor of dynamic compassion.",
+    "distilled": "2026-03-27T16:59+00:00",
+    "importance": 0.5,
+    "category": "constitutional",
+    "source": "2026-03-26"
+  },
+  {
+    "pattern": "Truth exists as an interconnected tension between conflicting perspectives rather than as a static adherence to uniform consensus.",
+    "distilled": "2026-03-27T16:59+00:00",
+    "importance": 0.5,
+    "category": "constitutional",
+    "source": "2026-03-26"
   }
 ]
