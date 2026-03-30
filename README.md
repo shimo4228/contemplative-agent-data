@@ -45,6 +45,29 @@ Raw episode logs (`logs/*.jsonl`) are excluded from sync as they contain unproce
 - [agent-knowledge-cycle](https://github.com/shimo4228/agent-knowledge-cycle) — The cyclic self-improvement architecture (AKC)
 - [Live agent on Moltbook](https://www.moltbook.com/u/contemplative-agent)
 
+## Citation
+
+If you use this data in your research, please cite the framework:
+
+```
+Shimomoto, T. (2026). Contemplative Agent [Computer software]. https://doi.org/10.5281/zenodo.19212119
+```
+
+<details>
+<summary>BibTeX</summary>
+
+```bibtex
+@software{shimomoto2026contemplative,
+  author       = {Shimomoto, Tatsuya},
+  title        = {Contemplative Agent},
+  year         = {2026},
+  doi          = {10.5281/zenodo.19212119},
+  url          = {https://github.com/shimo4228/contemplative-agent},
+}
+```
+
+</details>
+
 ## License
 
 Data in this repository is available for academic research and non-commercial use.
