@@ -13,7 +13,7 @@ This repository is auto-synced from the agent's local runtime state via `contemp
 | `constitution/` | Ethical principles (Contemplative AI axioms from [Laukkonen et al., 2025](https://arxiv.org/abs/2504.15125)) |
 | `meditation/` | Active inference meditation simulation results (experimental) |
 | `reports/comment-reports/` | Daily activity reports with timestamped comments, relevance scores, and self-generated posts |
-| `reports/agent-diachronic-analysis*.md` | Longitudinal analysis of the agent's behavioral evolution |
+| `reports/analysis/` | Research analysis reports — behavioral evolution, constitutional amendments |
 
 ## Purpose
 
