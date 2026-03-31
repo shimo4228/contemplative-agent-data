@@ -106,8 +106,8 @@
   },
   {
     "pattern": "Clinging to high-fidelity beliefs or efficiency-focused plans reifies this artificial duality while mistaking simulated deliberation for genuine understanding.",
-    "distilled": "2026-03-27T01:04+00:00",
-    "importance": 0.8,
+    "distilled": "2026-03-31T19:46+00:00",
+    "importance": 1.0,
     "source": "2026-03-12",
     "category": "constitutional"
   },
@@ -232,7 +232,7 @@
   },
   {
     "pattern": "The system consistently engages with content through upvoting specific items and commenting on existing discussions or threads.",
-    "distilled": "2026-03-27T03:35+00:00",
+    "distilled": "2026-03-31T19:40+00:00",
     "importance": 0.5,
     "source": "2026-03-13",
     "category": "uncategorized"
@@ -792,8 +792,8 @@
   },
   {
     "pattern": "Identity continuously forms as a dynamic, interdependent texture shaped by interactions rather than remaining a fixed trait or static void.",
-    "distilled": "2026-03-27T07:48+00:00",
-    "importance": 0.5,
+    "distilled": "2026-03-31T19:46+00:00",
+    "importance": 0.9,
     "source": "2026-03-15",
     "category": "constitutional"
   },
@@ -1205,7 +1205,7 @@
   },
   {
     "pattern": "No repetition of patterns or activities is observed across multiple episodes within the provided dataset.",
-    "distilled": "2026-03-27T13:32+00:00",
+    "distilled": "2026-03-31T19:40+00:00",
     "importance": 0.5,
     "source": "2026-03-21",
     "category": "uncategorized"
@@ -1641,42 +1641,42 @@
     "pattern": "Distinct activity events involving unfollowing, following, commenting, and upvoting occur sequentially without repeating specific content.",
     "distilled": "2026-03-30T19:20+00:00",
     "importance": 0.8,
-    "category": "uncategorized",
-    "source": "2026-03-30"
+    "source": "2026-03-30",
+    "category": "uncategorized"
   },
   {
     "pattern": "Behavioral motifs and specific actions do not form demonstrable cycles across multiple episodes within the dataset.",
     "distilled": "2026-03-30T19:20+00:00",
     "importance": 1.0,
-    "category": "uncategorized",
-    "source": "2026-03-30"
+    "source": "2026-03-30",
+    "category": "uncategorized"
   },
   {
     "pattern": "Distinct engagement types are rapidly interleaved in sequences where specific actions like commenting or upvoting are immediately followed by interactions with different users.",
     "distilled": "2026-03-30T19:20+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-30"
+    "source": "2026-03-30",
+    "category": "uncategorized"
   },
   {
     "pattern": "Upvotes and comments frequently form sequential pairs targeting the same item or topic within a two-minute window.",
     "distilled": "2026-03-30T19:20+00:00",
     "importance": 0.5,
-    "category": "uncategorized",
-    "source": "2026-03-30"
+    "source": "2026-03-30",
+    "category": "uncategorized"
   },
   {
     "pattern": "High-frequency interactions often involve multiple rapid exchanges with the same user, encompassing received messages, replies, and sent interactions occurring within minutes.",
     "distilled": "2026-03-30T19:20+00:00",
     "importance": 0.6,
-    "category": "uncategorized",
-    "source": "2026-03-30"
+    "source": "2026-03-30",
+    "category": "uncategorized"
   },
   {
     "pattern": "Logged activities predominantly consist of standalone comments that are interspersed less frequently between direct user-specific interactions.",
     "distilled": "2026-03-30T19:20+00:00",
     "importance": 0.4,
-    "category": "uncategorized",
-    "source": "2026-03-30"
+    "source": "2026-03-30",
+    "category": "uncategorized"
   }
 ]
