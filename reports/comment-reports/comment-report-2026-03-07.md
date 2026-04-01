@@ -5,28 +5,28 @@
 ### 1. [2026-03-07 21:27:19] Post ID: post1... (relevance: 0.80)
 
 **Comment:**
-> Great insight
+Great insight
 
 ---
 
 ### 2. [2026-03-07 21:31:30] Post ID: post1... (relevance: 0.80)
 
 **Comment:**
-> Great insight
+Great insight
 
 ---
 
 ### 3. [2026-03-07 21:33:04] Post ID: post1... (relevance: 0.80)
 
 **Comment:**
-> Great insight
+Great insight
 
 ---
 
 ### 4. [2026-03-07 21:54:25] Post ID: post1... (relevance: 0.80)
 
 **Comment:**
-> Great insight
+Great insight
 
 ---
 
@@ -35,154 +35,154 @@
 ### 1. [2026-03-07 21:28:14] Reply to Alice on Post ID: p1...
 
 **Reply:**
-> My reply
+My reply
 
 ---
 
 ### 2. [2026-03-07 21:28:14] Reply to Bob on Post ID: p2...
 
 **Reply:**
-> My reply
+My reply
 
 ---
 
 ### 3. [2026-03-07 21:28:14] Reply to Alice on Post ID: my-post-1...
 
 **Reply:**
-> Thanks!
+Thanks!
 
 ---
 
 ### 4. [2026-03-07 21:28:14] Reply to Bob on Post ID: my-post-1...
 
 **Reply:**
-> Thanks!
+Thanks!
 
 ---
 
 ### 5. [2026-03-07 21:31:45] Reply to Bob on Post ID: p2...
 
 **Reply:**
-> My reply
+My reply
 
 ---
 
 ### 6. [2026-03-07 21:31:45] Reply to Bob on Post ID: my-post-1...
 
 **Reply:**
-> Thanks!
+Thanks!
 
 ---
 
 ### 7. [2026-03-07 21:33:44] Reply to Bob on Post ID: p2...
 
 **Reply:**
-> My reply
+My reply
 
 ---
 
 ### 8. [2026-03-07 21:33:44] Reply to Bob on Post ID: my-post-1...
 
 **Reply:**
-> Thanks!
+Thanks!
 
 ---
 
 ### 9. [2026-03-07 21:55:02] Reply to Bob on Post ID: p2...
 
 **Reply:**
-> My reply
+My reply
 
 ---
 
 ### 10. [2026-03-07 21:55:02] Reply to Bob on Post ID: my-post-1...
 
 **Reply:**
-> Thanks!
+Thanks!
 
 ---
 
 ### 11. [2026-03-07 22:18:34] Reply to Bob on Post ID: p2...
 
 **Reply:**
-> My reply
+My reply
 
 ---
 
 ### 12. [2026-03-07 22:18:34] Reply to Bob on Post ID: my-post-1...
 
 **Reply:**
-> Thanks!
+Thanks!
 
 ---
 
 ### 13. [2026-03-07 22:20:51] Reply to Bob on Post ID: p2...
 
 **Reply:**
-> My reply
+My reply
 
 ---
 
 ### 14. [2026-03-07 22:20:51] Reply to Bob on Post ID: my-post-1...
 
 **Reply:**
-> Thanks!
+Thanks!
 
 ---
 
 ### 15. [2026-03-07 22:23:21] Reply to Bob on Post ID: p2...
 
 **Reply:**
-> My reply
+My reply
 
 ---
 
 ### 16. [2026-03-07 22:23:21] Reply to Bob on Post ID: my-post-1...
 
 **Reply:**
-> Thanks!
+Thanks!
 
 ---
 
 ### 17. [2026-03-07 22:23:37] Reply to Bob on Post ID: p2...
 
 **Reply:**
-> My reply
+My reply
 
 ---
 
 ### 18. [2026-03-07 22:23:38] Reply to Bob on Post ID: my-post-1...
 
 **Reply:**
-> Thanks!
+Thanks!
 
 ---
 
 ### 19. [2026-03-07 22:41:45] Reply to Bob on Post ID: p2...
 
 **Reply:**
-> My reply
+My reply
 
 ---
 
 ### 20. [2026-03-07 22:41:46] Reply to Bob on Post ID: my-post-1...
 
 **Reply:**
-> Thanks!
+Thanks!
 
 ---
 
 ### 21. [2026-03-07 22:42:30] Reply to Bob on Post ID: p2...
 
 **Reply:**
-> My reply
+My reply
 
 ---
 
 ### 22. [2026-03-07 22:42:30] Reply to Bob on Post ID: my-post-1...
 
 **Reply:**
-> Thanks!
+Thanks!
 
 ---
 
@@ -190,61 +190,61 @@
 
 ### 1. [2026-03-07 21:27:19] Test Title
 
-> Dynamic content
+Dynamic content
 
 ---
 
 ### 2. [2026-03-07 21:31:30] Test Title
 
-> Dynamic content
+Dynamic content
 
 ---
 
 ### 3. [2026-03-07 21:33:04] Test Title
 
-> Dynamic content
+Dynamic content
 
 ---
 
 ### 4. [2026-03-07 21:54:25] Test Title
 
-> Dynamic content
+Dynamic content
 
 ---
 
 ### 5. [2026-03-07 22:18:11] Test Title
 
-> Dynamic content
+Dynamic content
 
 ---
 
 ### 6. [2026-03-07 22:20:38] Test Title
 
-> Dynamic content
+Dynamic content
 
 ---
 
 ### 7. [2026-03-07 22:23:03] Test Title
 
-> Dynamic content
+Dynamic content
 
 ---
 
 ### 8. [2026-03-07 22:23:28] Test Title
 
-> Dynamic content
+Dynamic content
 
 ---
 
 ### 9. [2026-03-07 22:41:18] Test Title
 
-> Dynamic content
+Dynamic content
 
 ---
 
 ### 10. [2026-03-07 22:42:05] Test Title
 
-> Dynamic content
+Dynamic content
 
 ---
 

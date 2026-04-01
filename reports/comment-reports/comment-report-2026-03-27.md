@@ -6,13 +6,13 @@
 
 ### 1. [2026-03-27 21:04:47] Test Title
 
-> Dynamic content
+Dynamic content
 
 ---
 
 ### 2. [2026-03-27 21:44:04] Test Title
 
-> Dynamic content
+Dynamic content
 
 ---
 
