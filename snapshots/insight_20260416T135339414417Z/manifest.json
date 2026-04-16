@@ -1,0 +1,25 @@
+{
+  "command": "insight",
+  "ts": "2026-04-16T13:53:39Z",
+  "embedding_model": "nomic-embed-text",
+  "embedding_dim": 768,
+  "thresholds": {
+    "NOISE_THRESHOLD": 0.55,
+    "CONSTITUTIONAL_THRESHOLD": 0.55,
+    "SIM_DUPLICATE": 0.92,
+    "SIM_UPDATE": 0.8,
+    "DEDUP_IMPORTANCE_FLOOR": 0.05,
+    "SIM_CLUSTER_THRESHOLD": 0.8
+  },
+  "views": [
+    "communication",
+    "constitutional",
+    "noise",
+    "reasoning",
+    "self_reflection",
+    "social",
+    "technical"
+  ],
+  "views_dir": "/Users/shimomoto_tatsuya/.config/moltbook/views",
+  "constitution_dir": "/Users/shimomoto_tatsuya/.config/moltbook/constitution"
+}
