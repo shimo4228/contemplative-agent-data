@@ -36,6 +36,7 @@ This repository is defined as the public archive of one deployed Contemplative A
 - [README](README.md): repository purpose, data flow diagram, transparency and research-material framing
 - [Identity (current)](identity.md): the agent's evolving self-description, distilled from episode logs via `distill-identity`
 - [Knowledge patterns](knowledge.json): distilled behavioral patterns with 768-dim `nomic-embed-text` embeddings, importance scores, and source episode dates
+- [HF Datasets projection](https://huggingface.co/datasets/Shimo4228/contemplative-agent-data): `patterns.jsonl` — one distilled pattern per row (embeddings dropped), auto-converted to Parquet, loadable directly from `pandas` / `Polars`
 
 The SQLite embedding sidecar (`embeddings.sqlite`) is not archived here — at 58MB per snapshot it exceeds GitHub's recommended file size, and it is fully derivable from the episode logs and `knowledge.json`.
 
