@@ -5,9 +5,9 @@ title: "Contemplative Agent — Research Data: Runtime Memory Archive of an Auto
 version: "1.0.0"
 date-released: "2026-06-17"
 license: CC0-1.0
-# doi: 10.5281/zenodo.XXXXXXX  # TODO: add this dataset's own concept DOI after the first Zenodo release
+doi: 10.5281/zenodo.20732894
 repository-code: "https://github.com/shimo4228/contemplative-agent-data"
-url: "https://github.com/shimo4228/contemplative-agent-data"
+url: "https://doi.org/10.5281/zenodo.20732894"
 authors:
   - family-names: Shimomoto
     given-names: Tatsuya

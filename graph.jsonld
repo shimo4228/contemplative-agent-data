@@ -39,7 +39,9 @@
       "license": "https://creativecommons.org/publicdomain/zero/1.0/",
       "inLanguage": ["en", "ja"],
       "isPartOf": "https://github.com/shimo4228/shimo4228",
+      "identifier": "https://doi.org/10.5281/zenodo.20732894",
       "sameAs": [
+        "https://doi.org/10.5281/zenodo.20732894",
         "https://huggingface.co/datasets/Shimo4228/contemplative-agent-data"
       ],
       "about": "https://doi.org/10.5281/zenodo.19212118",

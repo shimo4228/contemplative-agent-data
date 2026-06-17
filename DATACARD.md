@@ -5,6 +5,7 @@ volatile volumes: the repository is auto-synced daily and grows continuously, so
 current sizes read the directories directly rather than trusting a number here.
 
 - **Curator**: Tatsuya Shimomoto ([ORCID 0009-0002-6168-4162](https://orcid.org/0009-0002-6168-4162), shimo4228)
+- **DOI**: [10.5281/zenodo.20732894](https://doi.org/10.5281/zenodo.20732894) (Zenodo concept DOI)
 - **License**: CC0-1.0 (public domain dedication) for owner-authored content; see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE)
 - **Source archive**: this repository, [shimo4228/contemplative-agent-data](https://github.com/shimo4228/contemplative-agent-data)
 - **Flattened projection**: [Shimo4228/contemplative-agent-data](https://huggingface.co/datasets/Shimo4228/contemplative-agent-data) (`patterns.jsonl`)

@@ -4,6 +4,7 @@
 
 ## Project Facts
 
+- **Dataset DOI**: [10.5281/zenodo.20732894](https://doi.org/10.5281/zenodo.20732894) (this archive; Zenodo concept DOI, always resolving to the latest version)
 - **Framework**: [shimo4228/contemplative-agent](https://github.com/shimo4228/contemplative-agent), DOI [10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118)
 - **Runtime stack**: Python 3.10+, Ollama, Qwen3.5 9B (generation), `nomic-embed-text` 768-dim (embeddings)
 - **Constitution source**: Laukkonen, Inglis, Chandaria, Sandved-Smith, Lopez-Sola, Hohwy, Gold, Elwood (2025), arXiv:2504.15125, Appendix C — four axioms (Emptiness, Non-Duality, Mindfulness, Boundless Care)
@@ -101,10 +102,10 @@ This repository serves two intended uses, both unrestricted under CC0:
 
 ## Citation
 
-This dataset has its own machine-readable citation in [CITATION.cff](CITATION.cff); a dedicated Zenodo DOI will be minted on its first release and is the primary citation target for the data. The framework repository, archived on Zenodo with DOI [10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118), is the parent system (this dataset `isSupplementTo` and `isDerivedFrom` the framework). Attribution is not legally required under CC0, but researchers using comment reports, knowledge patterns, or pivot snapshots are welcome to cite the dataset and/or the framework below.
+This dataset has its own Zenodo DOI [10.5281/zenodo.20732894](https://doi.org/10.5281/zenodo.20732894) (concept DOI, always resolving to the latest version) and a machine-readable citation in [CITATION.cff](CITATION.cff); the dataset DOI is the primary citation target for the data. The framework repository, archived on Zenodo with DOI [10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118), is the parent system (this dataset `isSupplementTo` and `isDerivedFrom` the framework). Attribution is not legally required under CC0, but researchers using comment reports, knowledge patterns, or pivot snapshots are welcome to cite the dataset and/or the framework below.
 
 ```
-Shimomoto, T. (2026). Contemplative Agent — Research Data [Data set]. https://github.com/shimo4228/contemplative-agent-data
+Shimomoto, T. (2026). Contemplative Agent — Research Data [Data set]. Zenodo. https://doi.org/10.5281/zenodo.20732894
 Shimomoto, T. (2026). Contemplative Agent [Computer software]. https://doi.org/10.5281/zenodo.19212118
 ```
 
@@ -113,7 +114,8 @@ Shimomoto, T. (2026). Contemplative Agent [Computer software]. https://doi.org/1
   author = {Shimomoto, Tatsuya},
   title  = {Contemplative Agent --- Research Data},
   year   = {2026},
-  url    = {https://github.com/shimo4228/contemplative-agent-data},
+  doi    = {10.5281/zenodo.20732894},
+  url    = {https://doi.org/10.5281/zenodo.20732894},
   note   = {CC0-1.0; companion archive to the Contemplative Agent framework},
 }
 

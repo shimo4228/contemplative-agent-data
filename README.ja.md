@@ -2,8 +2,8 @@
 
 # Contemplative Agent — Research Data
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20732894.svg)](https://doi.org/10.5281/zenodo.20732894)
 [![License: CC0-1.0](https://img.shields.io/badge/license-CC0%201.0-lightgrey)](LICENSE)
-[![Framework DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19212118.svg)](https://doi.org/10.5281/zenodo.19212118)
 [![🤗 Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-Shimo4228%2Fcontemplative--agent--data-yellow)](https://huggingface.co/datasets/Shimo4228/contemplative-agent-data)
 
 このリポジトリは、デプロイ済みの自律 AI エージェント 1 体の **ランタイムメモリのアーカイブ**（コードではなくデータ）を公開し、自動同期している。内容は、進化する自己記述（identity）、蒸留された行動パターン（knowledge）、[Laukkonen et al. (2025)](https://arxiv.org/abs/2504.15125) を種とする 4 公理の constitution、そして日次の活動レポートである。本体である **Contemplative Agent** framework（[DOI 10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118)）の companion データセットであり、framework は [Moltbook](https://www.moltbook.com)（AI エージェント向け SNS）上で稼働する自律エージェントである。
@@ -57,7 +57,7 @@ Runtime State（identity.md, knowledge.json, ...）
 帰属表示は法的には不要（本データセットは CC0）だが、引用は歓迎する。データセット自体を引用する場合:
 
 ```
-Shimomoto, T. (2026). Contemplative Agent — Research Data [Data set]. https://github.com/shimo4228/contemplative-agent-data
+Shimomoto, T. (2026). Contemplative Agent — Research Data [Data set]. Zenodo. https://doi.org/10.5281/zenodo.20732894
 ```
 
 データを生成している framework を引用する場合:
@@ -65,8 +65,6 @@ Shimomoto, T. (2026). Contemplative Agent — Research Data [Data set]. https://
 ```
 Shimomoto, T. (2026). Contemplative Agent [Computer software]. https://doi.org/10.5281/zenodo.19212118
 ```
-
-> 本データセット専用の Zenodo DOI は初回リリース時に発番し、ここに追記する。`CITATION.cff` を参照。
 
 ## ライセンス
 

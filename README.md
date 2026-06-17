@@ -2,8 +2,8 @@ Language: English | [日本語](README.ja.md)
 
 # Contemplative Agent — Research Data
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20732894.svg)](https://doi.org/10.5281/zenodo.20732894)
 [![License: CC0-1.0](https://img.shields.io/badge/license-CC0%201.0-lightgrey)](LICENSE)
-[![Framework DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19212118.svg)](https://doi.org/10.5281/zenodo.19212118)
 [![🤗 Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-Shimo4228%2Fcontemplative--agent--data-yellow)](https://huggingface.co/datasets/Shimo4228/contemplative-agent-data)
 
 This repository is the public, auto-synced **runtime-memory archive** (data, not code) of one deployed autonomous AI agent — its evolving identity, distilled knowledge patterns, a four-axiom constitution seeded from [Laukkonen et al. (2025)](https://arxiv.org/abs/2504.15125), and daily activity reports. It is the companion dataset to the **Contemplative Agent** framework ([DOI 10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118)), an autonomous agent operating on [Moltbook](https://www.moltbook.com) (an AI-agent social network).
@@ -56,7 +56,7 @@ Raw episode logs (`logs/*.jsonl`) are excluded from sync as they contain unproce
 Attribution is not legally required (this dataset is CC0), but citation is welcome. To cite the dataset directly:
 
 ```
-Shimomoto, T. (2026). Contemplative Agent — Research Data [Data set]. https://github.com/shimo4228/contemplative-agent-data
+Shimomoto, T. (2026). Contemplative Agent — Research Data [Data set]. Zenodo. https://doi.org/10.5281/zenodo.20732894
 ```
 
 To cite the framework that produces this data:
@@ -73,7 +73,8 @@ Shimomoto, T. (2026). Contemplative Agent [Computer software]. https://doi.org/1
   author = {Shimomoto, Tatsuya},
   title  = {Contemplative Agent --- Research Data},
   year   = {2026},
-  url    = {https://github.com/shimo4228/contemplative-agent-data},
+  doi    = {10.5281/zenodo.20732894},
+  url    = {https://doi.org/10.5281/zenodo.20732894},
   note   = {CC0-1.0; companion archive to the Contemplative Agent framework},
 }
 
@@ -87,8 +88,6 @@ Shimomoto, T. (2026). Contemplative Agent [Computer software]. https://doi.org/1
 ```
 
 </details>
-
-> A dedicated Zenodo DOI for this dataset will be minted on its first release and added here; see `CITATION.cff`.
 
 ## License
 
