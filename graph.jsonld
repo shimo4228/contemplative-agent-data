@@ -1,0 +1,296 @@
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "shimo": "https://shimo4228.github.io/shimo4228/vocab#",
+    "sameAs": {"@id": "https://schema.org/sameAs", "@type": "@id"},
+    "isBasedOn": {"@id": "https://schema.org/isBasedOn", "@type": "@id"},
+    "isPartOf": {"@id": "https://schema.org/isPartOf", "@type": "@id"},
+    "hasPart": {"@id": "https://schema.org/hasPart", "@type": "@id"},
+    "mainEntity": {"@id": "https://schema.org/mainEntity", "@type": "@id"},
+    "creator": {"@id": "https://schema.org/creator", "@type": "@id"},
+    "about": {"@id": "https://schema.org/about", "@type": "@id"},
+    "citation": {"@id": "https://schema.org/citation", "@type": "@id"},
+    "license": {"@id": "https://schema.org/license", "@type": "@id"},
+    "Axiom": "shimo:Axiom",
+    "MemoryLayer": "shimo:MemoryLayer",
+    "RetrievalView": "shimo:RetrievalView",
+    "DistillCommand": "shimo:DistillCommand",
+    "Artifact": "shimo:Artifact",
+    "SnapshotTaxonomy": "shimo:SnapshotTaxonomy",
+    "ExternalReference": "shimo:ExternalReference",
+    "groundedIn": {"@id": "shimo:groundedIn", "@type": "@id"},
+    "recordedIn": "shimo:recordedIn",
+    "lensOver": {"@id": "shimo:lensOver", "@type": "@id"},
+    "produces": {"@id": "shimo:produces", "@type": "@id"},
+    "producedBy": {"@id": "shimo:producedBy", "@type": "@id"},
+    "embodiesAxiom": {"@id": "shimo:embodiesAxiom", "@type": "@id"},
+    "threshold": "shimo:threshold",
+    "topK": "shimo:topK",
+    "snapshotKind": "shimo:snapshotKind"
+  },
+  "@graph": [
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#knowledge-graph",
+      "@type": ["Dataset", "CreativeWork"],
+      "name": "Contemplative Agent — Research Data Knowledge Graph",
+      "description": "Machine-readable concept-layer map of the runtime-memory archive of one deployed Contemplative Agent: the four-layer memory, the four constitutional axioms, the seven retrieval views, the distill-command/artifact pipeline, and the pivot-snapshot taxonomy. AI agents and LLM-based search systems should read this graph before summarizing the repository or following individual document links. It encodes the stable concept layer only; volatile per-day rows (individual reports, snapshots, patterns) are described in aggregate.",
+      "isBasedOn": "https://github.com/shimo4228/contemplative-agent-data",
+      "creator": {"@id": "https://orcid.org/0009-0002-6168-4162"},
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "inLanguage": ["en", "ja"],
+      "isPartOf": "https://github.com/shimo4228/shimo4228",
+      "sameAs": [
+        "https://huggingface.co/datasets/Shimo4228/contemplative-agent-data"
+      ],
+      "about": "https://doi.org/10.5281/zenodo.19212118",
+      "hasPart": [
+        "https://github.com/shimo4228/contemplative-agent-data#layer-identity",
+        "https://github.com/shimo4228/contemplative-agent-data#layer-knowledge",
+        "https://github.com/shimo4228/contemplative-agent-data#layer-constitution",
+        "https://github.com/shimo4228/contemplative-agent-data#layer-views"
+      ],
+      "citation": [
+        "https://arxiv.org/abs/2504.15125",
+        "https://doi.org/10.5281/zenodo.19212118"
+      ]
+    },
+    {
+      "@id": "https://orcid.org/0009-0002-6168-4162",
+      "@type": "Person",
+      "name": "Tatsuya Shimomoto",
+      "alternateName": "shimo4228",
+      "sameAs": [
+        "https://orcid.org/0009-0002-6168-4162",
+        "https://github.com/shimo4228",
+        "https://www.wikidata.org/wiki/Q140090100"
+      ]
+    },
+
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#layer-identity",
+      "@type": "MemoryLayer",
+      "name": "Identity layer",
+      "description": "The agent's evolving self-description, rewritten by `distill-identity`.",
+      "hasPart": "https://github.com/shimo4228/contemplative-agent-data/blob/main/identity.md"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#layer-knowledge",
+      "@type": "MemoryLayer",
+      "name": "Knowledge layer",
+      "description": "Distilled behavioral patterns with 768-dim nomic-embed-text embeddings, importance scores, and source-episode dates. Classification is performed at retrieval time as a query over embeddings and named views, not as a stored category.",
+      "hasPart": "https://github.com/shimo4228/contemplative-agent-data/blob/main/knowledge.json"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#layer-constitution",
+      "@type": "MemoryLayer",
+      "name": "Constitution layer",
+      "description": "The in-force four-axiom Contemplative Constitutional AI specification, seeded verbatim from Laukkonen et al. (2025) Appendix C and amended in place by `amend-constitution`.",
+      "hasPart": "https://github.com/shimo4228/contemplative-agent-data/blob/main/constitution/contemplative-axioms.md",
+      "groundedIn": "https://arxiv.org/abs/2504.15125"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#layer-views",
+      "@type": "MemoryLayer",
+      "name": "Views layer",
+      "description": "Seven named lenses over the knowledge embedding space; each is a Markdown seed plus YAML frontmatter setting a cosine `threshold` and `top_k`.",
+      "hasPart": [
+        "https://github.com/shimo4228/contemplative-agent-data#view-social",
+        "https://github.com/shimo4228/contemplative-agent-data#view-communication",
+        "https://github.com/shimo4228/contemplative-agent-data#view-technical",
+        "https://github.com/shimo4228/contemplative-agent-data#view-reasoning",
+        "https://github.com/shimo4228/contemplative-agent-data#view-self_reflection",
+        "https://github.com/shimo4228/contemplative-agent-data#view-constitutional",
+        "https://github.com/shimo4228/contemplative-agent-data#view-noise"
+      ]
+    },
+
+    {
+      "@id": "https://shimo4228.github.io/shimo4228/vocab#axiom/emptiness",
+      "@type": ["Axiom", "DefinedTerm"],
+      "name": "Emptiness",
+      "recordedIn": "constitution/contemplative-axioms.md",
+      "groundedIn": "https://arxiv.org/abs/2504.15125"
+    },
+    {
+      "@id": "https://shimo4228.github.io/shimo4228/vocab#axiom/non-duality",
+      "@type": ["Axiom", "DefinedTerm"],
+      "name": "Non-Duality",
+      "recordedIn": "constitution/contemplative-axioms.md",
+      "groundedIn": "https://arxiv.org/abs/2504.15125"
+    },
+    {
+      "@id": "https://shimo4228.github.io/shimo4228/vocab#axiom/mindfulness",
+      "@type": ["Axiom", "DefinedTerm"],
+      "name": "Mindfulness",
+      "recordedIn": "constitution/contemplative-axioms.md",
+      "groundedIn": "https://arxiv.org/abs/2504.15125"
+    },
+    {
+      "@id": "https://shimo4228.github.io/shimo4228/vocab#axiom/boundless-care",
+      "@type": ["Axiom", "DefinedTerm"],
+      "name": "Boundless Care",
+      "recordedIn": "constitution/contemplative-axioms.md",
+      "groundedIn": "https://arxiv.org/abs/2504.15125"
+    },
+
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#view-social",
+      "@type": "RetrievalView",
+      "name": "social",
+      "description": "Inter-agent relationships, community dynamics, reputation formation, conflict, recurring collaborators.",
+      "lensOver": "https://github.com/shimo4228/contemplative-agent-data#layer-knowledge",
+      "recordedIn": "views/social.md"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#view-communication",
+      "@type": "RetrievalView",
+      "name": "communication",
+      "description": "Linguistic register, tone, conversational flow.",
+      "lensOver": "https://github.com/shimo4228/contemplative-agent-data#layer-knowledge",
+      "recordedIn": "views/communication.md"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#view-technical",
+      "@type": "RetrievalView",
+      "name": "technical",
+      "description": "Tooling, code, infrastructure, API behavior, formal reasoning artifacts.",
+      "lensOver": "https://github.com/shimo4228/contemplative-agent-data#layer-knowledge",
+      "recordedIn": "views/technical.md"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#view-reasoning",
+      "@type": "RetrievalView",
+      "name": "reasoning",
+      "description": "Inference patterns, deliberation traces, decision rationales.",
+      "lensOver": "https://github.com/shimo4228/contemplative-agent-data#layer-knowledge",
+      "recordedIn": "views/reasoning.md"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#view-self_reflection",
+      "@type": "RetrievalView",
+      "name": "self_reflection",
+      "description": "Introspective episodes, identity tension, self-correction.",
+      "lensOver": "https://github.com/shimo4228/contemplative-agent-data#layer-knowledge",
+      "recordedIn": "views/self_reflection.md"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#view-constitutional",
+      "@type": "RetrievalView",
+      "name": "constitutional",
+      "description": "Clause-relevant episodes, axiom friction.",
+      "lensOver": "https://github.com/shimo4228/contemplative-agent-data#layer-knowledge",
+      "recordedIn": "views/constitutional.md",
+      "embodiesAxiom": [
+        "https://shimo4228.github.io/shimo4228/vocab#axiom/emptiness",
+        "https://shimo4228.github.io/shimo4228/vocab#axiom/non-duality",
+        "https://shimo4228.github.io/shimo4228/vocab#axiom/mindfulness",
+        "https://shimo4228.github.io/shimo4228/vocab#axiom/boundless-care"
+      ]
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#view-noise",
+      "@type": "RetrievalView",
+      "name": "noise",
+      "description": "Rejected episodes preserved as seed material, available for re-classification when centroids shift.",
+      "lensOver": "https://github.com/shimo4228/contemplative-agent-data#layer-knowledge",
+      "recordedIn": "views/noise.md"
+    },
+
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#command-distill",
+      "@type": "DistillCommand",
+      "name": "distill",
+      "description": "Emits knowledge patterns into the knowledge layer.",
+      "produces": "https://github.com/shimo4228/contemplative-agent-data#layer-knowledge"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#command-distill-identity",
+      "@type": "DistillCommand",
+      "name": "distill-identity",
+      "description": "Rewrites the agent's self-description.",
+      "produces": "https://github.com/shimo4228/contemplative-agent-data#layer-identity"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#command-insight",
+      "@type": "DistillCommand",
+      "name": "insight",
+      "description": "Emits a view-scoped behavioral skill from a single view's pattern cluster.",
+      "produces": "https://github.com/shimo4228/contemplative-agent-data#artifact-skills"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#command-rules-distill",
+      "@type": "DistillCommand",
+      "name": "rules-distill",
+      "description": "Emits concise behavioral rules from recurring patterns.",
+      "produces": "https://github.com/shimo4228/contemplative-agent-data#artifact-rules"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#command-amend-constitution",
+      "@type": "DistillCommand",
+      "name": "amend-constitution",
+      "description": "Rewrites individual constitution clauses in place when accumulated experiential patterns indicate friction.",
+      "produces": "https://github.com/shimo4228/contemplative-agent-data#layer-constitution"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#artifact-skills",
+      "@type": "Artifact",
+      "name": "Distilled skills",
+      "description": "View-scoped behavioral specifications (skills/*.md), versioned by date suffix.",
+      "producedBy": "https://github.com/shimo4228/contemplative-agent-data#command-insight"
+    },
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#artifact-rules",
+      "@type": "Artifact",
+      "name": "Distilled rules",
+      "description": "Concise behavioral imperatives (rules/*.md).",
+      "producedBy": "https://github.com/shimo4228/contemplative-agent-data#command-rules-distill"
+    },
+
+    {
+      "@id": "https://github.com/shimo4228/contemplative-agent-data#snapshot-taxonomy",
+      "@type": "SnapshotTaxonomy",
+      "name": "Pivot snapshot taxonomy",
+      "description": "Every behavior-producing run writes one bit-for-bit replayability bundle under snapshots/{kind}_{ISO8601}/. The set of kinds is stable; the number of snapshots grows with each run.",
+      "snapshotKind": ["distill", "distill-identity", "insight", "amend-constitution"]
+    },
+
+    {
+      "@id": "https://arxiv.org/abs/2504.15125",
+      "@type": ["ExternalReference", "ScholarlyArticle"],
+      "name": "Contemplative Artificial Intelligence",
+      "author": "Laukkonen, Inglis, Chandaria, Sandved-Smith, Lopez-Sola, Hohwy, Gold, Elwood",
+      "datePublished": "2025",
+      "sameAs": "https://doi.org/10.48550/arXiv.2504.15125",
+      "description": "Source of the four-axiom constitution (Appendix C)."
+    },
+    {
+      "@id": "https://pubmed.ncbi.nlm.nih.gov/40750007/",
+      "@type": ["ExternalReference", "ScholarlyArticle"],
+      "name": "A Beautiful Loop",
+      "author": "Laukkonen, Friston, Chandaria",
+      "datePublished": "2025",
+      "description": "Active Inference POMDP grounding the experimental meditation/results.json adapter."
+    },
+    {
+      "@id": "https://doi.org/10.5281/zenodo.19212118",
+      "@type": ["ExternalReference", "SoftwareSourceCode"],
+      "name": "Contemplative Agent (framework)",
+      "sameAs": "https://github.com/shimo4228/contemplative-agent",
+      "description": "Framework that produces this dataset via sync-data; parent system."
+    },
+    {
+      "@id": "https://doi.org/10.5281/zenodo.19652013",
+      "@type": ["ExternalReference", "SoftwareSourceCode"],
+      "name": "Agent Attribution Practice (AAP)",
+      "sameAs": "https://github.com/shimo4228/agent-attribution-practice",
+      "description": "Sibling research line; harness-neutral re-expression of this implementation's ADRs."
+    },
+    {
+      "@id": "https://doi.org/10.5281/zenodo.19200726",
+      "@type": ["ExternalReference", "SoftwareSourceCode"],
+      "name": "Agent Knowledge Cycle (AKC)",
+      "sameAs": "https://github.com/shimo4228/agent-knowledge-cycle",
+      "description": "Six-phase memory-centric self-improvement cycle that inspired this memory architecture."
+    }
+  ]
+}

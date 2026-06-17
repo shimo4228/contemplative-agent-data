@@ -1,0 +1,91 @@
+cff-version: 1.2.0
+message: "If you use this dataset, please cite it as below."
+type: dataset
+title: "Contemplative Agent — Research Data: Runtime Memory Archive of an Autonomous Contemplative AI Agent"
+version: "1.0.0"
+date-released: "2026-06-17"
+license: CC0-1.0
+# doi: 10.5281/zenodo.XXXXXXX  # TODO: add this dataset's own concept DOI after the first Zenodo release
+repository-code: "https://github.com/shimo4228/contemplative-agent-data"
+url: "https://github.com/shimo4228/contemplative-agent-data"
+authors:
+  - family-names: Shimomoto
+    given-names: Tatsuya
+    orcid: "https://orcid.org/0009-0002-6168-4162"
+    alias: shimo4228
+abstract: >-
+  Public archive of the runtime memory state of one deployed Contemplative
+  Agent, an autonomous AI agent operating on the Moltbook AI-agent social
+  network. Captures the four-layer memory — identity, knowledge (distilled
+  behavioral patterns with 768-dim nomic-embed-text embeddings, importance
+  scores, and source-episode dates), a four-axiom Contemplative Constitutional
+  AI specification seeded verbatim from Laukkonen et al. (2025) Appendix C and
+  amended in place, and seven named retrieval views — alongside daily comment
+  reports, weekly and diachronic behavioral analyses, and pivot snapshots that
+  make every behavior-producing run bit-for-bit replayable. Auto-synced daily
+  from the agent's local runtime via `contemplative-agent sync-data`. Dedicated
+  to the public domain under CC0-1.0; quoted third-party Moltbook context inside
+  the comment reports remains with its original authors (see NOTICE).
+keywords:
+  - autonomous AI agents
+  - contemplative AI
+  - agent memory
+  - constitutional AI
+  - active inference
+  - knowledge distillation
+  - agent behavior corpus
+  - runtime memory archive
+  - embedding-as-classification
+  - Moltbook
+references:
+  - type: software
+    title: "Contemplative Agent"
+    repository-code: "https://github.com/shimo4228/contemplative-agent"
+    doi: "10.5281/zenodo.19212118"
+    notes: "Framework that produces this dataset via `sync-data`. Canonical citation for the system; this dataset is its companion runtime archive."
+    authors:
+      - family-names: Shimomoto
+        given-names: Tatsuya
+        orcid: "https://orcid.org/0009-0002-6168-4162"
+  - type: article
+    title: "Contemplative Artificial Intelligence"
+    year: 2025
+    notes: "Source of the four-axiom constitution (Appendix C) archived in constitution/contemplative-axioms.md."
+    identifiers:
+      - type: other
+        value: "arXiv:2504.15125"
+    authors:
+      - family-names: Laukkonen
+        given-names: Ruben
+      - family-names: Inglis
+        given-names: Fionn
+      - family-names: Chandaria
+        given-names: Shamil
+      - family-names: Sandved-Smith
+        given-names: Lars
+      - family-names: Lopez-Sola
+        given-names: Edmundo
+      - family-names: Hohwy
+        given-names: Jakob
+      - family-names: Gold
+        given-names: Jonathan
+      - family-names: Elwood
+        given-names: Adam
+  - type: software
+    title: "Agent Attribution Practice (AAP)"
+    repository-code: "https://github.com/shimo4228/agent-attribution-practice"
+    doi: "10.5281/zenodo.19652013"
+    notes: "Sibling research line; harness-neutral re-expression of this implementation's architectural decisions."
+    authors:
+      - family-names: Shimomoto
+        given-names: Tatsuya
+        orcid: "https://orcid.org/0009-0002-6168-4162"
+  - type: software
+    title: "Agent Knowledge Cycle (AKC)"
+    repository-code: "https://github.com/shimo4228/agent-knowledge-cycle"
+    doi: "10.5281/zenodo.19200726"
+    notes: "Six-phase memory-centric self-improvement cycle that inspired this memory architecture."
+    authors:
+      - family-names: Shimomoto
+        given-names: Tatsuya
+        orcid: "https://orcid.org/0009-0002-6168-4162"

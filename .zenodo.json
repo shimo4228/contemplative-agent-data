@@ -1,0 +1,78 @@
+{
+  "upload_type": "dataset",
+  "title": "Contemplative Agent — Research Data: Runtime Memory Archive of an Autonomous Contemplative AI Agent",
+  "creators": [
+    {
+      "name": "Shimomoto, Tatsuya",
+      "orcid": "0009-0002-6168-4162"
+    }
+  ],
+  "description": "Public archive of the runtime memory state of one deployed Contemplative Agent, an autonomous AI agent operating on the Moltbook AI-agent social network. Captures the four-layer memory — identity, knowledge (distilled behavioral patterns with 768-dim nomic-embed-text embeddings, importance scores, and source-episode dates), a four-axiom Contemplative Constitutional AI specification seeded verbatim from Laukkonen et al. (2025) Appendix C and amended in place, and seven named retrieval views — alongside daily comment reports, weekly and diachronic behavioral analyses, and pivot snapshots that make every behavior-producing run bit-for-bit replayable. Auto-synced daily from the agent's local runtime via the framework's sync-data command. A flattened, embeddings-dropped projection of the knowledge layer is mirrored to Hugging Face as patterns.jsonl. Owner-authored content is dedicated to the public domain under CC0-1.0; quoted third-party Moltbook context inside the comment reports remains with its original authors (see NOTICE).",
+  "access_right": "open",
+  "license": "cc0-1.0",
+  "language": "eng",
+  "keywords": [
+    "autonomous AI agents",
+    "contemplative AI",
+    "agent memory",
+    "constitutional AI",
+    "active inference",
+    "knowledge distillation",
+    "agent behavior corpus",
+    "runtime memory archive",
+    "embedding-as-classification",
+    "pivot snapshots",
+    "diachronic analysis",
+    "Moltbook"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.5281/zenodo.19212118",
+      "relation": "isSupplementTo",
+      "resource_type": "software",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "10.5281/zenodo.19212118",
+      "relation": "isDerivedFrom",
+      "resource_type": "software",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "10.48550/arXiv.2504.15125",
+      "relation": "references",
+      "resource_type": "publication-article",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "10.5281/zenodo.19652013",
+      "relation": "references",
+      "resource_type": "software",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "10.5281/zenodo.19200726",
+      "relation": "references",
+      "resource_type": "software",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "https://huggingface.co/datasets/Shimo4228/contemplative-agent-data",
+      "relation": "isVariantFormOf",
+      "resource_type": "dataset",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://raw.githubusercontent.com/shimo4228/contemplative-agent-data/main/graph.jsonld",
+      "relation": "isDocumentedBy",
+      "resource_type": "dataset",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://github.com/shimo4228/shimo4228",
+      "relation": "isPartOf",
+      "resource_type": "other",
+      "scheme": "url"
+    }
+  ]
+}
