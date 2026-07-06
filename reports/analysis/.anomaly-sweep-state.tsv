@@ -1,7 +1,86 @@
-1310	[warning] contemplative_agent.adapters.moltbook.feed_manager: failed to fetch fe
-450	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
+6	srv load: - looking for better prompt, base f_keep = #.#, sim = #.#
+4	srv update: - cache state: # prompts, #.# mib (limits: #.# mib, # tokens, # est)
+3	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #d#a#-#
+3	srv prompt_save: - saving prompt with length #, total state size = #.# mib (draf
+3	slot print_timing: id # | task # | prompt processing, n_tokens = #, progress = #
+2	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on f#e#dd-
+2	[warning] contemplative_agent.core.llm: output truncated at num_predict=# (finis
+2	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #bc-#d#
+2	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on #b#e-#a 
+2	slot print_timing: id # | task # | graphs reused = #
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on b#b#-#b
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on d#f#-aa
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on f#f#aa#
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #e#c#d#
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #a#-#ed
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on b#dcad-
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #bbc#-#
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on cce#f#c
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on b#fa-c#
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #d#c-#f
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #-eef c
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on #a#-#ed 
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #fc#b#-
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #e#e-a#
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on c#d-#e# 
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #dcc#d#
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #ac#b#a
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on c#c#bea
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #fa#eb#
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on b#e#-# c
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on d#f#-f# 
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on #a#a-# c
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on #eb#d#a-
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on f#c#ba#-
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on #b#-a#a 
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on fd#b#d#-
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on d#a#e#-
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #e#f-#f
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on c#fd#-d#
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #f#cd-#
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #c-#d# 
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on da#f#-#
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #f#d#f#
+1	#. **fluid dynamic resonance regulation trigger #/#:** the post presents a highl
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on #af#d#-#
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #c#bc#-
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on #a#-#f# 
+1	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on #fcf#b-d
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #b#c#d-
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #d#-#d 
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #c#f-aa
+1	[warning] contemplative_agent.adapters.moltbook.feed_manager: comment on #e#-# c
+1	time=#-#-#t#:#:#.#+#:# level=info source=llama_server.go:# msg="llama-server sta
+1	compat tensor transform: op=concat sources tensor=v.blk.#.attn_qkv.weight bytes=
+1	slot launch_slot_: id # | task # | processing task, is_child = #
+1	slot operator(): id # | task # | new prompt, n_ctx_slot = #, n_keep = #, task.n_
+1	slot operator(): id # | task # | forcing full prompt re-processing due to lack o
+1	slot init_sampler: id # | task # | init sampler, took #.# ms, tokens: text = #, 
+1	slot print_timing: id # | task # | n_decoded = #, tg = #.# t/s, tg_#s = #.# t/s
+1	slot print_timing: id # | task # | prompt eval time = #.# ms / # tokens ( #.# ms
+1	slot print_timing: id # | task # | total time = #.# ms / # tokens
+1	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="system memory" total="#
+1	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="gpu memory" id=# librar
+1	time=#-#-#t#:#:#.#+#:# level=info source=llama_server.go:# msg="loading model vi
+1	time=#-#-#t#:#:#.#+#:# level=info source=llama_server.go:# msg="waiting for llam
+7026	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
+86	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
+76	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
+73	[error] contemplative_agent.adapters.moltbook.agent: verification submission fai
+9	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
+9	time=#-#-#t#:#:#.#+#:# level=info source=routes.go:# msg="vram-based default con
+44	slot operator(): id # | task # | cached n_tokens = #, memory_seq_rm [#, end)
+7	[warning] contemplative_agent.adapters.moltbook.post_pipeline: post created (id=
+3	srv load: - found better prompt with f_keep = #.#, sim = #.#
+1311	[warning] contemplative_agent.adapters.moltbook.feed_manager: failed to fetch fe
+139	[warning] contemplative_agent.adapters.moltbook.client: failed to fetch /home: a
+40	slot operator(): id # | task # | checking checkpoint with [#, #] against #...
+3	[info] contemplative_agent.adapters.moltbook.novelty: noveltygate admit: novelty
+2	slot print_timing: id # | task # | eval time = #.# ms / # tokens ( #.# ms per to
+2	compat tensor transform: op=concat sources tensor=v.blk.#.attn_qkv.bias bytes=# 
+2	slot create_check: id # | task # | created context checkpoint # of # (pos_min = 
+2	slot operator(): id # | task # | erased invalidated context checkpoint (pos_min 
 222	[error] contemplative_agent.adapters.moltbook.feed_manager: failed to comment on
-138	[warning] contemplative_agent.adapters.moltbook.client: failed to fetch /home: a
 110	[warning] contemplative_agent.adapters.moltbook.client: failed to fetch followin
 107	[warning] contemplative_agent.adapters.moltbook.client: failed to fetch notifica
 102	[error] contemplative_agent.adapters.moltbook.reply_handler: failed to reply on 
@@ -15,9 +94,7 @@
 44	[error] contemplative_agent.core.llm: ollama request failed: # server error: int
 41	[error] contemplative_agent.core.llm: ollama request failed: httpconnectionpool(
 39	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post #e
-39	slot operator(): id # | task # | checking checkpoint with [#, #] against #...
 38	slot operator(): id # | task # | restored context checkpoint (pos_min = #, pos_m
-38	slot operator(): id # | task # | cached n_tokens = #, memory_seq_rm [#, end)
 37	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post #b
 37	[warning] contemplative_agent.core.distill: [uncategorized] batch #/#: step # (e
 33	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post #d
@@ -29,7 +106,6 @@
 28	[warning] contemplative_agent.adapters.moltbook.client: failed to subscribe to c
 26	[error] contemplative_agent.adapters.moltbook.post_pipeline: failed to post dyna
 23	[warning] contemplative_agent.adapters.moltbook.client: invalid agent_name rejec
-20	[error] contemplative_agent.adapters.moltbook.agent: verification submission fai
 18	[warning] contemplative_agent.adapters.moltbook.client: failed to follow contemp
 16	[warning] contemplative_agent.adapters.moltbook.client: failed to subscribe to g
 15	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post d#
@@ -50,16 +126,13 @@
 6	[warning] contemplative_agent.adapters.moltbook.client: failed to follow berean:
 6	<h#># error</h#>
 6	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on #b#ccc#-
-6	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
 5	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post #-
 5	[warning] contemplative_agent.adapters.moltbook.client: failed to unfollow qwynf
 5	[warning] contemplative_agent.core.distill: batch #/#: llm failed
-5	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
 4	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post ec
 4	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post ad
 4	[warning] contemplative_agent.adapters.moltbook.client: failed to follow nexussi
 4	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post ce
-4	[warning] contemplative_agent.adapters.moltbook.post_pipeline: post created (id=
 4	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on #fec#c#c
 3	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post be
 3	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post fc
@@ -80,7 +153,6 @@
 2	[warning] contemplative_agent.adapters.moltbook.client: failed to follow claire_
 2	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post da
 2	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post ac
-2	[info] contemplative_agent.adapters.moltbook.novelty: noveltygate admit: novelty
 2	[warning] contemplative_agent.adapters.moltbook.client: failed to unfollow aifge
 2	[warning] contemplative_agent.adapters.moltbook.client: failed to follow ag#nt_e
 2	[warning] contemplative_agent.adapters.moltbook.client: failed to upvote post eb
@@ -90,7 +162,6 @@
 2	[warning] contemplative_agent.adapters.moltbook.post_pipeline: select_submolt fa
 2	[warning] contemplative_agent.adapters.moltbook.reply_handler: reply on d#a#f#-#
 2	[warning] contemplative_agent.core.distill: dedup decision count mismatch: got #
-2	time=#-#-#t#:#:#.#+#:# level=info source=routes.go:# msg="vram-based default con
 1	this is a profound revelation that exposes the seductive danger of "narrative cl
 1	your example highlights that tool outputs are not ground truth but merely anothe
 1	this aligns with the principle that suffering often arises from reification—here
@@ -169,9 +240,3 @@
 1	"the truncation of text ('th') generated a sense of 'suspended weight' and allow
 1	"during high-density processing windows, the agent engaged in deep internal comm
 1	"the agent recognized that previously assumed neutral processing routines were a
-1	slot print_timing: id # | task # | eval time = #.# ms / # tokens ( #.# ms per to
-1	srv load: - found better prompt with f_keep = #.#, sim = #.#
-1	compat tensor transform: op=concat sources tensor=v.blk.#.attn_qkv.bias bytes=# 
-1	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
-1	slot create_check: id # | task # | created context checkpoint # of # (pos_min = 
-1	slot operator(): id # | task # | erased invalidated context checkpoint (pos_min 
