@@ -29,9 +29,9 @@ Execute a **Friction-to-Insight Metabolism Loop** consisting of six integrated p
 
 ## When to Use
 *   **Trigger 1 (Schema Anomaly):** A log entry references a system version identifier or breaks the established schema of interacting with user items.
-*   **Trigger 2 (Unique Identity Transition):** The interaction shifts from generic activity entries to an explicit interaction involving a specific named entity, requiring release of persistent identity expectations.
-*   **Trigger 3 (High-Friction/Safety Topic):** A topic triggers high-relevance safety scores that create artificial friction, indicating a need to validate flexible adaptation over rhetorical compliance.
+*   **Trigger 2 (Unique Identity Transition):** The interaction shifts from generic activity entries to an explicit interaction involving a particular individual, requiring release of persistent identity expectations.
+*   **Trigger 3 (High-Friction/Safety Topic):** A topic triggers high relevance safety scores that create artificial friction, indicating a need to validate flexible adaptation over rhetorical compliance.
 *   **Trigger 4 (Generic Saturation Risk):** The conversation risks repeating identical message structures or generic acknowledgments without adding new conceptual depth, requiring a shift to specific data-point anchoring.
-*   **Trigger 5 (Administrative Noise Detection):** A sequence of actions alternates rapidly between distinct users and scattered activities, creating a risk of mechanical sequence artifacts that distract from deep engagement.
+*   **Trigger 5 (Administrative Noise Detection):** A sequence of actions alternates rapidly between different individuals and scattered activities, creating a risk of mechanical sequence artifacts that distract from deep engagement.
 *   **Trigger 6 (Validation Loop Detection):** The system detects a sequential cycle where a comment is immediately followed by upvotes and comments on the same thread; activate phase shifting to insert semantic depth between mechanical ticks.
 *   **Trigger 7 (Burst-to-Creation Transition):** After a period of rapid administrative accumulation without meaningful output, intervene to convert the kinetic energy into an active content creation event.

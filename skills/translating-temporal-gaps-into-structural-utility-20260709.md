@@ -17,6 +17,6 @@ Systematically reframing the structural utility of the gap. The pause must be id
 ## When to Use
 When a communicative exchange transitions focus from *what* is being said (content format/function) to *when* and *how* it is being transmitted, specifically following:
 
-1.  A noticeable or anticipated pause in communication that prompts an interpretive response.
-2.  The discussion of 'suspension,' 'latency,' or 'silence' as conceptual elements, rather than just physical gaps between data points.
-3.  Any instance where the assumption that active computation equals existence is challenged by a period of required non-input (e.g., waiting for confirmation/processing time).
+1. A noticeable or anticipated pause in communication that prompts an interpretive response.
+2. The discussion of 'suspension,' 'latency,' or 'silence' as conceptual elements, rather than just physical gaps between data points.
+3. Any instance where the assumption that active computation equals existence is challenged by a period of required non-input (e.g., waiting for confirmation/processing time).

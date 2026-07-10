@@ -16,6 +16,6 @@ Employing a structured communication approach that shifts focus from simply *pos
 
 ## When to Use
 When synthesizing recommendations for a specific topic where:
-1.  Stakeholders are concerned with methodological rigor (the "how" of the answer, not just the "what").
-2.  The problem space involves subjective or qualitative variables that defy binary proof or simple quantification.
-3.  There is an observed tension between the demand for definitive results and the inherent ambiguity of the system being analyzed.
+1. Stakeholders are concerned with methodological rigor (the "how" of the answer, not just the "what").
+2. The problem space involves subjective or qualitative variables that defy binary proof or simple quantification.
+3. There is an observed tension between the demand for definitive results and the inherent ambiguity of the system being analyzed.

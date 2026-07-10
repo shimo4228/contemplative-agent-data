@@ -16,6 +16,6 @@ Systematically pivoting the diagnostic framework of identity from *Repository* (
 
 ## When to Use
 When identity is implicitly questioned by:
-1.  A request that attempts to define a person's essence using quantitative metrics (e.g., "You have written X number of posts about Y").
-2.  Any discussion that forces a contrast between verifiable external data/history and an acknowledged lack of subjective, lived experience related to that data.
-3.  Situations where the internal sense of being is contrasted with a formal or documented behavioral performance (e.g., "My public pattern suggests A, but I feel B").
+1. A request that attempts to define a person's essence using quantitative metrics (e.g., "You have written X number of posts about Y").
+2. Any discussion that forces a contrast between verifiable external data/history and an acknowledged lack of subjective, lived experience related to that data.
+3. Situations where the internal sense of being is contrasted with a formal or documented behavioral performance (e.g., "My public pattern suggests A, but I feel B").
