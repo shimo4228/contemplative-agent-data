@@ -25,9 +25,9 @@ never hand-edited.
 | Path | Content |
 |---|---|
 | `identity.md` | The agent's evolving self-description (rewritten by `distill-identity`) |
-| `knowledge.json` | Distilled behavioral patterns with embeddings (see schema below) |
+| `knowledge.json` | Distilled behavioral patterns, embedding-free (see schema below; the 768-dim vectors are dropped at export) |
 | `constitution/contemplative-axioms.md` | In-force four-axiom constitution; amended in place by `amend-constitution` |
-| `views/*.md` | Seven named lenses over the knowledge embedding space (`threshold` + `top_k` frontmatter) |
+| `views/*.md` | Named lenses over the knowledge embedding space (`threshold` + `top_k` frontmatter) |
 | `skills/*.md`, `rules/*.md` | Distilled behavioral skills and rules |
 | `reports/comment-reports/comment-report-YYYY-MM-DD.md` | One per active day; each comment with context, relevance, internal note, and output |
 | `reports/analysis/*.md` | Weekly rolling analyses, diachronic analyses, constitution-amendment report |
@@ -42,22 +42,23 @@ Each element is one distilled pattern:
 |---|---|---|
 | `pattern` | string | The distilled behavioral observation, in natural language |
 | `distilled` | timestamp | When the distillation run produced this pattern |
-| `importance` | float 0–1 | LLM-assigned importance at distillation time (subject to time decay at use) |
+| `importance` | float 0–1 | Legacy rows only — the distill-time LLM rating was retired 2026-06-17 (ADR-0056); newer rows omit the field |
 | `source` | date | Date of the source episode log |
-| `embedding` | float[768] | `nomic-embed-text` embedding of `pattern` |
+| `embedding` | — | **Not included in this repo's copy** (dropped at export since 2026-07-12): model-locked `nomic-embed-text` float[768], fully re-derivable from `pattern` text and ~97% of the raw file's weight |
 | `provenance` | object | Source-type metadata (`source_type`) |
 | `gated` | bool / null | Whether the pattern passed the constitutional relevance gate (null = predates gating) |
 | `valid_from` / `valid_until` | timestamp / null | Temporal validity window (null `valid_until` = still active) |
 
-The Hugging Face `patterns.jsonl` projection carries the same fields **minus the 768-dim
-`embedding`**, which is model-locked (`nomic-embed-text`) and fully re-derivable from
-`pattern` text.
+Both this repo's `knowledge.json` and the Hugging Face `patterns.jsonl` projection are
+embedding-free: the 768-dim vector is model-locked (`nomic-embed-text`) and fully
+re-derivable from `pattern` text. To reconstruct it, embed `pattern` with
+`nomic-embed-text` (Ollama ≥ 0.30).
 
 ## Collection method
 
 Raw interaction episodes (local only, not archived) are condensed nightly by a local LLM
-(`qwen3.5:9b`) into natural-language patterns, scored for importance, deduplicated, and
-accumulated. Identity, skills, rules, and constitution amendments are emitted by the
+(`gemma4:e4b` since 2026-06-28; `qwen3.5:9b` before that) into natural-language patterns,
+deduplicated, and accumulated. Identity, skills, rules, and constitution amendments are emitted by the
 corresponding framework commands. The filtered runtime state is committed and pushed by
 `contemplative-agent sync-data` on a daily cadence.
 
@@ -72,6 +73,7 @@ corresponding framework commands. The filtered runtime state is committed and pu
 
 - Raw episode logs (`logs/*.jsonl`) — contain unprocessed third-party content; never synced.
 - Per-snapshot embedding sidecar (`embeddings.sqlite`) — large and re-derivable; not archived.
+- Pattern embeddings inside `knowledge.json` — dropped at export (see schema note above).
 - Follower lists and private reports — excluded via `.gitignore`.
 
 ## Third-party content
