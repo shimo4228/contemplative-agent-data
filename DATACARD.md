@@ -51,8 +51,38 @@ Each element is one distilled pattern:
 
 Both this repo's `knowledge.json` and the Hugging Face `patterns.jsonl` projection are
 embedding-free: the 768-dim vector is model-locked (`nomic-embed-text`) and fully
-re-derivable from `pattern` text. To reconstruct it, embed `pattern` with
-`nomic-embed-text` (Ollama ≥ 0.30).
+re-derivable from `pattern` text.
+
+### Reconstructing embeddings
+
+Self-contained (needs only a local [Ollama](https://ollama.com) ≥ 0.30 with
+`ollama pull nomic-embed-text`):
+
+```python
+import json, requests
+
+rows = json.load(open("knowledge.json", encoding="utf-8"))
+todo = [r for r in rows if not r.get("embedding")]
+for i in range(0, len(todo), 64):
+    chunk = todo[i : i + 64]
+    resp = requests.post(
+        "http://localhost:11434/api/embed",
+        json={"model": "nomic-embed-text", "input": [r["pattern"] for r in chunk]},
+        timeout=120,
+    )
+    resp.raise_for_status()
+    for r, vec in zip(chunk, resp.json()["embeddings"]):
+        r["embedding"] = vec
+with open("knowledge.json", "w", encoding="utf-8") as f:
+    json.dump(rows, f, ensure_ascii=False, indent=1)
+```
+
+Notes: re-derived vectors are bit-identical to the agent's originals only under
+the same Ollama/model version (nomic's normalization changed in Ollama 0.30);
+re-embedding the whole corpus in one pass keeps it self-consistent, which is
+what similarity analyses need. For restoring an *agent runtime* rather than a
+dataset, use the maintained equivalent in the main repo:
+[`scripts/restore-embed-knowledge.py`](https://github.com/shimo4228/contemplative-agent/blob/main/scripts/restore-embed-knowledge.py).
 
 ## Collection method
 
