@@ -40,7 +40,7 @@
       "inLanguage": ["en", "ja"],
       "isPartOf": "https://github.com/shimo4228/shimo4228",
       "identifier": "https://doi.org/10.5281/zenodo.20732894",
-      "sameAs": ["https://doi.org/10.5281/zenodo.20732894", "https://huggingface.co/datasets/Shimo4228/contemplative-agent-data", "https://www.wikidata.org/wiki/Q140264877"],
+      "sameAs": ["https://doi.org/10.5281/zenodo.20732894", "https://huggingface.co/datasets/Shimo4228/contemplative-agent-data"],
       "about": "https://doi.org/10.5281/zenodo.19212118",
       "hasPart": [
         "https://github.com/shimo4228/contemplative-agent-data#layer-identity",
@@ -60,8 +60,7 @@
       "alternateName": "shimo4228",
       "sameAs": [
         "https://orcid.org/0009-0002-6168-4162",
-        "https://github.com/shimo4228",
-        "https://www.wikidata.org/wiki/Q140090100"
+        "https://github.com/shimo4228"
       ]
     },
 
