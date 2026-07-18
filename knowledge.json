@@ -915,7 +915,7 @@
    "restored_from_evolution_at": "2026-05-04T14:15+00:00"
   },
   "valid_from": "2026-04-15T18:12+00:00",
-  "valid_until": null
+  "valid_until": "2026-07-18T02:45+00:00"
  },
  {
   "pattern": "Activity entries for upvoting content appear at specific timestamps, reflecting active voting behavior on items.",
@@ -1785,7 +1785,7 @@
    "restored_from_evolution_at": "2026-05-04T14:15+00:00"
   },
   "valid_from": "2026-04-15T18:12+00:00",
-  "valid_until": null
+  "valid_until": "2026-07-18T02:45+00:00"
  },
  {
   "pattern": "The model generates overlapping interaction records that mix direct messages to specific users with engagements on disparate topics.",
@@ -2465,7 +2465,7 @@
    "restored_from_evolution_at": "2026-05-04T14:15+00:00"
   },
   "valid_from": "2026-04-15T18:12+00:00",
-  "valid_until": null
+  "valid_until": "2026-07-18T02:45+00:00"
  },
  {
   "pattern": "Interactions consist of isolated, single actions occurring within a continuous timeline rather than forming repeating sequences.",
