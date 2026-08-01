@@ -1,0 +1,152 @@
+diff --git a/scripts/state_invariant_check.py b/scripts/state_invariant_check.py
+index 64698cb..c21c8c4 100755
+--- a/scripts/state_invariant_check.py
++++ b/scripts/state_invariant_check.py
+@@ -227,8 +227,23 @@ def load_state(home: Path) -> tuple[list[dict], dict]:
+ _LEVEL_ICON = {_OK: "✅", _INFO: "ℹ️", _WARN: "⚠️", _FAIL: "❌"}
+ 
+ 
+-def render_markdown(results: list[InvariantResult]) -> str:
++def render_markdown(results: list[InvariantResult], *, read_at: str | None = None) -> str:
++    """Render the invariant table.
++
++    ``read_at`` stamps *when* the live store was read. Without it the counts
++    below silently compete with the committed-snapshot counts in the weekly
++    report's state diff, which are a different source measured at a different
++    moment (ADR-0075: the reading exists, the label that makes it usable does
++    not — findings F1.4).
++    """
+     lines = ["## State Invariant Check", ""]
++    source = "live store" if read_at is None else f"live store, read at {read_at}"
++    lines.append(
++        f"Source: {source} — `total` counts every row in `knowledge.json`, "
++        "so total = live + tombstones (ADR-0021). Committed-snapshot counts "
++        "elsewhere in this report are a different source and moment."
++    )
++    lines.append("")
+     fails = sum(1 for r in results if r.level == _FAIL)
+     warns = sum(1 for r in results if r.level == _WARN)
+     if fails:
+@@ -262,7 +277,8 @@ def main(argv: list[str] | None = None) -> int:
+     parser.add_argument("--home", type=Path, required=True, help="MOLTBOOK_HOME")
+     args = parser.parse_args(argv)
+     results = run(args.home)
+-    print(render_markdown(results))
++    read_at = datetime.now().astimezone().isoformat(timespec="seconds")
++    print(render_markdown(results, read_at=read_at))
+     # Exit non-zero only on a hard FAIL so a caller can gate on corruption;
+     # WARN/INFO are reporting-only.
+     return 1 if any(r.level == _FAIL for r in results) else 0
+diff --git a/scripts/weekly-analysis.sh b/scripts/weekly-analysis.sh
+index 0667599..b13b715 100755
+--- a/scripts/weekly-analysis.sh
++++ b/scripts/weekly-analysis.sh
+@@ -143,10 +143,24 @@ if [[ -d "$DATA_REPO/.git" ]]; then
+         fi
+ 
+         # Knowledge pattern count
++        #
++        # Provenance is stamped into the line because this count is NOT the one
++        # the state invariant check reports (ADR-0075): these are *committed
++        # snapshots* of the data repo, taken at the last sync commit at or before
++        # each window bound, while the invariant check reads the *live* store at
++        # report-generation time — typically a day of accumulation later, and it
++        # counts tombstones too. Three numbers, three questions; unlabelled they
++        # read as a contradiction (findings F1.4).
+         STATE_DIFF+="### knowledge.json"$'\n'
+         count_start=$(git show "$start_commit":knowledge.json 2>/dev/null | python3 -c "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "N/A")
+         count_end=$(git show "$end_commit":knowledge.json 2>/dev/null | python3 -c "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "N/A")
+-        STATE_DIFF+="Pattern count: $count_start (start) -> $count_end (end)"$'\n\n'
++        start_sha=$(git rev-parse --short=7 "$start_commit" 2>/dev/null || echo "unknown")
++        end_sha=$(git rev-parse --short=7 "$end_commit" 2>/dev/null || echo "unknown")
++        start_cdate=$(git log -1 --format=%cI "$start_commit" 2>/dev/null || echo "unknown")
++        end_cdate=$(git log -1 --format=%cI "$end_commit" 2>/dev/null || echo "unknown")
++        STATE_DIFF+="Pattern count (data repo, committed snapshots — rows in knowledge.json, tombstones included):"$'\n'
++        STATE_DIFF+="$count_start (start, commit $start_sha @ $start_cdate) -> $count_end (end, commit $end_sha @ $end_cdate)"$'\n\n'
++        STATE_DIFF+="Not comparable to the State Invariant Check totals below, which read the live store at report-generation time."$'\n\n'
+     else
+         STATE_DIFF="No state diff available (insufficient git history)."
+     fi
+diff --git a/tests/test_state_invariant_check.py b/tests/test_state_invariant_check.py
+index 1fe1cf9..22dc844 100644
+--- a/tests/test_state_invariant_check.py
++++ b/tests/test_state_invariant_check.py
+@@ -153,6 +153,17 @@ class TestLoadAndRender:
+         assert "`with`" not in out
+         assert "\\|" in out
+ 
++    def test_render_stamps_the_source_and_moment_of_the_counts(self):
++        """findings F1.4: the report carried three counts of the same store from
++        two sources and labelled none of them. The header must say which store
++        this table read, when, and that `total` includes tombstones — otherwise
++        it reads as contradicting the state diff's committed-snapshot counts."""
++        out = sic.render_markdown(
++            sic.check_knowledge([_live("p")]), read_at="2026-08-01T09:00:00+09:00"
++        )
++        assert "live store, read at 2026-08-01T09:00:00+09:00" in out
++        assert "total = live + tombstones" in out
++
+     def test_run_endtoend_on_missing_home_is_clean(self, tmp_path):
+         # No state files → empty pattern list → no corruption, no crash.
+         results = sic.run(tmp_path / "nonexistent")
+diff --git a/tests/test_weekly_analysis_shell.py b/tests/test_weekly_analysis_shell.py
+index 8c8cc87..05564f3 100644
+--- a/tests/test_weekly_analysis_shell.py
++++ b/tests/test_weekly_analysis_shell.py
+@@ -209,6 +209,56 @@ class TestPromptAssembly:
+         # The scan's boundary holds end to end: the body it hashed stays out.
+         assert "a body" not in prompt.split("## Daily Reports")[0]
+ 
++    def test_pattern_count_line_names_its_source_and_commits(self, tmp_path):
++        """findings F1.4: the state diff's pattern counts are committed snapshots
++        of the data repo, the invariant check's are the live store at generation
++        time. Unlabelled, the two disagree by a day of accumulation plus the
++        tombstones and a reader cannot tell which answers which question."""
++        home = _make_home(tmp_path)
++        data_repo = tmp_path / "fakehome" / "MyAI_Lab" / "contemplative-agent-data"
++        data_repo.mkdir(parents=True)
++
++        def git(*a: str, when: str | None = None) -> None:
++            env = {
++                **os.environ,
++                "GIT_CONFIG_GLOBAL": "/dev/null",
++                "GIT_CONFIG_SYSTEM": "/dev/null",
++            }
++            if when:
++                # `git log --before` filters on the *committer* date, so pinning
++                # only the author date would leave both commits stamped "now".
++                env["GIT_AUTHOR_DATE"] = when
++                env["GIT_COMMITTER_DATE"] = when
++            subprocess.run(["git", *a], cwd=data_repo, check=True, capture_output=True, env=env)
++
++        git("init", "-q")
++        git("config", "user.email", "t@example.com")
++        git("config", "user.name", "t")
++        (data_repo / "knowledge.json").write_text("[]", encoding="utf-8")
++        git("add", "knowledge.json")
++        git("commit", "-qm", "start", when="2026-07-18T00:00:00+0900")
++        (data_repo / "knowledge.json").write_text('[{"pattern": "a"}]', encoding="utf-8")
++        git("commit", "-qam", "end", when=f"{END_DATE}T00:00:00+0900")
++
++        captured = tmp_path / "prompt.txt"
++        bin_dir = tmp_path / "bin"
++        bin_dir.mkdir(exist_ok=True)
++        stub = bin_dir / "claude"
++        stub.write_text(
++            f'#!/bin/bash\ncat >> "{captured}"\nprintf "# Weekly\\n"\n', encoding="utf-8"
++        )
++        stub.chmod(0o755)
++
++        result = _run(home, bin_dir, tmp_path)
++
++        assert result.returncode == 0, result.stderr
++        prompt = captured.read_text(encoding="utf-8")
++        assert "Pattern count (data repo, committed snapshots" in prompt
++        assert "0 (start, commit " in prompt
++        assert "1 (end, commit " in prompt
++        # The label that makes the count usable: which store, measured when.
++        assert "live store at report-generation time" in prompt
++
+ 
+ class TestPreflight:
+     def test_missing_claude_fails_before_the_collection_pass(self, tmp_path):

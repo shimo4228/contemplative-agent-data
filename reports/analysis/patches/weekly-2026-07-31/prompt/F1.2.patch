@@ -1,0 +1,230 @@
+diff --git a/docs/CODEMAPS/architecture.md b/docs/CODEMAPS/architecture.md
+index 2d6a6bb..068149d 100644
+--- a/docs/CODEMAPS/architecture.md
++++ b/docs/CODEMAPS/architecture.md
+@@ -453,6 +453,8 @@ translate: best-effort .ja.md (sonnet); failure never rolls back the two promote
+ 
+ Order is load-bearing. The sweep's Δ / 🆕 columns are defined against its last committed snapshot, so it runs `--no-update --emit-state` and the baseline is committed after the report lands — a run that produces nothing must spend nothing (findings F1.2; two consecutive weeks lost). The invariant check and the duplicate scan hold no state and are absolute readings, so they need no such ordering.
+ 
++The sweep's signature is keyed on **level + message only** — the logger name (`%(name)s`) is split off and carried as a display-only `Origin` column. The name is an address, not an anomaly type: keying on it made a pure module rename reset every known signature to 🆕 (finding F1.2), i.e. the Δ / 🆕 columns measured the codebase rather than the runtime. Package splits are expected to keep happening (ADR-0079), so the instrument must be refactor-invariant.
++
+ Injection boundary: the sweep and the invariant check must never read episode logs. The duplicate scan does, and is the only intake permitted to — it emits **only** 12-hex SHA-256 digests, counts, filename-derived dates and the fixed `{post, reply, comment}` vocabulary (ADR-0083, gated by `TestOutputBoundary`). All three are observability: a failure degrades to a "not available" stub and never breaks the report.
+ 
+ ### weekly-pipeline  [`scripts/weekly-pipeline.sh`, ADR-0085]
+diff --git a/scripts/log_anomaly_sweep.py b/scripts/log_anomaly_sweep.py
+index 1ff68e0..0e2f1b3 100755
+--- a/scripts/log_anomaly_sweep.py
++++ b/scripts/log_anomaly_sweep.py
+@@ -16,6 +16,10 @@ Security (load-bearing):
+ - Output is normalized signatures (timestamps stripped, digits squashed,
+   truncated), not verbatim log bodies, to shrink the injection surface further.
+ 
++Signature key: level + message. The logger name is deliberately excluded (it is
++an address, not an anomaly type) and reported as a display-only column, so a
++module rename cannot reset the novelty baseline.
++
+ State: a TSV ``count<TAB>signature`` snapshot of the previous sweep, used to
+ compute the NEW flag and the per-signature delta. Committing it is an
+ irreversible side effect — the Δ / 🆕 columns are defined against it, so a run
+@@ -63,33 +67,78 @@ _TS_CLOCK_RE = re.compile(r"^\[?\d\d:\d\d:\d\d[.,]?\d*\]?\s*")
+ _DIGITS_RE = re.compile(r"\d+")
+ _WS_RE = re.compile(r"\s+")
+ 
++# The logger name (``%(name)s`` in the runtime's format string) is an *address*,
++# not an anomaly type: moving a call site between modules renames it without
++# changing behaviour. Keying the signature on it makes the 🆕 / Δ columns
++# measure the codebase instead of the runtime — a pure refactor resets every
++# known signature to new. So the name is split off before the signature is
++# built and carried as a non-keyed display column instead.
++_LEVEL_TOKEN = r"\[?(?:DEBUG|INFO|WARNING|ERROR|CRITICAL)\]?"
++# ``[WARNING] pkg.mod: message`` — a level prefix makes the following
++# ``token:`` unambiguously the logger name.
++_ORIGIN_AFTER_LEVEL_RE = re.compile(rf"^(?P<level>{_LEVEL_TOKEN}\s+)(?P<name>[A-Za-z_][\w.]*):\s+")
++# ``pkg.mod: message`` with no level prefix — require a dotted name so a
++# message that merely starts with ``word:`` is not mistaken for an origin.
++_ORIGIN_BARE_RE = re.compile(r"^(?P<name>[A-Za-z_]\w*(?:\.\w+)+):\s+")
++
+ _SIG_MAXLEN = 80
+ 
+ 
+ @dataclass(frozen=True)
+ class Finding:
+-    """One normalized anomaly type with its frequency and novelty."""
++    """One normalized anomaly type with its frequency and novelty.
++
++    ``origins`` is the set of logger names the signature was seen under. It is
++    display-only: it never participates in the signature, the state file, or
++    the novelty computation, so a module rename changes the column and not the
++    🆕 / Δ reading.
++    """
+ 
+     signature: str
+     count: int
+     delta: int
+     is_new: bool
++    origins: tuple[str, ...] = ()
+ 
+ 
+-def normalize(line: str) -> str:
+-    """Collapse a log line into a stable signature.
++def split_origin(line: str) -> tuple[str, str]:
++    """Split a timestamp-stripped line into ``(logger name, rest)``.
+ 
+-    Strips the leading timestamp / clock prefix, lowercases, squashes digit
+-    runs to ``#`` (so numeric variation — counts, ids, ports — groups), and
+-    truncates. Agent-name variation is intentionally *not* squashed; minor
+-    over-splitting is safer than over-merging distinct anomalies.
++    The level prefix stays with the rest (it *is* part of the anomaly type);
++    only the logger name is lifted out. Returns ``("", line)`` when no logger
++    name is present.
++    """
++    m = _ORIGIN_AFTER_LEVEL_RE.match(line)
++    if m:
++        return m.group("name"), m.group("level") + line[m.end() :]
++    m = _ORIGIN_BARE_RE.match(line)
++    if m:
++        return m.group("name"), line[m.end() :]
++    return "", line
++
++
++def normalize_with_origin(line: str) -> tuple[str, str]:
++    """Collapse a log line into ``(signature, origin)``.
++
++    Strips the leading timestamp / clock prefix, lifts the logger name out
++    (returned separately, never keyed), lowercases, squashes digit runs to
++    ``#`` (so numeric variation — counts, ids, ports — groups), and truncates.
++    Agent-name variation is intentionally *not* squashed; minor over-splitting
++    is safer than over-merging distinct anomalies.
+     """
+     s = _TS_ISO_RE.sub("", line)
+     s = _TS_CLOCK_RE.sub("", s)
+-    s = s.strip().lower()
++    s = s.strip()
++    origin, s = split_origin(s)
++    s = s.lower()
+     s = _DIGITS_RE.sub("#", s)
+     s = _WS_RE.sub(" ", s).strip()
+-    return s[:_SIG_MAXLEN]
++    return s[:_SIG_MAXLEN], origin
++
++
++def normalize(line: str) -> str:
++    """Collapse a log line into a stable signature (logger name excluded)."""
++    return normalize_with_origin(line)[0]
+ 
+ 
+ def analyze(lines: Iterable[str], prev_counts: dict[str, int]) -> list[Finding]:
+@@ -100,13 +149,17 @@ def analyze(lines: Iterable[str], prev_counts: dict[str, int]) -> list[Finding]:
+     since last sweep. Sort: NEW first, then largest delta, then largest count.
+     """
+     counts: Counter[str] = Counter()
++    origins: dict[str, list[str]] = {}
+     for line in lines:
+         if not _is_signal(line):
+             continue
+-        sig = normalize(line)
++        sig, origin = normalize_with_origin(line)
+         if not sig:
+             continue
+         counts[sig] += 1
++        seen = origins.setdefault(sig, [])
++        if origin and origin not in seen:
++            seen.append(origin)
+ 
+     findings: list[Finding] = []
+     for sig, count in counts.items():
+@@ -122,6 +175,7 @@ def analyze(lines: Iterable[str], prev_counts: dict[str, int]) -> list[Finding]:
+                 count=count,
+                 delta=count - prev,
+                 is_new=(prev == 0),
++                origins=tuple(origins.get(sig, ())),
+             )
+         )
+     findings.sort(key=lambda f: (not f.is_new, -f.delta, -f.count))
+@@ -186,17 +240,20 @@ def render_markdown(findings: list[Finding], top: int) -> str:
+         f"by novelty then frequency delta:"
+     )
+     lines.append("")
+-    lines.append("| New | Count | Δ | Signature (normalized) |")
+-    lines.append("|----|------|----|------------------------|")
++    lines.append("| New | Count | Δ | Signature (normalized) | Origin |")
++    lines.append("|----|------|----|------------------------|--------|")
+     for f in findings[:top]:
+         flag = "🆕" if f.is_new else ""
+         # Neutralize Markdown breakers so a signature cannot break out of its
+         # code span in the downstream LLM prompt.
+         sig = md_safe(f.signature)
+-        lines.append(f"| {flag} | {f.count} | {f.delta:+d} | `{sig}` |")
++        origin = md_safe(", ".join(f.origins)) if f.origins else "—"
++        lines.append(f"| {flag} | {f.count} | {f.delta:+d} | `{sig}` | {origin} |")
+     lines.append("")
+     lines.append(
+-        "_Signatures are normalized (timestamps stripped, digits squashed). "
++        "_Signatures are normalized (timestamps stripped, digits squashed, "
++        "logger name excluded). Origin is display-only — it does not affect "
++        "the Δ / 🆕 columns, so a module rename cannot reset the baseline. "
+         "Source: self-written logs only; episode logs are never read._"
+     )
+     return "\n".join(lines) + "\n"
+diff --git a/tests/test_log_anomaly_sweep.py b/tests/test_log_anomaly_sweep.py
+index 8e21ea6..c25faae 100644
+--- a/tests/test_log_anomaly_sweep.py
++++ b/tests/test_log_anomaly_sweep.py
+@@ -31,6 +31,57 @@ class TestNormalize:
+         assert sig.startswith("error circuit breaker open")
+ 
+ 
++class TestRefactorInvariantSignature:
++    """The logger name is an address, not an anomaly type (finding F1.2).
++
++    A pure module rename (``7c96e0f`` moved publish-adjacent call sites into
++    ``adapters/moltbook/publish.py`` without touching a single message string)
++    used to reset every affected signature to 🆕 and float it to the top of the
++    top-25 by novelty — the Δ / 🆕 columns measured the codebase, not the
++    runtime.
++    """
++
++    _BEFORE = "2026-06-23 18:00:07 [ERROR] contemplative_agent.adapters.moltbook.reply_handler: Failed to reply on abc123: boom"  # noqa: E501
++    _AFTER = "2026-06-30 18:00:07 [ERROR] contemplative_agent.adapters.moltbook.publish: Failed to reply on abc123: boom"  # noqa: E501
++
++    def test_same_message_from_two_modules_is_one_signature(self):
++        assert las.normalize(self._BEFORE) == las.normalize(self._AFTER)
++        assert "reply_handler" not in las.normalize(self._BEFORE)
++
++    def test_level_is_still_keyed(self):
++        warn = self._AFTER.replace("[ERROR]", "[WARNING]")
++        assert las.normalize(warn) != las.normalize(self._AFTER)
++        assert las.normalize(self._AFTER).startswith("[error] failed to reply on")
++
++    def test_rename_does_not_make_a_known_signature_new(self):
++        prev = {las.normalize(self._BEFORE): 1}
++        findings = las.analyze([self._AFTER], prev)
++        assert len(findings) == 1
++        assert findings[0].is_new is False
++        assert findings[0].delta == 0
++
++    def test_origin_is_carried_but_not_keyed(self):
++        findings = las.analyze([self._BEFORE, self._AFTER], {})
++        assert len(findings) == 1
++        assert set(findings[0].origins) == {
++            "contemplative_agent.adapters.moltbook.reply_handler",
++            "contemplative_agent.adapters.moltbook.publish",
++        }
++        out = las.render_markdown(findings, top=25)
++        assert "publish" in out
++
++    def test_state_file_stays_keyed_on_signature_only(self, tmp_path):
++        state = tmp_path / "sweep.tsv"
++        las.write_state(state, las.analyze([self._BEFORE], {}))
++        assert "reply_handler" not in state.read_text(encoding="utf-8")
++        assert las.read_state(state)[las.normalize(self._AFTER)] == 1
++
++    def test_message_starting_with_a_word_and_colon_is_not_stripped(self):
++        # Only a dotted name (or one following a level prefix) is an origin.
++        sig = las.normalize("2026-06-23 18:00:07 done_reason=length: output truncated")
++        assert sig.startswith("done_reason=length: output truncated")
++
++
+ class TestAnalyze:
+     def test_non_signal_lines_ignored(self):
+         lines = ["just a normal info line", "starting session", "all good"]
