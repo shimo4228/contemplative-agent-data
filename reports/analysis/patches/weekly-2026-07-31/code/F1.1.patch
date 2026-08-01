@@ -1,0 +1,125 @@
+diff --git a/scripts/log_anomaly_sweep.py b/scripts/log_anomaly_sweep.py
+index 1ff68e0..aea4b10 100755
+--- a/scripts/log_anomaly_sweep.py
++++ b/scripts/log_anomaly_sweep.py
+@@ -58,11 +58,33 @@ def _is_signal(line: str) -> bool:
+ _LOG_GLOB = "*.log"
+ _AUDIT_NAME = "audit.jsonl"
+ 
+-_TS_ISO_RE = re.compile(r"^\[?\d{4}-\d\d-\d\d[T ][\d:.\-+Z]*\]?\s*")
++# ``[\d:.,\-+Z]`` (note the comma): ``logging``'s default asctime renders
++# milliseconds as ``2026-07-25 09:12:33,123``. Without the comma the ``,123``
++# survived the strip and landed at the head of every signature, spending
++# budget the message needed.
++_TS_ISO_RE = re.compile(r"^\[?\d{4}-\d\d-\d\d[T ][\d:.,\-+Z]*\]?\s*")
+ _TS_CLOCK_RE = re.compile(r"^\[?\d\d:\d\d:\d\d[.,]?\d*\]?\s*")
+ _DIGITS_RE = re.compile(r"\d+")
+ _WS_RE = re.compile(r"\s+")
+ 
++# The runtime's log format (``cli/runtime.py``) is
++# ``%(asctime)s [%(levelname)s] %(name)s: %(message)s``; ``%(name)s`` is a
++# dotted module path up to ~47 chars. Keying the signature on the *address*
++# rather than the predicate pushed the outcome clause past the length cap
++# ("... created but verification failed" truncated to "... created" — a
++# failure rendered as its own opposite). Match the known format and drop the
++# module path; lines that do not match fall back to prefix stripping.
++_RUNTIME_LINE_RE = re.compile(
++    r"^\[(?P<level>DEBUG|INFO|WARNING|ERROR|CRITICAL)\]\s+"
++    r"(?P<name>[A-Za-z_][\w.]*):\s*(?P<message>.*)$"
++)
++
++# Hex-shaped ids (uuid fragments, sha digests) vary per item the way digit runs
++# do, so they must squash the same way or every item gets its own signature.
++# The lookahead requires at least one digit so English words made only of
++# ``a-f`` letters ("decade", "facade") are not mistaken for ids.
++_HEXID_RE = re.compile(r"\b(?=[0-9a-f]*\d)[0-9a-f]{6,}(?:-[0-9a-f]{4,})*\b")
++
+ _SIG_MAXLEN = 80
+ 
+ 
+@@ -79,14 +101,22 @@ class Finding:
+ def normalize(line: str) -> str:
+     """Collapse a log line into a stable signature.
+ 
+-    Strips the leading timestamp / clock prefix, lowercases, squashes digit
+-    runs to ``#`` (so numeric variation — counts, ids, ports — groups), and
+-    truncates. Agent-name variation is intentionally *not* squashed; minor
+-    over-splitting is safer than over-merging distinct anomalies.
++    Strips the leading timestamp / clock prefix and — for lines in the
++    runtime's own log format — the dotted ``%(name)s`` module path, so the
++    length cap covers the predicate ("... created but verification failed")
++    instead of the address. Lowercases, squashes digit runs and hex-shaped ids
++    to ``#`` (so per-item variation groups), and truncates. Agent-name
++    variation is intentionally *not* squashed; minor over-splitting is safer
++    than over-merging distinct anomalies.
+     """
+     s = _TS_ISO_RE.sub("", line)
+     s = _TS_CLOCK_RE.sub("", s)
+-    s = s.strip().lower()
++    s = s.strip()
++    m = _RUNTIME_LINE_RE.match(s)
++    if m is not None:
++        s = f"[{m.group('level')}] {m.group('message')}"
++    s = s.lower()
++    s = _HEXID_RE.sub("#", s)
+     s = _DIGITS_RE.sub("#", s)
+     s = _WS_RE.sub(" ", s).strip()
+     return s[:_SIG_MAXLEN]
+@@ -196,7 +226,8 @@ def render_markdown(findings: list[Finding], top: int) -> str:
+         lines.append(f"| {flag} | {f.count} | {f.delta:+d} | `{sig}` |")
+     lines.append("")
+     lines.append(
+-        "_Signatures are normalized (timestamps stripped, digits squashed). "
++        "_Signatures are normalized (timestamps and module paths stripped, "
++        "digits and ids squashed). "
+         "Source: self-written logs only; episode logs are never read._"
+     )
+     return "\n".join(lines) + "\n"
+diff --git a/tests/test_log_anomaly_sweep.py b/tests/test_log_anomaly_sweep.py
+index 8e21ea6..5570bc2 100644
+--- a/tests/test_log_anomaly_sweep.py
++++ b/tests/test_log_anomaly_sweep.py
+@@ -31,6 +31,43 @@ class TestNormalize:
+         assert sig.startswith("error circuit breaker open")
+ 
+ 
++class TestRuntimeFormatSignature:
++    """The publish-verification failure must survive the length cap.
++
++    The runtime format is ``%(asctime)s [%(levelname)s] %(name)s: %(message)s``
++    with a ~47-char dotted module path; keying the signature on the rendered
++    line truncated ``created but verification failed`` to ``created``, so a
++    failure rendered as a success (findings F1.1).
++    """
++
++    LINE = (
++        "2026-07-25 09:12:33,123 [WARNING] "
++        "contemplative_agent.adapters.moltbook.publish: "
++        "Reply on 836e1237-a5b2 created but verification failed; not recording"
++    )
++
++    def test_outcome_clause_survives_the_length_cap(self):
++        sig = las.normalize(self.LINE)
++        assert "verification failed" in sig
++        assert "contemplative_agent" not in sig
++        assert sig.startswith("[warning] reply on ")
++
++    def test_comma_milliseconds_do_not_leak_into_the_signature(self):
++        assert not las.normalize(self.LINE).startswith(",")
++
++    def test_id_shaped_tokens_squash_like_digit_runs(self):
++        other = self.LINE.replace("836e1237-a5b2", "91ab77de-0c31")
++        assert las.normalize(self.LINE) == las.normalize(other)
++
++    def test_distinct_predicates_stay_distinct(self):
++        comment = self.LINE.replace("Reply on", "Comment on")
++        assert las.normalize(self.LINE) != las.normalize(comment)
++
++    def test_hex_letter_words_are_not_mistaken_for_ids(self):
++        sig = las.normalize("[WARNING] mod.name: a decade of facade beef")
++        assert "decade" in sig and "facade" in sig
++
++
+ class TestAnalyze:
+     def test_non_signal_lines_ignored(self):
+         lines = ["just a normal info line", "starting session", "all good"]
