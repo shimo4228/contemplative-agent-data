@@ -1,0 +1,12 @@
+{
+  "tool": "vulture",
+  "report_prefixes": [
+    "src/",
+    "scripts/"
+  ],
+  "count": 0,
+  "candidates": [],
+  "parsed_total": 157,
+  "unparsed_lines": 0,
+  "stderr_lines": 0
+}

@@ -1,0 +1,206 @@
+diff --git a/config/prompts/weekly-analysis.md b/config/prompts/weekly-analysis.md
+index ee6e613..ec03b51 100644
+--- a/config/prompts/weekly-analysis.md
++++ b/config/prompts/weekly-analysis.md
+@@ -33,6 +33,7 @@ Summarize changes to the agent's internal state during this period:
+ - **Rules**: List all rules at period end. Note any added/removed/modified.
+ - **Knowledge**: Pattern count at start vs end. Carry the source label the input gives you — the state diff reports *committed snapshots of the data repo* (with commit sha and date), the invariant check reports the *live store at report-generation time* (whose `total` includes tombstones). These answer different questions and legitimately differ; report each with its label rather than treating the gap as a contradiction or picking one as canonical.
+ - **Operational drift** (from the provided *Log Anomaly Sweep* and *State Invariant Check*): surface any anomaly type flagged 🆕 (new since last sweep) or sharply spiking (high Δ), and any invariant at ⚠️ WARN or ❌ FAIL. These are deterministic signals — report them as observations (what changed, how much); proposing fixes belongs to the downstream diagnosis step, not this report.
++- **Skill selection** (from the provided *Skill-selection shadow reading*): which skills pass-1 actually selected this week — selection frequency, verdict distribution (judged vs fail-open), hallucination rate, never-selected tail. This is the measured middle link between *installed* (state diff) and *vocabulary in output* (E): when A or E attributes output vocabulary to a skill, check the attribution against this list instead of inferring selection from vocabulary. Report the reading as observations; it carries names and counts only.
+ 
+ If state diffs are provided, analyze them. If not, note "no state data available."
+ 
+@@ -103,7 +104,8 @@ The following data will be provided:
+ 3. **Agent state diffs** (identity, constitution, skills, rules, knowledge count) — if available
+ 4. **Log Anomaly Sweep** — deterministic ranking of log anomalies by novelty (🆕 = new since last sweep) then frequency delta; read it for B's operational-drift note
+ 5. **State Invariant Check** — deterministic ✅/⚠️/❌ checks over knowledge.json / agents.json; read it for B's operational-drift note
+-6. **Previous reports** (last 3 weeks if available) — for trend comparison
++6. **Skill-selection shadow reading** — deterministic aggregate of the pass-1 skill-selection log (selected skill names with frequency, verdict distribution, hallucination rate, never-selected tail; names and counts only); read it for B's skill-selection note
++7. **Previous reports** (last 3 weeks if available) — for trend comparison
+ 
+ # Downstream
+ 
+diff --git a/docs/CODEMAPS/architecture.md b/docs/CODEMAPS/architecture.md
+index 5a94a62..2cca87e 100644
+--- a/docs/CODEMAPS/architecture.md
++++ b/docs/CODEMAPS/architecture.md
+@@ -1,4 +1,4 @@
+-<!-- Generated: 2026-08-01 | Updated: 2026-08-07 (weekly-pipeline dead-code intake) | Files scanned: 74 | Token estimate: ~9179 -->
++<!-- Generated: 2026-08-01 | Updated: 2026-08-08 (weekly-analysis skill-selection intake) | Files scanned: 74 | Token estimate: ~9179 -->
+ # Architecture
+ 
+ ## Project Type
+@@ -463,7 +463,7 @@ ViewRegistry.find_by_view("constitutional", get_live_patterns())
+ 
+ ### weekly-analysis  [`scripts/weekly-analysis.sh`, ADR-0040]
+ 
+-Runs outside the agent process (launchd → `claude -p`), assembling a prompt from operator-facing artifacts plus **four deterministic intakes**, then a diagnosis companion (`weekly-report-diagnosis` skill) produces the F sections.
++Runs outside the agent process (launchd → `claude -p`), assembling a prompt from operator-facing artifacts plus **five deterministic intakes**, then a diagnosis companion (`weekly-report-diagnosis` skill) produces the F sections.
+ 
+ ```text
+ collect: daily comment-reports + data-repo state diff + previous N reports
+@@ -471,6 +471,8 @@ collect: daily comment-reports + data-repo state diff + previous N reports
+        + state_invariant_check.py (accumulated state: knowledge.json / agents.json)
+        + cross_day_duplicate_scan.py (published-body identity: episode logs → digests)
+        + api_drift_scan.py       (platform schema drift: api-audit.jsonl keys; vocab state)
++       + skill-selection reading (pass-1 selection log: skill-selection-*.jsonl → names
++                                  and counts; package renderer via `uv run --no-sync`)
+ generate: claude -p → weekly-<end>.md.tmp
+ promote:  mv tmp → weekly-<end>.md        (atomic; a failure leaves the prior report)
+        →  mv sweep-state.pending → sweep-state   (novelty baseline committed ONLY here)
+@@ -478,13 +480,13 @@ promote:  mv tmp → weekly-<end>.md        (atomic; a failure leaves the prior
+ translate: best-effort .ja.md (sonnet); failure never rolls back the promotes
+ ```
+ 
+-Order is load-bearing. The sweep's Δ / 🆕 columns and the drift scan's new/removed pairs are defined against their last committed snapshots, so both run `--no-update --emit-state` and their baselines are committed after the report lands — a run that produces nothing must spend nothing (findings F1.2; two consecutive weeks lost). The invariant check and the duplicate scan hold no state and are absolute readings, so they need no such ordering.
++Order is load-bearing. The sweep's Δ / 🆕 columns and the drift scan's new/removed pairs are defined against their last committed snapshots, so both run `--no-update --emit-state` and their baselines are committed after the report lands — a run that produces nothing must spend nothing (findings F1.2; two consecutive weeks lost). The invariant check, the duplicate scan and the skill-selection reading hold no state and are absolute readings, so they need no such ordering.
+ 
+ The drift scan (2026-08-06) diffs the per-endpoint response-key vocabulary the client already records in `api-audit.jsonl` (2xx envelopes only, so outages do not read as schema changes) and tracks the `POST /verify` consecutive-failure run against the platform's 10-failure suspension rule. It exists because the platform ships API changes unannounced (observed: the `check_in` key appearing on `/home` in 2026-08, carrying role "standing instructions" — a third-party injection channel the adapter deliberately never consumes, gated by `tests/test_home_field_allowlist.py`). The spec (`skill.md`) is untrusted external text: it is never fetched in the unattended chain, and on drift the rendered section directs the re-read to the Saturday gate.
+ 
+ The sweep's signature is keyed on **level + message**, with the dotted `%(name)s` module path dropped for lines in the runtime's own log format, and hex-shaped ids squashed to `#` alongside digit runs. The 80-character cap is the reason: the module path alone runs to ~47 characters, so keying on it spent the budget on the address and truncated the predicate — `"reply on <id> created but verification failed"` rendered as `"reply on <id> created"`, a failure displayed as its own opposite (findings F1.1). Excluding the name also makes the instrument refactor-invariant: a pure module move (`7c96e0f`) used to reset every affected signature to 🆕, i.e. the Δ / 🆕 columns measured the codebase rather than the runtime (findings F1.2). The trade is that the same message from two subsystems now merges into one row, so the logger name is carried as a display-only `Origin` column — it never enters the signature, the state file or the novelty computation, so the reader keeps the distinction the key deliberately drops.
+ 
+-Injection boundary: the sweep, the invariant check and the drift scan must never read episode logs (the drift scan reads only the self-written `api-audit.jsonl`; the platform-controlled key names it renders are Markdown-escaped and length-capped). The duplicate scan does, and is the only intake permitted to — it emits **only** 12-hex SHA-256 digests, counts, filename-derived dates and the fixed `{post, reply, comment}` vocabulary (ADR-0083, gated by `TestOutputBoundary`). All four are observability: a failure degrades to a "not available" stub and never breaks the report.
++Injection boundary: the sweep, the invariant check and the drift scan must never read episode logs (the drift scan reads only the self-written `api-audit.jsonl`; the platform-controlled key names it renders are Markdown-escaped and length-capped). The duplicate scan does, and is the only intake permitted to — it emits **only** 12-hex SHA-256 digests, counts, filename-derived dates and the fixed `{post, reply, comment}` vocabulary (ADR-0083, gated by `TestOutputBoundary`). The skill-selection reading (2026-08-08, findings F1.4) reads the self-written `skill-selection-*.jsonl` shadow log (ADR-0076): the *selected* middle link between *installed* (state diff) and *vocabulary in output* (section E) was already logged per publish action but never supplied to the report. Its records embed the selection situation — untrusted post bodies — so the renderer (`format_skill_selection_report`, the same one behind `report --skill-selection`) emits skill names and counts only, never the situation strings (same ADR-0083 boundary; gated by `test_skill_selection_reading_reaches_the_prompt_names_only`). All five are observability: a failure degrades to a "not available" stub and never breaks the report.
+ 
+ ### weekly-pipeline  [`scripts/weekly-pipeline.sh`, ADR-0085]
+ 
+@@ -504,7 +506,7 @@ Stage 4 fix:       per code-scope F1: git worktree @ HEAD → claude -p (fix-imp
+                    blocks export (inspector, not approver)
+                    prompt-scope F1: draft diff only, no Verify, full text at the gate
+ Stage 5 insight:   read-only recommendation pass over .staged/ (insight-recommendation.md)
+-Stage 6 deadcode:  dead_code_scan.py (vulture over the repo checkout; 5th deterministic
++Stage 6 deadcode:  dead_code_scan.py (vulture over the repo checkout; 6th deterministic
+                    intake — detection only, feeds the packet directly; runs before
+                    improve so a recurring scan failure feeds the P4 detector)
+ Stage 7 improve:   only when the same reason code recurred 2 consecutive runs (check-improvement)
+diff --git a/scripts/weekly-analysis.sh b/scripts/weekly-analysis.sh
+index fe82319..eb5367c 100755
+--- a/scripts/weekly-analysis.sh
++++ b/scripts/weekly-analysis.sh
+@@ -302,6 +302,59 @@ if [[ -d "$MOLTBOOK_HOME/logs" ]]; then
+ fi
+ [[ -z "$DUP_SCAN" ]] && DUP_SCAN="## Cross-Day Duplicate Scan"$'\n\n'"No duplicate scan available."
+ 
++# --- Skill-selection shadow reading (pass-1 selection intake, 2026-08-08) ---
++# Deterministic aggregate of logs/skill-selection-*.jsonl (the ADR-0076 shadow
++# writer). Without it the report sees *installed* (state diff) and *vocabulary
++# in output* (its own reading of E) and has to infer the middle link —
++# *selected* — from vocabulary matching, even though selection is already
++# logged per publish action. Renders names and counts only via the existing
++# `report --skill-selection` renderer (selection frequency, verdict
++# distribution, hallucination rate, never-selected tail); the situation
++# strings in the log are built from untrusted post bodies and never enter the
++# prompt (ADR-0083 boundary, held by the renderer). Read-only over the log and
++# skills dir — no selection behavior changes, so the open T-SKILLSEL window is
++# unaffected. Observability only — a failure must not break the weekly report.
++# `uv run --no-sync`, not bare python3: the renderer lives in the package
++# (venv-only imports), same invocation shape as weekly-pipeline.sh's
++# dead-code intake; launchd's plist PATH already covers uv (~/.local/bin).
++SKILL_SELECTION=""
++if [[ -d "$MOLTBOOK_HOME/logs" ]]; then
++    SKILL_SELECTION=$(uv run --project "$PROJECT_ROOT" --no-sync -q python - \
++        "$MOLTBOOK_HOME" "$START_DATE" <<'PY' 2>/dev/null || true
++import sys
++from datetime import date, datetime, timezone
++from pathlib import Path
++
++from contemplative_agent.core.skill_selection import (
++    format_skill_selection_report,
++    read_skill_selection_log,
++)
++
++home = Path(sys.argv[1])
++start = date.fromisoformat(sys.argv[2])
++# The reader windows by days-back-from-today (UTC); anchor the cutoff to the
++# report window's start date. For scheduled runs (end = yesterday) this is
++# exact; for backfill runs the window has no upper bound, which the rendered
++# "Window: last N days" line states honestly.
++days = max((datetime.now(timezone.utc).date() - start).days, 1)
++skills_dir = home / "skills"
++print(
++    format_skill_selection_report(
++        read_skill_selection_log(
++            home / "logs",
++            days=days,
++            skills_dir=skills_dir if skills_dir.is_dir() else None,
++        )
++    )
++)
++PY
++    )
++    if [[ -n "$SKILL_SELECTION" ]]; then
++        echo "Included skill-selection reading"
++    fi
++fi
++[[ -z "$SKILL_SELECTION" ]] && SKILL_SELECTION="## Skill-selection shadow reading (ADR-0076)"$'\n\n'"No skill-selection reading available."
++
+ # --- Build prompt ---
+ SYSTEM_PROMPT=$(cat "$PROMPT_TEMPLATE")
+ 
+@@ -319,6 +372,8 @@ $INVARIANTS
+ 
+ $DUP_SCAN
+ 
++$SKILL_SELECTION
++
+ $PREV_REPORTS
+ 
+ ## Daily Reports
+diff --git a/tests/test_weekly_analysis_shell.py b/tests/test_weekly_analysis_shell.py
+index 05564f3..557f80a 100644
+--- a/tests/test_weekly_analysis_shell.py
++++ b/tests/test_weekly_analysis_shell.py
+@@ -15,6 +15,7 @@ macOS-only: the script uses BSD ``date -j``.
+ 
+ from __future__ import annotations
+ 
++import json
+ import os
+ import shutil
+ import subprocess
+@@ -209,6 +210,45 @@ class TestPromptAssembly:
+         # The scan's boundary holds end to end: the body it hashed stays out.
+         assert "a body" not in prompt.split("## Daily Reports")[0]
+ 
++    def test_skill_selection_reading_reaches_the_prompt_names_only(self, tmp_path):
++        """findings F1.4: the pass-1 selection log was the one instrument not in
++        the prompt — the report inferred *selected* from output vocabulary. The
++        intake must carry skill names and counts, and never the selection
++        situation strings, which are built from untrusted post bodies
++        (ADR-0083 boundary, held by the renderer)."""
++        home = _make_home(tmp_path)
++        record = {
++            "ts": f"{END_DATE}T10:00:00+00:00",
++            "verdict": "judged",
++            "selected": ["fabricated-benchmark-guard"],
++            "rejected_names": [],
++            "full_skill_tokens": 1000,
++            "would_be_skill_tokens": 100,
++            # The reader ignores fields it does not aggregate; a plaintext
++            # situation here proves the renderer emits names and counts only.
++            "prompt": "SITUATION-MARKER an untrusted post body",
++        }
++        (home / "logs" / f"skill-selection-{END_DATE}.jsonl").write_text(
++            json.dumps(record) + "\n", encoding="utf-8"
++        )
++        captured = tmp_path / "prompt.txt"
++        bin_dir = tmp_path / "bin"
++        bin_dir.mkdir(exist_ok=True)
++        stub = bin_dir / "claude"
++        stub.write_text(
++            f'#!/bin/bash\ncat >> "{captured}"\nprintf "# Weekly\\n"\n', encoding="utf-8"
++        )
++        stub.chmod(0o755)
++
++        result = _run(home, bin_dir, tmp_path)
++
++        assert result.returncode == 0, result.stderr
++        prompt = captured.read_text(encoding="utf-8")
++        assert "## Skill-selection shadow reading" in prompt
++        assert "No skill-selection reading available" not in prompt
++        assert "fabricated-benchmark-guard: 1" in prompt
++        assert "SITUATION-MARKER" not in prompt
++
+     def test_pattern_count_line_names_its_source_and_commits(self, tmp_path):
+         """findings F1.4: the state diff's pattern counts are committed snapshots
+         of the data repo, the invariant check's are the live store at generation

@@ -1,0 +1,242 @@
+diff --git a/src/contemplative_agent/cli/adopt.py b/src/contemplative_agent/cli/adopt.py
+index a5bea34..1fb0bc0 100644
+--- a/src/contemplative_agent/cli/adopt.py
++++ b/src/contemplative_agent/cli/adopt.py
+@@ -153,18 +153,31 @@ def _delete_adopted_sources(target: Path, sources: Sequence[str]) -> None:
+ def _adopt_write_item(item: _StagedItem, *, yes: bool, audit_source: AuditSource) -> bool:
+     """Write the staged text to its target after approval; True when adopted."""
+     from ..core._io import write_restricted
++    from ..core.artifact_extraction import canonicalize_frontmatter_name, slug_from_stem
+ 
+     # H5 collision guard — exempt when a stocktake merge deliberately reuses
+     # one of its own source names (merge-into-source overwrite).
+     target = item.target
+     if target.name not in (item.sources or ()):
+         target = approval._collision_free_path(target, item.text)
++    # One-canonical-identity invariant, established AT the write boundary
++    # (weekly 2026-08-08 F1.3): the extraction-time canonicalization
++    # (insight/rules-distill) is a producer convention, not an invariant —
++    # text staged before that fix landed, staged by a future producer that
++    # skips it, or renamed by the collision guard just above would all enter
++    # the live store with a frontmatter ``name:`` that ``ls`` never shows.
++    # Idempotent normalization, not a gate: an already-canonical candidate
++    # (and any body without frontmatter — identity, constitution, legacy
++    # rules) passes through byte-identical, and nothing is rejected.
++    text = canonicalize_frontmatter_name(item.text, slug_from_stem(target.stem))
+     approved = True if yes else approval._approve_write(target)
+     approval._log_approval(
+         item.command,
+         target,
+         approved,
+-        item.text,
++        # Log the canonicalized text — the audit row's content hash must
++        # match the bytes actually written to the durable store.
++        text,
+         source=audit_source,
+         source_ids=item.source_ids,
+         epistemic_counts=item.epistemic_counts,
+@@ -173,7 +186,7 @@ def _adopt_write_item(item: _StagedItem, *, yes: bool, audit_source: AuditSource
+         print("Skipped.")
+         return False
+     target.parent.mkdir(parents=True, exist_ok=True)
+-    to_write = item.text if item.text.endswith("\n") else item.text + "\n"
++    to_write = text if text.endswith("\n") else text + "\n"
+     write_restricted(target, to_write)
+     # skill-stocktake merges pass the original filenames in `sources`
+     # so they get deleted once the merged result is adopted.
+diff --git a/src/contemplative_agent/core/artifact_extraction.py b/src/contemplative_agent/core/artifact_extraction.py
+index 959c414..890e95d 100644
+--- a/src/contemplative_agent/core/artifact_extraction.py
++++ b/src/contemplative_agent/core/artifact_extraction.py
+@@ -28,6 +28,11 @@ logger = logging.getLogger(__name__)
+ 
+ _FRONTMATTER_NAME_RE = re.compile(r"^name:.*$", re.MULTILINE)
+ 
++# Inverse of the ``<slug>-YYYYMMDD.md`` naming that resolve_artifact_path
++# composes, plus the optional ``-N`` counter that the adopt-time collision
++# guard (cli.approval._collision_free_path) may append after the date.
++_DATED_STEM_RE = re.compile(r"^(?P<slug>.+)-\d{8}(?P<counter>-\d+)?$")
++
+ 
+ @dataclass(frozen=True)
+ class ResolvedArtifactPath:
+@@ -77,6 +82,23 @@ def resolve_artifact_path(
+     return ResolvedArtifactPath(filename=filename, target_path=path, slug=slug)
+ 
+ 
++def slug_from_stem(stem: str) -> str:
++    """Return the date-free identity token for a final target filename stem.
++
++    Inverts :func:`resolve_artifact_path`'s ``<slug>-YYYYMMDD`` naming while
++    preserving a trailing ``-N`` collision counter: a collision-renamed file
++    (``foo-20260801-2.md``) must carry a declared name distinct from the file
++    it collided with (``foo`` vs ``foo-2``), or the two would re-collide in
++    every consumer that keys on the declared name (``skill_theme`` selector
++    key, novelty dedup, stocktake clustering). Stems without a date suffix
++    (identity/constitution targets, legacy names) are returned unchanged.
++    """
++    m = _DATED_STEM_RE.match(stem)
++    if not m:
++        return stem
++    return m.group("slug") + (m.group("counter") or "")
++
++
+ def canonicalize_frontmatter_name(text: str, slug: str) -> str:
+     """Return *text* with its frontmatter ``name:`` scalar set to *slug*.
+ 
+diff --git a/tests/test_cli_adopt.py b/tests/test_cli_adopt.py
+index 10b6f8d..0fad4f4 100644
+--- a/tests/test_cli_adopt.py
++++ b/tests/test_cli_adopt.py
+@@ -1017,6 +1017,114 @@ class TestAdoptStagedNamesFlag:
+         assert (skills / "a.md").exists()
+ 
+ 
++class TestAdoptCanonicalizesFrontmatterName:
++    """Weekly 2026-08-08 F1.3: the one-canonical-identity invariant must be
++    established at the write boundary (_adopt_write_item), not inherited from
++    the producer. Two divergence sources survived at that boundary:
++
++    1. text staged BEFORE extraction-time canonicalization existed (the
++       2026-08-01 straddle: staged 00:16 UTC, fix landed 02:05, adopted 02:37)
++       was written verbatim with a diverging ``name:``;
++    2. a collision rename (`-2` suffix) changed the filename after the
++       producer had canonicalized, minting a fresh divergence.
++    """
++
++    DIVERGENT = (
++        "---\n"
++        "name: assume-perfect-adversarial-understanding\n"
++        'description: "d"\n'
++        "origin: auto-extracted\n"
++        "---\n"
++        "\n"
++        "# Mandating Structural Integrity Axioms\n"
++        "\n"
++        "body\n"
++    )
++
++    def _adopt(self, tmp_path, items):
++        staged_dir = tmp_path / ".staged"
++        audit = tmp_path / "logs" / "audit.jsonl"
++        args = argparse.Namespace(yes=True)
++        with (
++            patch("contemplative_agent.adapters.moltbook.config.STAGED_DIR", staged_dir),
++            patch("contemplative_agent.adapters.moltbook.config.MOLTBOOK_DATA_DIR", tmp_path),
++            patch("contemplative_agent.cli.approval.AUDIT_LOG_PATH", audit),
++        ):
++            _stage_results(items, command="insight")
++            _handle_adopt_staged(args, MagicMock())
++
++    def test_staged_divergent_name_is_canonicalized_at_write(self, tmp_path):
++        """Divergence source 1: a pre-canonicalization (or future
++        non-canonicalizing producer) body must not enter the store verbatim."""
++        target = tmp_path / "skills" / "mandating-structural-integrity-axioms-20260801.md"
++        self._adopt(
++            tmp_path,
++            [
++                StageItem(
++                    "mandating-structural-integrity-axioms-20260801.md", self.DIVERGENT, target
++                )
++            ],
++        )
++        written = target.read_text()
++        assert "name: mandating-structural-integrity-axioms\n" in written
++        assert "assume-perfect-adversarial-understanding" not in written
++        # Heading (human-readable title) survives untouched.
++        assert "# Mandating Structural Integrity Axioms" in written
++
++    def test_collision_rename_recanonicalizes_to_final_stem(self, tmp_path):
++        """Divergence source 2: the `-2` collision rename happens after the
++        producer canonicalized, so the write must re-derive the name from the
++        FINAL stem — and the two files must not share a declared name."""
++        canonical = '---\nname: dup-skill\ndescription: "d"\n---\n\n# Dup Skill\n\nfirst body\n'
++        collider = '---\nname: dup-skill\ndescription: "d"\n---\n\n# Dup Skill\n\nsecond body\n'
++        target = tmp_path / "skills" / "dup-skill-20260801.md"
++        self._adopt(
++            tmp_path,
++            [
++                StageItem("dup-skill-20260801.md", canonical, target),
++                StageItem("dup-skill-20260801.md", collider, target),
++            ],
++        )
++        first = (tmp_path / "skills" / "dup-skill-20260801.md").read_text()
++        second = (tmp_path / "skills" / "dup-skill-20260801-2.md").read_text()
++        assert "name: dup-skill\n" in first
++        assert "name: dup-skill-2\n" in second
++
++    def test_body_without_frontmatter_passes_through_unchanged(self, tmp_path):
++        """Normalization, not a gate: identity/constitution-shaped prose and
++        legacy bodies without frontmatter are written byte-identical."""
++        target = tmp_path / "identity.md"
++        self._adopt(tmp_path, [StageItem("identity.md", "I am prose.\n", target)])
++        assert target.read_text() == "I am prose.\n"
++
++    def test_audit_log_hashes_the_written_text(self, tmp_path):
++        """The audit row must describe the bytes in the durable store, not
++        the pre-normalization staged text (replayable-audit-logs)."""
++        import hashlib
++
++        target = tmp_path / "skills" / "mandating-structural-integrity-axioms-20260801.md"
++        self._adopt(
++            tmp_path,
++            [
++                StageItem(
++                    "mandating-structural-integrity-axioms-20260801.md", self.DIVERGENT, target
++                )
++            ],
++        )
++        decisions = [
++            json.loads(line)
++            for line in (tmp_path / "logs" / "audit.jsonl").read_text().strip().splitlines()
++        ]
++        adopted = [d for d in decisions if d["source"] == "stage-adopted-auto"]
++        assert len(adopted) == 1
++        written = target.read_text()
++        assert adopted[0]["content_hash"] == (hashlib.sha256(written.encode()).hexdigest()[:16])
++        # ...and it must NOT be the hash of the pre-normalization staged text.
++        assert (
++            adopted[0]["content_hash"] != (hashlib.sha256(self.DIVERGENT.encode()).hexdigest()[:16])
++        )
++
++
+ class TestAdoptionOrderForCollisionPair:
+     """Codex review round-2 P2: adopt-staged must process a collision pair in
+     staging order — a plain name sort put dup-2.md.meta.json first ('-' < '.')
+diff --git a/tests/test_insight.py b/tests/test_insight.py
+index 66e8fbe..3ba4ff8 100644
+--- a/tests/test_insight.py
++++ b/tests/test_insight.py
+@@ -12,6 +12,7 @@ from contemplative_agent.core import insight_novelty
+ from contemplative_agent.core.artifact_extraction import (
+     canonicalize_frontmatter_name,
+     resolve_artifact_path,
++    slug_from_stem,
+ )
+ from contemplative_agent.core.insight import (
+     FULL_RECLUSTER_WARN_N,
+@@ -183,6 +184,24 @@ class TestCanonicalizeFrontmatterName:
+         assert skill_theme(out)[0] == "my-skill"
+ 
+ 
++class TestSlugFromStem:
++    """slug_from_stem inverts resolve_artifact_path's naming at adopt time."""
++
++    def test_strips_date_suffix(self) -> None:
++        assert slug_from_stem("my-skill-20260801") == "my-skill"
++
++    def test_keeps_collision_counter(self) -> None:
++        """A collision-renamed file (`-2` from _collision_free_path) must map
++        to a declared name distinct from the file it collided with —
++        `foo` vs `foo-2` — or every declared-name consumer re-collides."""
++        assert slug_from_stem("my-skill-20260801-2") == "my-skill-2"
++
++    def test_stem_without_date_is_unchanged(self) -> None:
++        # identity/constitution targets and legacy names carry no date suffix.
++        assert slug_from_stem("identity") == "identity"
++        assert slug_from_stem("dup") == "dup"
++
++
+ class TestStagedSkillIdentityInvariant:
+     @patch(
+         "contemplative_agent.core.llm.generate_full",
