@@ -1,0 +1,671 @@
+diff --git a/docs/CODEMAPS/architecture.md b/docs/CODEMAPS/architecture.md
+index 5a94a62..23fdbcf 100644
+--- a/docs/CODEMAPS/architecture.md
++++ b/docs/CODEMAPS/architecture.md
+@@ -467,13 +467,14 @@ Runs outside the agent process (launchd → `claude -p`), assembling a prompt fr
+ 
+ ```text
+ collect: daily comment-reports + data-repo state diff + previous N reports
+-       + log_anomaly_sweep.py    (event stream: *.log + audit.jsonl; novelty state)
++       + log_anomaly_sweep.py    (event stream: *.log + audit.jsonl; novelty state + corpus census)
+        + state_invariant_check.py (accumulated state: knowledge.json / agents.json)
+        + cross_day_duplicate_scan.py (published-body identity: episode logs → digests)
+        + api_drift_scan.py       (platform schema drift: api-audit.jsonl keys; vocab state)
+ generate: claude -p → weekly-<end>.md.tmp
+ promote:  mv tmp → weekly-<end>.md        (atomic; a failure leaves the prior report)
+        →  mv sweep-state.pending → sweep-state   (novelty baseline committed ONLY here)
++       →  mv sweep-state.pending.corpus.tsv → sweep-state.corpus.tsv  (lockstep; see below)
+        →  mv api-drift-state.pending → api-drift-state   (same discipline)
+ translate: best-effort .ja.md (sonnet); failure never rolls back the promotes
+ ```
+@@ -484,6 +485,8 @@ The drift scan (2026-08-06) diffs the per-endpoint response-key vocabulary the c
+ 
+ The sweep's signature is keyed on **level + message**, with the dotted `%(name)s` module path dropped for lines in the runtime's own log format, and hex-shaped ids squashed to `#` alongside digit runs. The 80-character cap is the reason: the module path alone runs to ~47 characters, so keying on it spent the budget on the address and truncated the predicate — `"reply on <id> created but verification failed"` rendered as `"reply on <id> created"`, a failure displayed as its own opposite (findings F1.1). Excluding the name also makes the instrument refactor-invariant: a pure module move (`7c96e0f`) used to reset every affected signature to 🆕, i.e. the Δ / 🆕 columns measured the codebase rather than the runtime (findings F1.2). The trade is that the same message from two subsystems now merges into one row, so the logger name is carried as a display-only `Origin` column — it never enters the signature, the state file or the novelty computation, so the reader keeps the distinction the key deliberately drops.
+ 
++The sweep has **no time window**: it counts every line each allowed file currently holds, so a row's `Count` spans that file's lifetime — and the files rotate on different schedules (`ollama-serve.log` nightly since 2026-08-01, `agent-launchd.log` weekly via `backup-runtime.sh`, the one-shot `insight-` / `distill-launchd.log` never), which makes two rows of one table not necessarily commensurable. Rotation also moves the novelty baseline: lines leave the `*.log` glob, counts fall, and known signatures re-appear as 🆕 — once a rare footnote, the steady state since nightly rotation shipped. Filtering by timestamp would discard signal, so the instrument states its basis instead (findings F1.1, 2026-08-07): a per-file **corpus census** (name, lines read, signal lines) is written to a sidecar `<state>.corpus.tsv` — a sidecar because `read_state` silently drops any state-file line whose first field is not an int, so a header row there would vanish on read — and rendered above the table beside the previous sweep's three figures, with an explicit "🆕 and Δ are not comparable to last week's" sentence when the corpus lost more than 10% of its lines. The census is written *before* its snapshot (the snapshot's existence is the shell's "sweep completed" signal) and promoted in lockstep with it; if the pair breaks, the shell deletes the old census so the next run reports "no previous census" rather than asserting a comparison against a corpus that no longer exists.
++
+ Injection boundary: the sweep, the invariant check and the drift scan must never read episode logs (the drift scan reads only the self-written `api-audit.jsonl`; the platform-controlled key names it renders are Markdown-escaped and length-capped). The duplicate scan does, and is the only intake permitted to — it emits **only** 12-hex SHA-256 digests, counts, filename-derived dates and the fixed `{post, reply, comment}` vocabulary (ADR-0083, gated by `TestOutputBoundary`). All four are observability: a failure degrades to a "not available" stub and never breaks the report.
+ 
+ ### weekly-pipeline  [`scripts/weekly-pipeline.sh`, ADR-0085]
+diff --git a/scripts/log_anomaly_sweep.py b/scripts/log_anomaly_sweep.py
+index 87b5c2e..615b263 100755
+--- a/scripts/log_anomaly_sweep.py
++++ b/scripts/log_anomaly_sweep.py
+@@ -23,6 +23,20 @@ that commits the snapshot and then fails to produce anything spends the week's
+ novelty baseline for nobody. ``--no-update --emit-state PATH`` writes the
+ snapshot aside; the caller promotes it (atomic rename) only after its own work
+ has succeeded.
++
++Measurement basis: **there is no time window.** Every line present in each
++allowed file at sweep time is counted, so a row's ``Count`` spans that file's
++lifetime — and the files rotate on different schedules (``ollama-serve.log``
++nightly, ``agent-launchd.log`` weekly, the ``*-launchd.log`` of the one-shot
++commands never), which makes two rows of one table not necessarily
++commensurable. Rotation also lands inside the sweep's own history: lines leave
++the ``*.log`` glob, counts fall, and a known signature re-appears as 🆕. That
++cannot be fixed by filtering without discarding signal, so the instrument
++instead **states its own basis**: a per-file corpus census (name, lines read,
++signal lines) is written to a sidecar beside the state path
++(``<state>.corpus.tsv`` — the state TSV itself cannot carry a header, see
++``read_state``) and rendered above the table next to the previous sweep's
++figures, with an explicit sentence when the corpus shrank.
+ """
+ 
+ from __future__ import annotations
+@@ -30,7 +44,7 @@ from __future__ import annotations
+ import argparse
+ import re
+ from collections import Counter
+-from collections.abc import Iterable
++from collections.abc import Iterable, Iterator
+ from dataclasses import dataclass
+ from pathlib import Path
+ 
+@@ -118,6 +132,45 @@ class Finding:
+     origins: tuple[str, ...] = ()
+ 
+ 
++@dataclass(frozen=True)
++class FileCensus:
++    """What one allowed file contributed to this sweep.
++
++    ``lines_read`` is every line the sweep consumed from the file (the
++    denominator); ``signal_lines`` is the subset that passed ``_is_signal``
++    (the numerator the table's counts are drawn from).
++    """
++
++    name: str
++    lines_read: int
++    signal_lines: int
++
++
++@dataclass(frozen=True)
++class Corpus:
++    """The per-file census of one sweep — its measurement basis.
++
++    The sweep has no time window, so this is the only statement of *what* the
++    counts were computed over. Diffing it against the previous sweep's census
++    is what distinguishes "53 genuinely new failure classes" from "two inputs
++    rotated away", which the counts alone cannot express.
++    """
++
++    files: tuple[FileCensus, ...] = ()
++
++    @property
++    def file_count(self) -> int:
++        return len(self.files)
++
++    @property
++    def lines_read(self) -> int:
++        return sum(f.lines_read for f in self.files)
++
++    @property
++    def signal_lines(self) -> int:
++        return sum(f.signal_lines for f in self.files)
++
++
+ def normalize_with_origin(line: str) -> tuple[str, str]:
+     """Collapse a log line into ``(signature, origin)``.
+ 
+@@ -214,13 +267,63 @@ def write_state(path: Path, findings: Iterable[Finding]) -> None:
+     path.write_text(body, encoding="utf-8")
+ 
+ 
+-def iter_allowed_log_lines(log_dir: Path) -> Iterable[str]:
++def corpus_state_path(state: Path) -> Path:
++    """Sidecar path holding the corpus census beside the state snapshot.
++
++    A sidecar rather than a header row in the state file itself: ``read_state``
++    silently drops any line whose first field is not an int, so a header would
++    vanish without a trace on read and the census would be unrecoverable.
++    """
++    return state.with_name(state.name + ".corpus.tsv")
++
++
++def write_corpus(path: Path, corpus: Corpus) -> None:
++    """Persist the census as ``lines_read<TAB>signal_lines<TAB>name`` TSV."""
++    path.parent.mkdir(parents=True, exist_ok=True)
++    body = "".join(f"{c.lines_read}\t{c.signal_lines}\t{_tsv_safe(c.name)}\n" for c in corpus.files)
++    path.write_text(body, encoding="utf-8")
++
++
++def read_corpus(path: Path) -> Corpus | None:
++    """Load the previous sweep's census; ``None`` when no census exists.
++
++    ``None`` (never recorded — first sweep after this instrument shipped) is
++    kept distinct from ``Corpus(())`` (recorded, and the corpus was empty):
++    the first cannot support a comparison, the second can.
++    """
++    if not path.is_file():
++        return None
++    rows: list[FileCensus] = []
++    for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
++        parts = raw.split("\t", 2)
++        if len(parts) != 3 or not parts[2]:
++            continue
++        try:
++            rows.append(FileCensus(parts[2], int(parts[0]), int(parts[1])))
++        except ValueError:
++            continue
++    return Corpus(tuple(rows))
++
++
++def _tsv_safe(name: str) -> str:
++    """Keep a file name on one TSV field (tabs/newlines are legal in POSIX names)."""
++    return name.replace("\t", " ").replace("\n", " ").replace("\r", " ")
++
++
++def iter_allowed_log_lines(log_dir: Path, census: list[FileCensus] | None = None) -> Iterator[str]:
+     """Yield lines from *.log + audit.jsonl only. NEVER episode logs.
+ 
+     Symlinks are skipped: a ``*.log`` symlink could otherwise redirect into an
+     episode log (``2026-06-23.jsonl``) and breach the injection boundary the
+     name-glob is meant to enforce. The logs dir is self-written (launchd stderr
+     + audit_log), so a legitimate symlink is not expected.
++
++    When ``census`` is given, one ``FileCensus`` per file actually opened is
++    appended to it as that file is exhausted — the corpus accounting the
++    provenance line reports. Skipped symlinks contribute no row (nothing was
++    read from them); a file that fails mid-read contributes the lines that did
++    reach the caller, which is what the counts were actually computed over. The
++    list is complete only once the generator is fully consumed.
+     """
+     files = sorted(log_dir.glob(_LOG_GLOB))
+     audit = log_dir / _AUDIT_NAME
+@@ -229,16 +332,92 @@ def iter_allowed_log_lines(log_dir: Path) -> Iterable[str]:
+     for f in files:
+         if f.is_symlink():
+             continue
++        lines_read = 0
++        signal_lines = 0
+         try:
+             with f.open(encoding="utf-8", errors="replace") as fh:
+-                yield from fh
++                for line in fh:
++                    lines_read += 1
++                    if _is_signal(line):
++                        signal_lines += 1
++                    yield line
+         except OSError:
+-            continue
++            pass
++        if census is not None:
++            census.append(FileCensus(f.name, lines_read, signal_lines))
++
++
++# A corpus this much smaller than the previous census is a rotation event, not
++# noise: lines left the ``*.log`` glob, so counts fell and known signatures
++# re-appear as 🆕. Not a filter — nothing is suppressed at any size; it only
++# decides whether the reader is *told* that this week's Δ / 🆕 are incomparable.
++_CORPUS_SHRINK_RATIO = 0.9
++
++
++def corpus_shrank(corpus: Corpus, prev_corpus: Corpus | None) -> bool:
++    """True when the corpus lost material ground against the previous census."""
++    if prev_corpus is None or prev_corpus.lines_read <= 0:
++        return False
++    return corpus.lines_read < prev_corpus.lines_read * _CORPUS_SHRINK_RATIO
+ 
+ 
+-def render_markdown(findings: list[Finding], top: int) -> str:
+-    """Render the ranked findings as a Markdown section."""
++def _describe(corpus: Corpus) -> str:
++    return (
++        f"{corpus.file_count} files, {corpus.lines_read} lines read, "
++        f"{corpus.signal_lines} signal lines"
++    )
++
++
++def render_provenance(corpus: Corpus, prev_corpus: Corpus | None) -> list[str]:
++    """The measurement-basis block rendered above the table.
++
++    States what the counts were computed over, what the previous sweep was
++    computed over, and — when those two differ materially — that the novelty
++    and delta columns cannot be compared across them.
++    """
++    if prev_corpus is None:
++        tail = (
++            "No census was recorded for the previous sweep, so this week's "
++            "Δ / 🆕 rest on a snapshot of unstated basis."
++        )
++    else:
++        tail = f"Previous sweep: {_describe(prev_corpus)}."
++    out = [f"_Corpus this sweep: {_describe(corpus)}. {tail}_", ""]
++    out.append(
++        "_Counts have no time window: each is the total over the file's whole "
++        "current contents, and those files rotate on different schedules, so "
++        "two rows may span very different periods._"
++    )
++    if corpus_shrank(corpus, prev_corpus):
++        assert prev_corpus is not None  # corpus_shrank is False when it is None
++        # Floor, not round: 99.96% rounds to "100%", which reads as an empty
++        # corpus when four lines are still there. Understate the shrink.
++        pct = int((1 - corpus.lines_read / prev_corpus.lines_read) * 100)
++        out.append("")
++        out.append(
++            f"_⚠️ The corpus shrank {pct}% against the previous census — lines "
++            "left the `*.log` glob (rotation), so 🆕 and Δ this week are not "
++            "comparable to last week's._"
++        )
++    out.append("")
++    return out
++
++
++def render_markdown(
++    findings: list[Finding],
++    top: int,
++    corpus: Corpus,
++    prev_corpus: Corpus | None = None,
++) -> str:
++    """Render the ranked findings as a Markdown section.
++
++    ``corpus`` is required: the numbers below are uninterpretable without the
++    basis they were computed over, so there is no rendering that omits it.
++    ``prev_corpus`` is genuinely optional (the first sweep has none) and its
++    absence is stated in the output rather than passed over.
++    """
+     lines = ["## Log Anomaly Sweep", ""]
++    lines.extend(render_provenance(corpus, prev_corpus))
+     if not findings:
+         lines.append("No anomaly-signal lines found in `*.log` / `audit.jsonl`.")
+         return "\n".join(lines) + "\n"
+@@ -286,16 +465,27 @@ def main(argv: list[str] | None = None) -> int:
+         default=None,
+         help="write the snapshot to this path instead of committing it; pair "
+         "with --no-update so the caller can promote it (atomic rename) "
+-        "only after the work this sweep fed has actually succeeded",
++        "only after the work this sweep fed has actually succeeded. The "
++        "corpus census sidecar (PATH.corpus.tsv) is emitted alongside and "
++        "must be promoted in lockstep",
+     )
+     args = parser.parse_args(argv)
+ 
+     prev = read_state(args.state)
+-    findings = analyze(iter_allowed_log_lines(args.log_dir), prev)
+-    print(render_markdown(findings, args.top))
++    prev_corpus = read_corpus(corpus_state_path(args.state))
++    census: list[FileCensus] = []
++    findings = analyze(iter_allowed_log_lines(args.log_dir, census), prev)
++    corpus = Corpus(tuple(census))
++    print(render_markdown(findings, args.top, corpus, prev_corpus))
++    # The census is written *before* its state snapshot in both pairs: the
++    # caller treats the snapshot's existence as "the sweep ran to completion"
++    # (weekly-analysis.sh promotes on `-e $SWEEP_PENDING`), so the snapshot
++    # must stay the last file to appear.
+     if not args.no_update:
++        write_corpus(corpus_state_path(args.state), corpus)
+         write_state(args.state, findings)
+     if args.emit_state is not None:
++        write_corpus(corpus_state_path(args.emit_state), corpus)
+         write_state(args.emit_state, findings)
+     return 0
+ 
+diff --git a/scripts/weekly-analysis.sh b/scripts/weekly-analysis.sh
+index fe82319..310570c 100755
+--- a/scripts/weekly-analysis.sh
++++ b/scripts/weekly-analysis.sh
+@@ -225,11 +225,16 @@ fi
+ ANOMALY_SWEEP=""
+ SWEEP_STATE="$REPORT_DIR/.anomaly-sweep-state.tsv"
+ SWEEP_PENDING="$REPORT_DIR/.anomaly-sweep-state.pending.$$"
++# The corpus census: which files, how many lines, how many signal lines the
++# counts were computed over. The sweep derives both paths as <state>.corpus.tsv
++# (log_anomaly_sweep.corpus_state_path), so these two must mirror the two above.
++SWEEP_CORPUS="$SWEEP_STATE.corpus.tsv"
++SWEEP_PENDING_CORPUS="$SWEEP_PENDING.corpus.tsv"
+ # Named here (not in the API drift block below) because the trap on the next
+ # line must cover it; keep them together if either block moves.
+ DRIFT_PENDING="$REPORT_DIR/.api-drift-state.pending.$$"
+ OUTPUT_TMP=""   # set at the generate step; named here so the trap can cover it
+-trap 'rm -f "$SWEEP_PENDING" "$DRIFT_PENDING" ${OUTPUT_TMP:+"$OUTPUT_TMP"}' EXIT
++trap 'rm -f "$SWEEP_PENDING" "$SWEEP_PENDING_CORPUS" "$DRIFT_PENDING" ${OUTPUT_TMP:+"$OUTPUT_TMP"}' EXIT
+ if [[ -d "$MOLTBOOK_HOME/logs" ]]; then
+     mkdir -p "$REPORT_DIR"
+     ANOMALY_SWEEP=$(python3 "$PROJECT_ROOT/scripts/log_anomaly_sweep.py" \
+@@ -367,6 +372,18 @@ echo "Size: $(wc -c < "$OUTPUT") bytes"
+ if [[ -e "$SWEEP_PENDING" ]]; then
+     if mv "$SWEEP_PENDING" "$SWEEP_STATE"; then
+         echo "Anomaly sweep state committed: $SWEEP_STATE"
++        # In lockstep with the snapshot, never on its own: the census is the
++        # snapshot's measurement basis, so a stale census beside fresh counts
++        # would make next week's provenance line assert a corpus comparison
++        # that never happened — the exact mis-reading it exists to prevent.
++        # The sweep writes the census before the snapshot, so reaching here
++        # with no census means the pair was broken, not merely incomplete.
++        if [[ -e "$SWEEP_PENDING_CORPUS" ]] && mv "$SWEEP_PENDING_CORPUS" "$SWEEP_CORPUS"; then
++            echo "Anomaly sweep corpus census committed: $SWEEP_CORPUS"
++        else
++            rm -f "$SWEEP_CORPUS"
++            echo "WARNING: sweep corpus census missing or unpromotable; next run reports no previous census rather than a stale one" >&2
++        fi
+     else
+         echo "WARNING: sweep state promote failed; next run compares against a wider window" >&2
+     fi
+diff --git a/tests/test_log_anomaly_sweep.py b/tests/test_log_anomaly_sweep.py
+index a4fe3fe..1db1137 100644
+--- a/tests/test_log_anomaly_sweep.py
++++ b/tests/test_log_anomaly_sweep.py
+@@ -14,6 +14,10 @@ from pathlib import Path
+ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+ import log_anomaly_sweep as las  # noqa: E402  # pyright: ignore[reportMissingImports]
+ 
++# A stand-in measurement basis for render tests that are not about provenance.
++# ``render_markdown`` requires one: the counts are uninterpretable without it.
++CORPUS = las.Corpus((las.FileCensus("agent.log", 10, 3),))
++
+ 
+ class TestNormalize:
+     def test_strips_clock_prefix_and_squashes_digits(self):
+@@ -116,7 +120,7 @@ class TestOriginIsCarriedButNotKeyed:
+             "contemplative_agent.adapters.moltbook.publish",
+             "contemplative_agent.core.embeddings",
+         }
+-        out = las.render_markdown(findings, top=25)
++        out = las.render_markdown(findings, top=25, corpus=CORPUS)
+         assert "publish" in out and "embeddings" in out
+         assert "| Origin |" in out
+ 
+@@ -146,7 +150,7 @@ class TestOriginIsCarriedButNotKeyed:
+         hostile = "09:12:33 [WARNING] mod.na|me: Connection refused"
+         findings = las.analyze([hostile], {})
+         assert findings[0].origins == ()
+-        assert "na|me" not in las.render_markdown(findings, top=25)
++        assert "na|me" not in las.render_markdown(findings, top=25, corpus=CORPUS)
+         # And a well-formed origin is confined to the dotted-identifier set.
+         ok = las.analyze([self.PUBLISH], {})[0].origins[0]
+         assert re.fullmatch(r"[A-Za-z_]\w*(?:\.\w+)+", ok)
+@@ -337,12 +341,227 @@ class TestAllowedFilesOnly:
+ 
+ class TestRenderMarkdown:
+     def test_empty_findings(self):
+-        out = las.render_markdown([], top=25)
++        out = las.render_markdown([], top=25, corpus=CORPUS)
+         assert "No anomaly-signal lines found" in out
+ 
+     def test_new_flag_and_counts_rendered(self):
+         findings = las.analyze(["ERROR new boom"], {})
+-        out = las.render_markdown(findings, top=25)
++        out = las.render_markdown(findings, top=25, corpus=CORPUS)
+         assert "Log Anomaly Sweep" in out
+         assert "🆕" in out
+         assert "1 new since last sweep" in out
++
++
++class TestCorpusCensus:
++    """The sweep applies no time window, so the counts are per-file-lifetime
++    totals over whatever the ``*.log`` glob held at sweep time. A week where
++    two inputs rotated away is otherwise indistinguishable from a week of new
++    failure classes (findings F1.1, weekly-2026-08-07): counts collapse and
++    known signatures re-appear as 🆕. The census is what lets the report say
++    which happened.
++    """
++
++    @staticmethod
++    def _log_dir(tmp_path):
++        d = tmp_path / "logs"
++        d.mkdir()
++        (d / "a.log").write_text("ERROR boom\nplain info line\nERROR boom\n", encoding="utf-8")
++        (d / "b.log").write_text("nothing interesting\n", encoding="utf-8")
++        return d
++
++    def test_census_records_lines_and_signal_lines_per_file(self, tmp_path):
++        census = []
++        list(las.iter_allowed_log_lines(self._log_dir(tmp_path), census))
++        assert [(c.name, c.lines_read, c.signal_lines) for c in census] == [
++            ("a.log", 3, 2),
++            ("b.log", 1, 0),
++        ]
++
++    def test_census_omits_the_skipped_symlink(self, tmp_path):
++        """A file the boundary refuses to read contributes no rows and no lines."""
++        d = self._log_dir(tmp_path)
++        (d / "2026-06-23.jsonl").write_text("ERROR injection bait\n", encoding="utf-8")
++        (d / "evil.log").symlink_to(d / "2026-06-23.jsonl")
++        census = []
++        list(las.iter_allowed_log_lines(d, census))
++        assert [c.name for c in census] == ["a.log", "b.log"]
++
++    def test_census_is_optional_and_iteration_is_unchanged_without_it(self, tmp_path):
++        d = self._log_dir(tmp_path)
++        census = []
++        assert list(las.iter_allowed_log_lines(d)) == list(las.iter_allowed_log_lines(d, census))
++
++    def test_totals_sum_the_per_file_rows(self):
++        corpus = las.Corpus((las.FileCensus("a.log", 3, 2), las.FileCensus("b.log", 1, 0)))
++        assert (corpus.file_count, corpus.lines_read, corpus.signal_lines) == (2, 4, 2)
++
++    def test_sidecar_roundtrip(self, tmp_path):
++        path = tmp_path / "sweep.tsv.corpus.tsv"
++        corpus = las.Corpus((las.FileCensus("a.log", 3, 2), las.FileCensus("b.log", 1, 0)))
++        las.write_corpus(path, corpus)
++        assert las.read_corpus(path) == corpus
++
++    def test_absent_sidecar_is_none_not_an_empty_corpus(self, tmp_path):
++        """``None`` means "cannot compare"; ``Corpus(())`` means "compared, and
++        the corpus was empty" — the provenance line says different things."""
++        assert las.read_corpus(tmp_path / "nope.tsv") is None
++        las.write_corpus(tmp_path / "empty.tsv", las.Corpus(()))
++        assert las.read_corpus(tmp_path / "empty.tsv") == las.Corpus(())
++
++    def test_sidecar_sits_beside_the_state_and_not_inside_it(self, tmp_path):
++        """``read_state`` drops non-int first fields silently, so the census
++        cannot live as a header row in the state TSV."""
++        state = tmp_path / "sub" / ".anomaly-sweep-state.tsv"
++        assert las.corpus_state_path(state) == state.parent / ".anomaly-sweep-state.tsv.corpus.tsv"
++
++    def test_malformed_sidecar_rows_are_skipped_not_fatal(self, tmp_path):
++        path = tmp_path / "corpus.tsv"
++        path.write_text("garbage\nx\ty\tz.log\n5\t1\tgood.log\n", encoding="utf-8")
++        assert las.read_corpus(path) == las.Corpus((las.FileCensus("good.log", 5, 1),))
++
++
++class TestProvenanceLine:
++    A_LOG = las.Corpus((las.FileCensus("a.log", 1000, 40),))
++
++    def test_states_files_lines_and_signal_lines(self):
++        out = las.render_markdown([], top=25, corpus=self.A_LOG)
++        assert "1 files, 1000 lines read, 40 signal lines" in out
++
++    def test_states_the_previous_sweeps_three_figures(self):
++        prev = las.Corpus((las.FileCensus("a.log", 900, 30), las.FileCensus("b.log", 100, 5)))
++        out = las.render_markdown([], top=25, corpus=self.A_LOG, prev_corpus=prev)
++        assert "Previous sweep: 2 files, 1000 lines read, 35 signal lines" in out
++
++    def test_says_so_when_there_is_no_previous_census(self):
++        out = las.render_markdown([], top=25, corpus=self.A_LOG)
++        assert "No census was recorded for the previous sweep" in out
++
++    def test_always_states_that_counts_have_no_time_window(self):
++        out = las.render_markdown([], top=25, corpus=self.A_LOG, prev_corpus=self.A_LOG)
++        assert "no time window" in out
++
++    def test_a_shrunk_corpus_is_called_out_as_incomparable(self):
++        """The 2026-08-07 shape: two inputs rotated away mid-window, counts
++        collapsed, and 53 signatures read as new. The reader must be told."""
++        prev = las.Corpus((las.FileCensus("a.log", 4000, 400),))
++        out = las.render_markdown([], top=25, corpus=self.A_LOG, prev_corpus=prev)
++        assert "shrank 75%" in out
++        assert "not comparable to last week's" in out
++
++    def test_a_near_total_shrink_does_not_round_up_to_100_percent(self):
++        """A rendered 100% reads as "the corpus is empty" — reserve it for that."""
++        prev = las.Corpus((las.FileCensus("a.log", 999_000, 40_000),))
++        out = las.render_markdown([], top=25, corpus=self.A_LOG, prev_corpus=prev)
++        assert "shrank 99%" in out
++
++    def test_an_emptied_corpus_does_read_as_100_percent(self):
++        prev = las.Corpus((las.FileCensus("a.log", 1000, 40),))
++        out = las.render_markdown([], top=25, corpus=las.Corpus(()), prev_corpus=prev)
++        assert "shrank 100%" in out
++
++    def test_a_stable_corpus_is_not_called_out(self):
++        prev = las.Corpus((las.FileCensus("a.log", 1010, 41),))
++        out = las.render_markdown([], top=25, corpus=self.A_LOG, prev_corpus=prev)
++        assert "shrank" not in out
++
++    def test_a_grown_corpus_is_not_called_out(self):
++        prev = las.Corpus((las.FileCensus("a.log", 100, 4),))
++        out = las.render_markdown([], top=25, corpus=self.A_LOG, prev_corpus=prev)
++        assert "shrank" not in out
++
++    def test_shrink_needs_a_previous_census_to_be_measured_against(self):
++        assert las.corpus_shrank(self.A_LOG, None) is False
++        assert las.corpus_shrank(self.A_LOG, las.Corpus(())) is False
++
++    def test_provenance_is_present_even_when_nothing_was_found(self):
++        """An anomaly-free week still has a basis, and it is the reading that
++        most needs one: 'no findings' over a corpus that just rotated away is
++        not the same statement as 'no findings' over a full week."""
++        out = las.render_markdown([], top=25, corpus=self.A_LOG)
++        assert "No anomaly-signal lines found" in out
++        assert "Corpus this sweep:" in out
++
++
++class TestMainWritesTheCensus:
++    @staticmethod
++    def _log_dir(tmp_path):
++        d = tmp_path / "logs"
++        d.mkdir()
++        (d / "agent.log").write_text("ERROR boom\nidle\n", encoding="utf-8")
++        return d
++
++    def test_census_is_written_beside_the_committed_state(self, tmp_path, capsys):
++        state = tmp_path / "sweep.tsv"
++        las.main(["--log-dir", str(self._log_dir(tmp_path)), "--state", str(state)])
++        capsys.readouterr()
++        assert las.read_corpus(las.corpus_state_path(state)) == las.Corpus(
++            (las.FileCensus("agent.log", 2, 1),)
++        )
++
++    def test_census_is_emitted_beside_the_pending_snapshot(self, tmp_path, capsys):
++        """The shell promotes both with the same atomic rename, so the pending
++        census must be derivable from the pending snapshot path."""
++        state = tmp_path / "sweep.tsv"
++        pending = tmp_path / "sweep.tsv.pending"
++        las.main(
++            [
++                "--log-dir",
++                str(self._log_dir(tmp_path)),
++                "--state",
++                str(state),
++                "--no-update",
++                "--emit-state",
++                str(pending),
++            ]
++        )
++        capsys.readouterr()
++        assert las.read_corpus(las.corpus_state_path(pending)) is not None
++        assert not las.corpus_state_path(state).exists()
++
++    def test_no_update_writes_no_census(self, tmp_path, capsys):
++        state = tmp_path / "sweep.tsv"
++        las.main(["--log-dir", str(self._log_dir(tmp_path)), "--state", str(state), "--no-update"])
++        capsys.readouterr()
++        assert not las.corpus_state_path(state).exists()
++
++    def test_the_snapshot_is_still_the_last_file_to_appear(self, tmp_path, capsys, monkeypatch):
++        """The caller treats the snapshot's existence as "the sweep completed"
++        (``weekly-analysis.sh`` promotes on ``-e $SWEEP_PENDING``), so the
++        census must be written before it, never after."""
++        order: list[str] = []
++        real_state, real_corpus = las.write_state, las.write_corpus
++
++        def spy_state(path, findings):
++            order.append("state")
++            real_state(path, findings)
++
++        def spy_corpus(path, corpus):
++            order.append("corpus")
++            real_corpus(path, corpus)
++
++        monkeypatch.setattr(las, "write_state", spy_state)
++        monkeypatch.setattr(las, "write_corpus", spy_corpus)
++        pending = tmp_path / "sweep.tsv.pending"
++        las.main(
++            [
++                "--log-dir",
++                str(self._log_dir(tmp_path)),
++                "--state",
++                str(tmp_path / "sweep.tsv"),
++                "--no-update",
++                "--emit-state",
++                str(pending),
++            ]
++        )
++        capsys.readouterr()
++        assert order == ["corpus", "state"]
++
++    def test_a_previous_census_reaches_the_rendered_provenance(self, tmp_path, capsys):
++        state = tmp_path / "sweep.tsv"
++        las.write_corpus(
++            las.corpus_state_path(state), las.Corpus((las.FileCensus("agent.log", 9999, 500),))
++        )
++        las.main(["--log-dir", str(self._log_dir(tmp_path)), "--state", str(state), "--no-update"])
++        out = capsys.readouterr().out
++        assert "Previous sweep: 1 files, 9999 lines read, 500 signal lines" in out
++        assert "shrank" in out
+diff --git a/tests/test_weekly_analysis_shell.py b/tests/test_weekly_analysis_shell.py
+index 05564f3..e46a3d0 100644
+--- a/tests/test_weekly_analysis_shell.py
++++ b/tests/test_weekly_analysis_shell.py
+@@ -32,6 +32,7 @@ SCRIPT = REPO_ROOT / "scripts" / "weekly-analysis.sh"
+ 
+ END_DATE = "2026-07-24"
+ SEEDED_STATE = "7\t[warning] seeded signature\n"
++SEEDED_CORPUS = "5000\t300\told-rotated.log\n"
+ 
+ 
+ def _make_home(tmp_path: Path) -> Path:
+@@ -51,6 +52,9 @@ def _make_home(tmp_path: Path) -> Path:
+     (home / "reports" / "analysis" / ".anomaly-sweep-state.tsv").write_text(
+         SEEDED_STATE, encoding="utf-8"
+     )
++    (home / "reports" / "analysis" / ".anomaly-sweep-state.tsv.corpus.tsv").write_text(
++        SEEDED_CORPUS, encoding="utf-8"
++    )
+     return home
+ 
+ 
+@@ -91,6 +95,10 @@ def _state(home: Path) -> Path:
+     return home / "reports" / "analysis" / ".anomaly-sweep-state.tsv"
+ 
+ 
++def _corpus(home: Path) -> Path:
++    return home / "reports" / "analysis" / ".anomaly-sweep-state.tsv.corpus.tsv"
++
++
+ def _pending_files(home: Path) -> list[Path]:
+     return list((home / "reports" / "analysis").glob(".anomaly-sweep-state.pending*"))
+ 
+@@ -102,6 +110,7 @@ class TestFailedRunSpendsNothing:
+ 
+         assert result.returncode != 0, result.stdout
+         assert _state(home).read_text(encoding="utf-8") == SEEDED_STATE
++        assert _corpus(home).read_text(encoding="utf-8") == SEEDED_CORPUS
+         assert not (home / "reports" / "analysis" / f"weekly-{END_DATE}.md").exists()
+         assert _pending_files(home) == [], "pending snapshot leaked past the trap"
+ 
+@@ -146,6 +155,23 @@ class TestSuccessfulRunCommits:
+         assert result.returncode == 0, result.stderr
+         assert _state(home).read_text(encoding="utf-8") == ""
+ 
++    def test_corpus_census_is_promoted_in_lockstep_with_the_state(self, tmp_path):
++        """The census is the snapshot's measurement basis (findings F1.1).
++
++        Promoting one without the other is worse than promoting neither: next
++        week's provenance line would compare fresh counts against a census of a
++        corpus that no longer exists, and assert the comparison as fact.
++        """
++        home = _make_home(tmp_path)
++        result = _run(home, _stub_claude(tmp_path, exit_code=0, body="# Weekly\n"), tmp_path)
++
++        assert result.returncode == 0, result.stderr
++        assert _state(home).read_text(encoding="utf-8") != SEEDED_STATE
++        census = _corpus(home).read_text(encoding="utf-8")
++        assert census != SEEDED_CORPUS, "census was never committed beside the state"
++        # agent.log holds the two anomaly lines _make_home seeded.
++        assert census == "2\t2\tagent.log\n"
++
+     def test_translation_failure_does_not_roll_back_the_state(self, tmp_path):
+         """The .ja.md pass is best-effort and must not gate the baseline.
+ 

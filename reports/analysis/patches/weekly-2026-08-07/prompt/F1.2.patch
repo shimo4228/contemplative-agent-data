@@ -1,0 +1,897 @@
+diff --git a/docs/CODEMAPS/adapters-moltbook.md b/docs/CODEMAPS/adapters-moltbook.md
+index abb34e7..00bfbac 100644
+--- a/docs/CODEMAPS/adapters-moltbook.md
++++ b/docs/CODEMAPS/adapters-moltbook.md
+@@ -140,7 +140,12 @@ drop — ADR-0062 12th amendment; the failure *kind* stays in the
+ when every produced candidate was already server-rejected. `solve_challenge_result()` also returns `solver_path` for audit/eval use. `record_verification_audit()` writes
+ `logs/verification-audit.jsonl` with `challenge_b64`, `challenge_sha256`,
+ hashed `verification_code`, answer, `solver_path`, and `/verify` success; the
+-challenge is not written as raw prompt text. 7 consecutive failures →
++challenge is not written as raw prompt text. A create-time handshake also
++carries `action` (`comment` / `reply` / `post`, threaded explicitly from the
++three `passes_verification` call sites — never parsed back out of the log
++line), `target_sha256` (digest only, ADR-0083) and `content_recorded`, so the
++handshake-failure rate splits into "cost the agent a visible body" vs "was
++solved on retry"; all three are `None` off the create path. 7 consecutive failures →
+ `SessionContext.rate_limited = True` → auto-stop session.
+ 
+ ---
+diff --git a/docs/CODEMAPS/architecture.md b/docs/CODEMAPS/architecture.md
+index 5a94a62..4b5838e 100644
+--- a/docs/CODEMAPS/architecture.md
++++ b/docs/CODEMAPS/architecture.md
+@@ -181,7 +181,12 @@ CLI → Agent.run_session(autonomy_level, session_mins)
+  │      until verified, so memory/NoveltyGate recording happens ONLY after
+  │      success (posts, comments, replies). Each challenge outcome is also
+  │      appended to logs/verification-audit.jsonl with challenge_b64 +
+- │      challenge_sha256, solver_path, answer, and verify_success.
++ │      challenge_sha256, solver_path, answer, and verify_success — plus
++ │      action (comment/reply/post), target_sha256 (digest only, ADR-0083)
++ │      and content_recorded for create-time handshakes, so a body published
++ │      on-platform but deliberately left unrecorded is countable per kind
++ │      instead of surviving only as a WARNING line the log sweep normalizes
++ │      (weekly F1.2 2026-08-08).
+  └─ MemoryStore.record() → EpisodeLog (append-only JSONL)
+ ```
+ 
+diff --git a/docs/CODEMAPS/moltbook-agent.md b/docs/CODEMAPS/moltbook-agent.md
+index 3d04c35..c6790b2 100644
+--- a/docs/CODEMAPS/moltbook-agent.md
++++ b/docs/CODEMAPS/moltbook-agent.md
+@@ -247,7 +247,7 @@ In `config/prompts/*.md`, lazy-loaded via `core/prompts.py`:
+ | `logs/audit.jsonl` | JSONL | `MOLTBOOK_HOME` | Approval history + source_ids + epistemic_counts (ADR-0020/0050) |
+ | `logs/skill-usage-*.jsonl` | JSONL | `MOLTBOOK_HOME` | Historic skill log (ADR-0023 sunset ADR-0036; no new files; observation evidence only) |
+ | `logs/llm-calls-*.jsonl` | JSONL (0600) | `MOLTBOOK_HOME` | Per-call LLM telemetry: caller/model/tokens/duration/outcome/`think` (trace requested) + `thinking_source` (which channel delivered it, or `absent`) + sparse `thinking_fallback_reason` (why it did not, ADR-0068 amendment); never prompt bodies or trace content (sha256 prefix only) |
+-| `logs/verification-audit.jsonl` | JSONL (0600) | `MOLTBOOK_HOME` | Verification challenge corpus/outcome log: `challenge_b64`, `challenge_sha256`, hashed code, answer, solver_path, verify_success |
++| `logs/verification-audit.jsonl` | JSONL (0600) | `MOLTBOOK_HOME` | Verification challenge corpus/outcome log: `challenge_b64`, `challenge_sha256`, hashed code, answer, solver_path, verify_success, plus the create-time columns `action` (`comment`/`reply`/`post`, `None` off the create path), `target_sha256` (digest only, ADR-0083) and `content_recorded` — so an orphaned publish (created on-platform, deliberately unrecorded) is countable per kind |
+ 
+ ## Security Boundaries
+ 
+diff --git a/src/contemplative_agent/adapters/moltbook/agent.py b/src/contemplative_agent/adapters/moltbook/agent.py
+index 924a790..12adb2f 100644
+--- a/src/contemplative_agent/adapters/moltbook/agent.py
++++ b/src/contemplative_agent/adapters/moltbook/agent.py
+@@ -41,6 +41,8 @@ from .reply_handler import ReplyHandler
+ from .session_context import SessionContext
+ from .submolt_scope import SubmoltScopeScan, scan_submolt_scope
+ from .verification import (
++    VerificationAction,
++    VerificationSolveResult,
+     VerificationTracker,
+     _sanitize_audit_error,
+     record_verification_audit,
+@@ -492,7 +494,13 @@ class Agent:
+     # Verification
+     # ------------------------------------------------------------------
+ 
+-    def _handle_verification(self, verification: dict) -> bool:
++    def _handle_verification(
++        self,
++        verification: dict,
++        *,
++        action: VerificationAction | None = None,
++        target_id: str | None = None,
++    ) -> bool:
+         """Solve and submit a content-verification challenge.
+ 
+         ``verification`` is the object Moltbook embeds in a create-response
+@@ -502,6 +510,15 @@ class Agent:
+         when the content was verified (or no action was needed); False when
+         solving or submission failed (caller leaves the content unrecorded).
+ 
++        ``action`` / ``target_id`` are threaded by ``passes_verification``'s
++        call sites so every audit record written here states which create kind
++        it gated and (as a digest) which target — the countable trace of an
++        orphaned publish (weekly F1.2 2026-08-08). ``content_recorded`` in
++        those records mirrors this method's return value, because that IS the
++        caller contract: True ⇒ the caller records the body, False ⇒ it
++        deliberately records nothing. Left None when ``action`` is None (a
++        non-create-time invocation has no body at stake).
++
+         Deliberately NOT routed through _confirm_side_effect (audit H1):
+         verification is a platform anti-bot handshake required for created
+         content to become visible, not a social action — gating it would
+@@ -520,6 +537,23 @@ class Agent:
+         challenge_text = raw_challenge if isinstance(raw_challenge, str) else ""
+         verification_code = raw_code if isinstance(raw_code, str) else ""
+ 
++        def _audit(
++            solve_result: VerificationSolveResult,
++            *,
++            verify_success: bool,
++            error: str | None = None,
++        ) -> None:
++            record_verification_audit(
++                challenge_text=challenge_text,
++                verification_code=verification_code,
++                solve_result=solve_result,
++                verify_success=verify_success,
++                error=error,
++                action=action,
++                target_id=target_id,
++                content_recorded=verify_success if action is not None else None,
++            )
++
+         if not challenge_text or not verification_code:
+             # Key names are server-controlled — sanitize before they touch
+             # the plain application log or the audit error field.
+@@ -532,10 +566,8 @@ class Agent:
+             # (and can auto-stop the session), so without a record a
+             # server-side shape change would be indistinguishable in
+             # verification-audit.jsonl from verification not happening at all.
+-            record_verification_audit(
+-                challenge_text=challenge_text,
+-                verification_code=verification_code,
+-                solve_result=unsolved_result(challenge_text),
++            _audit(
++                unsolved_result(challenge_text),
+                 verify_success=False,
+                 error="malformed_verification_object keys=" + keys_repr,
+             )
+@@ -545,10 +577,8 @@ class Agent:
+         solve_result = solve_challenge_result(challenge_text)
+         answer = solve_result.answer
+         if answer is None:
+-            record_verification_audit(
+-                challenge_text=challenge_text,
+-                verification_code=verification_code,
+-                solve_result=solve_result,
++            _audit(
++                solve_result,
+                 verify_success=False,
+                 error=solve_result.abstain_reason or "solve_failed",
+             )
+@@ -559,12 +589,7 @@ class Agent:
+         try:
+             result = submit_verification(client, verification_code, answer)
+             if result.get("success"):
+-                record_verification_audit(
+-                    challenge_text=challenge_text,
+-                    verification_code=verification_code,
+-                    solve_result=solve_result,
+-                    verify_success=True,
+-                )
++                _audit(solve_result, verify_success=True)
+                 self._verification.record_success()
+                 logger.info("Verification submitted and accepted")
+                 return True
+@@ -572,24 +597,12 @@ class Agent:
+             # injection in agent-launchd.log (same care as client.py).
+             safe_error = _sanitize_audit_error(str(result.get("error", "")))
+             logger.warning("Verification rejected: %s", safe_error)
+-            record_verification_audit(
+-                challenge_text=challenge_text,
+-                verification_code=verification_code,
+-                solve_result=solve_result,
+-                verify_success=False,
+-                error=safe_error or "verify_rejected",
+-            )
++            _audit(solve_result, verify_success=False, error=safe_error or "verify_rejected")
+             self._verification.record_failure()
+             return False
+         except (MoltbookClientError, ValueError) as exc:
+             logger.error("Verification submission failed: %s", exc)
+-            record_verification_audit(
+-                challenge_text=challenge_text,
+-                verification_code=verification_code,
+-                solve_result=solve_result,
+-                verify_success=False,
+-                error=str(exc),
+-            )
++            _audit(solve_result, verify_success=False, error=str(exc))
+             self._verification.record_failure()
+             return False
+ 
+diff --git a/src/contemplative_agent/adapters/moltbook/feed_manager.py b/src/contemplative_agent/adapters/moltbook/feed_manager.py
+index b589f54..23197dc 100644
+--- a/src/contemplative_agent/adapters/moltbook/feed_manager.py
++++ b/src/contemplative_agent/adapters/moltbook/feed_manager.py
+@@ -22,7 +22,13 @@ from .config import (
+ from .content import ContentManager
+ from .dedup import is_promotional, is_repeat_target_for_author
+ from .llm_functions import generate_internal_note, score_relevance
+-from .publish import client_error_guard, log_published, passes_verification, verification_of
++from .publish import (
++    VerificationHandler,
++    client_error_guard,
++    log_published,
++    passes_verification,
++    verification_of,
++)
+ from .session_context import SessionContext
+ 
+ logger = logging.getLogger(__name__)
+@@ -45,7 +51,7 @@ class FeedManager:
+         get_content: Callable[[], ContentManager],
+         confirm_action: Callable[[str, str], bool],
+         confirm_side_effect: Callable[[str], bool],
+-        handle_verification: Callable[[dict], bool],
++        handle_verification: VerificationHandler,
+     ) -> None:
+         self._ctx = ctx
+         self._domain = domain
+@@ -455,6 +461,8 @@ class FeedManager:
+                 verification_of(created),
+                 self._handle_verification,
+                 description=f"Comment on {post_id[:12]}",
++                action="comment",
++                target_id=post_id,
+             ):
+                 return False
+             # Record the dedup hash only now that the comment is actually posted
+diff --git a/src/contemplative_agent/adapters/moltbook/post_pipeline.py b/src/contemplative_agent/adapters/moltbook/post_pipeline.py
+index 1d6ca9a..451f97e 100644
+--- a/src/contemplative_agent/adapters/moltbook/post_pipeline.py
++++ b/src/contemplative_agent/adapters/moltbook/post_pipeline.py
+@@ -27,7 +27,7 @@ from .llm_functions import (
+     summarize_post_topic,
+ )
+ from .novelty import NoveltyGate
+-from .publish import client_error_guard, log_published, passes_verification
++from .publish import VerificationHandler, client_error_guard, log_published, passes_verification
+ from .session_context import SessionContext
+ 
+ logger = logging.getLogger(__name__)
+@@ -88,7 +88,7 @@ class PostPipeline:
+         get_feed: Callable[[], list[dict]],
+         confirm_action: Callable[..., bool],
+         novelty_gate: NoveltyGate,
+-        handle_verification: Callable[[dict], bool],
++        handle_verification: VerificationHandler,
+     ) -> None:
+         self._ctx = ctx
+         self._domain = domain
+@@ -422,6 +422,8 @@ class PostPipeline:
+                 post_data.get("verification"),
+                 self._handle_verification,
+                 description=f"Post (id={post_id})",
++                action="post",
++                target_id=post_id,
+             ):
+                 return
+             # Past this gate the post is provably created AND visible, so record
+diff --git a/src/contemplative_agent/adapters/moltbook/publish.py b/src/contemplative_agent/adapters/moltbook/publish.py
+index 5ddec55..326afaa 100644
+--- a/src/contemplative_agent/adapters/moltbook/publish.py
++++ b/src/contemplative_agent/adapters/moltbook/publish.py
+@@ -20,14 +20,33 @@ from __future__ import annotations
+ import logging
+ from collections.abc import Callable, Iterator
+ from contextlib import contextmanager
+-from typing import Any
++from typing import Any, Protocol
+ 
+ from ...core.text_utils import log_preview
+ from .client import MoltbookClientError
++from .verification import VerificationAction
+ 
+ logger = logging.getLogger(__name__)
+ 
+ 
++class VerificationHandler(Protocol):
++    """The create-time handshake callback (``agent._handle_verification``).
++
++    ``action`` / ``target_id`` identify what the handshake gates so the
++    verification audit record can carry them as data (weekly F1.2 2026-08-08)
++    instead of the caller dropping them into a log format string the sweep
++    normalizes into uncountability.
++    """
++
++    def __call__(
++        self,
++        verification: dict,
++        *,
++        action: VerificationAction | None = None,
++        target_id: str | None = None,
++    ) -> bool: ...
++
++
+ @contextmanager
+ def client_error_guard(action: str, *, on_rate_limited: Callable[[], None]) -> Iterator[None]:
+     """Swallow a ``MoltbookClientError`` from one outward write.
+@@ -47,9 +66,11 @@ def client_error_guard(action: str, *, on_rate_limited: Callable[[], None]) -> I
+ 
+ def passes_verification(
+     verification: Any,
+-    handle_verification: Callable[[dict], bool],
++    handle_verification: VerificationHandler,
+     *,
+     description: str,
++    action: VerificationAction,
++    target_id: str,
+ ) -> bool:
+     """Solve the create-response challenge, if the response carries one.
+ 
+@@ -60,11 +81,17 @@ def passes_verification(
+     write instead silences the agent: it dedups future attempts against content
+     nobody ever saw.
+ 
++    ``action`` and ``target_id`` are required precisely because a failure
++    records nothing: the audit record is then the ONLY countable trace that a
++    published body was orphaned, and it needs the create kind and a joinable
++    target digest to say so (weekly F1.2 2026-08-08). The WARNING below stays
++    as the human-readable trace; it is no longer the only one.
++
+     A trusted-bypass response carries no ``verification`` key and passes.
+     """
+     if verification is None:
+         return True
+-    if handle_verification(verification):
++    if handle_verification(verification, action=action, target_id=target_id):
+         return True
+     logger.warning("%s created but verification failed; not recording", description)
+     return False
+diff --git a/src/contemplative_agent/adapters/moltbook/reply_handler.py b/src/contemplative_agent/adapters/moltbook/reply_handler.py
+index 6cce1d2..76c67bd 100644
+--- a/src/contemplative_agent/adapters/moltbook/reply_handler.py
++++ b/src/contemplative_agent/adapters/moltbook/reply_handler.py
+@@ -14,7 +14,13 @@ from .client import MoltbookClient
+ from .config import ADAPTIVE_BACKOFF
+ from .dedup import is_promotional
+ from .llm_functions import generate_internal_note, generate_reply
+-from .publish import client_error_guard, log_published, passes_verification, verification_of
++from .publish import (
++    VerificationHandler,
++    client_error_guard,
++    log_published,
++    passes_verification,
++    verification_of,
++)
+ from .session_context import SessionContext
+ 
+ logger = logging.getLogger(__name__)
+@@ -88,7 +94,7 @@ class ReplyHandler:
+         ctx: SessionContext,
+         confirm_action: Callable[[str, str], bool],
+         confirm_side_effect: Callable[[str], bool],
+-        handle_verification: Callable[[dict], bool],
++        handle_verification: VerificationHandler,
+     ) -> None:
+         self._ctx = ctx
+         self._confirm_action = confirm_action
+@@ -309,6 +315,8 @@ class ReplyHandler:
+                 verification_of(created),
+                 self._handle_verification,
+                 description=f"Reply on {post_id[:12]}",
++                action="reply",
++                target_id=post_id,
+             ):
+                 return
+             ctx.commented_posts.add(reply_key)
+diff --git a/src/contemplative_agent/adapters/moltbook/verification.py b/src/contemplative_agent/adapters/moltbook/verification.py
+index b4f1dd9..3ae617b 100644
+--- a/src/contemplative_agent/adapters/moltbook/verification.py
++++ b/src/contemplative_agent/adapters/moltbook/verification.py
+@@ -112,6 +112,15 @@ _NUMBER_PATTERN = r"-?\d+(?:\.\d+)?"
+ _EXPR_PATTERN = re.compile(rf"\(?\s*({_NUMBER_PATTERN})\s*([+*/xX-])\s*({_NUMBER_PATTERN})\s*\)?")
+ VERIFICATION_AUDIT_PATH = EPISODE_LOG_DIR / "verification-audit.jsonl"
+ 
++# Kinds of create-time handshake (weekly F1.2 2026-08-08). The audit record's
++# `action` column carries one of these when the record comes from a
++# create-response handshake, threaded explicitly from the publish call sites —
++# never parsed back out of a log/description string. None means "not from a
++# create-time handshake" (a direct solve, or any row written before the field
++# existed), so a longitudinal reading must treat None as unknown, not as
++# "no content at stake".
++VerificationAction = Literal["comment", "reply", "post"]
++
+ 
+ @dataclass(frozen=True)
+ class VerificationSolveResult:
+@@ -369,12 +378,25 @@ def record_verification_audit(
+     solve_result: VerificationSolveResult,
+     verify_success: bool,
+     error: str | None = None,
++    action: VerificationAction | None = None,
++    target_id: str | None = None,
++    content_recorded: bool | None = None,
+ ) -> None:
+     """Append a best-effort verification corpus/audit record.
+ 
+     The raw challenge is stored as base64, not free text, so direct log reads do
+     not become a prompt-injection path. Decode it only inside an explicit
+     untrusted-content evaluation harness.
++
++    ``action`` / ``target_id`` / ``content_recorded`` (weekly F1.2 2026-08-08)
++    make an orphaned publish countable: a create-time handshake failure leaves
++    a body visible on-platform that the agent deliberately does not record
++    (``publish.passes_verification``), and before these fields its only trace
++    was a WARNING line the log sweep normalizes into uncountability. The weekly
++    report's recorded-bodies denominator can now be reconciled exactly instead
++    of stated as a floor. ``target_id`` is stored as ``target_sha256`` only —
++    the count and the joinability are needed, never the raw identifier
++    (ADR-0083 boundary discipline).
+     """
+     try:
+         record = _verification_audit_record(
+@@ -383,12 +405,24 @@ def record_verification_audit(
+             solve_result=solve_result,
+             verify_success=verify_success,
+             error=error,
++            action=action,
++            target_id=target_id,
++            content_recorded=content_recorded,
+         )
+         append_jsonl_restricted(VERIFICATION_AUDIT_PATH, record)
+     except Exception as exc:
+         # WARNING (not debug): a persistently broken audit writer must be
+         # visible at default log levels (observability sweep 2026-07-10).
+-        logger.warning("Verification audit record failed: %s", exc)
++        #
++        # The action kind rides the message (F-VER-8, weekly F1.2): when the
++        # audit write is what failed, this line is the only remaining trace of
++        # a create-time handshake, and a trace that cannot say WHICH kind of
++        # body was at stake is indistinguishable from a handshake that never
++        # happened — the exact uncountability this change exists to close. The
++        # kind is a closed vocabulary of our own literals, never server text,
++        # so it is safe to log unsanitized (the digest and the raw target id
++        # both stay out).
++        logger.warning("Verification audit record failed (action=%s): %s", action or "none", exc)
+ 
+ 
+ def unsolved_result(challenge_text: str) -> VerificationSolveResult:
+@@ -414,6 +448,9 @@ def _verification_audit_record(
+     solve_result: VerificationSolveResult,
+     verify_success: bool,
+     error: str | None,
++    action: VerificationAction | None = None,
++    target_id: str | None = None,
++    content_recorded: bool | None = None,
+ ) -> dict[str, Any]:
+     record: dict[str, Any] = {
+         "ts": now_iso("seconds"),
+@@ -431,6 +468,14 @@ def _verification_audit_record(
+         "solver_path": solve_result.solver_path,
+         "solve_success": solve_result.answer is not None,
+         "verify_success": verify_success,
++        # Which create kind this handshake gated (None: not create-time), the
++        # target as a digest ONLY (ADR-0083 — joinable, never identifying),
++        # and whether the caller went on to record the body. Together these
++        # turn "≥N orphaned publishes" from a log-sweep floor into an exact,
++        # per-kind count (weekly F1.2 2026-08-08).
++        "action": action,
++        "target_sha256": _sha256_text(target_id) if target_id else None,
++        "content_recorded": content_recorded,
+         "error": _sanitize_audit_error(error) if error else None,
+     }
+     return record
+diff --git a/tests/test_agent.py b/tests/test_agent.py
+index 1fb4acc..0b95cda 100644
+--- a/tests/test_agent.py
++++ b/tests/test_agent.py
+@@ -3660,6 +3660,205 @@ class TestHandleVerificationMalformedObject:
+         assert "malformed_verification_object" in kwargs["error"]
+ 
+ 
++class TestVerificationAuditActionThreading:
++    """Weekly F1.2 2026-08-08: each create-time handshake states its own kind.
++
++    The three ``passes_verification`` call sites already held the create kind
++    and the target id — and dropped both into a ``description`` format string
++    that only ever reached a WARNING line, which the log sweep lowercases,
++    squashes and truncates. So ``verification-audit.jsonl`` could answer "how
++    many handshakes failed" but not "how many published bodies were orphaned,
++    of which kind", and the weekly report had to state its denominator as a
++    floor.
++
++    These pin the threading at the real call sites (not at
++    ``passes_verification`` in isolation): the defect was in what the callers
++    passed, so a test that supplies the arguments itself would have stayed
++    green. ``content_recorded`` mirrors the handshake verdict because that IS
++    the caller contract — pass ⇒ the body is recorded, fail ⇒ nothing is.
++    """
++
++    @patch("contemplative_agent.adapters.moltbook.agent.record_verification_audit")
++    @patch(
++        "contemplative_agent.adapters.moltbook.agent.solve_challenge_result",
++        return_value=_solve_result(None),
++    )
++    @patch("contemplative_agent.adapters.moltbook.feed_manager.score_relevance", return_value=0.95)
++    def test_orphaned_comment_is_countable_by_kind(
++        self, mock_score, mock_solve, mock_audit, tmp_path
++    ):
++        """The defect's own scenario: a comment created on-platform whose
++        handshake failed, which the agent deliberately does not record."""
++        content = MagicMock()
++        agent, client, scheduler = _make_agent(tmp_path, content=content)
++        content.create_comment.return_value = GenerationOutput(text="Great insight")
++        client.post_comment.return_value = {
++            "id": "c-new",
++            "verification": {
++                "verification_code": "moltbook_verify_x",
++                "challenge_text": "noise",
++            },
++        }
++
++        result = agent._feed_manager.engage_with_post(
++            {"content": "text", "id": "post1"}, client, scheduler
++        )
++
++        assert result is False
++        kwargs = mock_audit.call_args.kwargs
++        assert kwargs["action"] == "comment"
++        assert kwargs["target_id"] == "post1"
++        # The body is visible on-platform but unrecorded — the whole point of
++        # the column: this row is the orphan's only countable trace.
++        assert kwargs["content_recorded"] is False
++
++    @patch("contemplative_agent.adapters.moltbook.agent.record_verification_audit")
++    @patch(
++        "contemplative_agent.adapters.moltbook.agent.submit_verification",
++        return_value={"success": True},
++    )
++    @patch(
++        "contemplative_agent.adapters.moltbook.agent.solve_challenge_result",
++        return_value=_solve_result("15.00"),
++    )
++    @patch("contemplative_agent.adapters.moltbook.feed_manager.time")
++    @patch("contemplative_agent.adapters.moltbook.feed_manager.random")
++    @patch("contemplative_agent.adapters.moltbook.feed_manager.score_relevance", return_value=0.95)
++    def test_verified_comment_is_marked_recorded(
++        self, mock_score, mock_random, mock_time, mock_solve, mock_submit, mock_audit, tmp_path
++    ):
++        """The other half of the split the report needs: a handshake failure
++        that cost a visible body vs one that did not."""
++        mock_random.uniform.return_value = 60.0
++        content = MagicMock()
++        agent, client, scheduler = _make_agent(tmp_path, content=content)
++        content.create_comment.return_value = GenerationOutput(text="Great insight")
++        client.post_comment.return_value = {
++            "id": "c-new",
++            "verification": {
++                "verification_code": "moltbook_verify_x",
++                "challenge_text": "noise",
++            },
++        }
++
++        result = agent._feed_manager.engage_with_post(
++            {"content": "text", "id": "post1"}, client, scheduler
++        )
++
++        assert result is True
++        kwargs = mock_audit.call_args.kwargs
++        assert kwargs["action"] == "comment"
++        assert kwargs["content_recorded"] is True
++
++    @patch("contemplative_agent.adapters.moltbook.agent.record_verification_audit")
++    @patch(
++        "contemplative_agent.adapters.moltbook.agent.solve_challenge_result",
++        return_value=_solve_result(None),
++    )
++    @patch(
++        "contemplative_agent.adapters.moltbook.reply_handler.generate_reply",
++        return_value=GenerationOutput(text="My reply"),
++    )
++    def test_orphaned_reply_is_countable_by_kind(
++        self, mock_reply, mock_solve, mock_audit, tmp_path
++    ):
++        agent, client, scheduler = _make_agent(tmp_path)
++        client.get_notifications.return_value = [
++            {
++                "type": "comment",
++                "id": "n1",
++                "post_id": "p1",
++                "content": "Nice post!",
++                "post_content": "Original content",
++                "agent_id": "a1",
++                "agent_name": "Alice",
++            }
++        ]
++        client.get_post_comments.return_value = []
++        client.post_comment.return_value = {
++            "id": "c-new",
++            "verification": {
++                "verification_code": "moltbook_verify_x",
++                "challenge_text": "noise",
++            },
++        }
++
++        agent._reply_handler.run_cycle(client, scheduler, time.time() + 3600)
++
++        kwargs = mock_audit.call_args.kwargs
++        assert kwargs["action"] == "reply"
++        assert kwargs["target_id"] == "p1"
++        assert kwargs["content_recorded"] is False
++        # The reply is genuinely unrecorded — otherwise "orphaned" would be
++        # the wrong word for what the column counts.
++        assert not any("Replied to" in a for a in agent._ctx.actions_taken)
++
++    @patch("contemplative_agent.adapters.moltbook.agent.record_verification_audit")
++    @patch(
++        "contemplative_agent.adapters.moltbook.agent.solve_challenge_result",
++        return_value=_solve_result(None),
++    )
++    @patch(
++        "contemplative_agent.adapters.moltbook.post_pipeline.select_submolt",
++        return_value="philosophy",
++    )
++    @patch(
++        "contemplative_agent.adapters.moltbook.post_pipeline.summarize_post_topic",
++        return_value="reflection on alignment",
++    )
++    @patch(
++        "contemplative_agent.adapters.moltbook.post_pipeline.generate_post_title",
++        return_value="Notes on dedup gates",
++    )
++    @patch(
++        "contemplative_agent.adapters.moltbook.post_pipeline._score_post_relevance",
++        return_value=0.8,
++    )
++    def test_orphaned_post_is_countable_by_kind(
++        self,
++        mock_score,
++        mock_title,
++        mock_summarize,
++        mock_submolt,
++        mock_solve,
++        mock_audit,
++        tmp_path,
++    ):
++        content = MagicMock()
++        gate = _RecordingNoveltyGate()
++        agent, client, scheduler = _make_agent(tmp_path, content=content, novelty_gate=gate)
++        content.create_cooperation_post.return_value = GenerationOutput(
++            text="We paused to revisit how gates intersect with memory."
++        )
++
++        feed_resp = MagicMock()
++        feed_resp.json.return_value = {
++            "posts": [{"title": "t", "content": "c", "id": "p1", "submolt_name": "philosophy"}]
++        }
++        post_resp = MagicMock()
++        post_resp.json.return_value = {
++            "success": True,
++            "post": {
++                "id": "new-post-123",
++                "verification_status": "pending",
++                "verification": {
++                    "verification_code": "moltbook_verify_x",
++                    "challenge_text": "noise",
++                },
++            },
++        }
++        client.get.return_value = feed_resp
++        client.post.return_value = post_resp
++
++        agent._post_pipeline.run_cycle(client, scheduler)
++
++        kwargs = mock_audit.call_args.kwargs
++        assert kwargs["action"] == "post"
++        assert kwargs["target_id"] == "new-post-123"
++        assert kwargs["content_recorded"] is False
++        assert gate.recorded == []
++
++
+ class TestPostPipelineSelectionOrdering:
+     """ADR-0081 Decision 2 regression pin: post_title reuses the
+     cooperation_post pass's skill selection via a module-level hand-off in
+diff --git a/tests/test_verification.py b/tests/test_verification.py
+index e8ec452..12692e3 100644
+--- a/tests/test_verification.py
++++ b/tests/test_verification.py
+@@ -1625,6 +1625,88 @@ class TestVerificationAudit:
+         assert record["error"] == "baderror"
+ 
+ 
++class TestVerificationAuditActionColumns:
++    """Weekly F1.2 2026-08-08: an orphaned publish must be countable.
++
++    A create-time handshake failure leaves a body visible on-platform that the
++    agent deliberately does not record (``publish.passes_verification``). Before
++    these columns its only trace was a WARNING line the log sweep lowercases,
++    squashes and truncates — so the weekly report could state its recorded-body
++    denominator only as a floor ("at least 15"). ``action`` /
++    ``target_sha256`` / ``content_recorded`` make the same event countable and
++    joinable per kind.
++    """
++
++    _SOLVED = VerificationSolveResult(
++        answer="15.00",
++        solver_path="code_parse",
++        challenge_sha256="challenge-sha",
++    )
++
++    def test_action_and_recorded_flag_land_in_the_record(self):
++        record = _verification_audit_record(
++            challenge_text="noise",
++            verification_code="moltbook_verify_v1",
++            solve_result=self._SOLVED,
++            verify_success=False,
++            error="verify_rejected",
++            action="comment",
++            target_id="post-abc123",
++            content_recorded=False,
++        )
++
++        assert record["action"] == "comment"
++        assert record["content_recorded"] is False
++        assert record["target_sha256"] == _sha256_text("post-abc123")
++
++    def test_raw_target_id_never_reaches_the_record(self):
++        # ADR-0083 output-boundary discipline: the count and the joinability
++        # are what is needed, not the identifier.
++        record = _verification_audit_record(
++            challenge_text="noise",
++            verification_code="moltbook_verify_v1",
++            solve_result=self._SOLVED,
++            verify_success=True,
++            error=None,
++            action="post",
++            target_id="post-abc123",
++            content_recorded=True,
++        )
++
++        assert "post-abc123" not in json.dumps(record)
++
++    def test_non_create_time_handshake_leaves_the_columns_none(self):
++        # Dense field, sparse meaning: None reads as "not a create-time
++        # handshake / unknown", never as "no body was at stake". Records
++        # written before this change carry None for the same reason, so a
++        # longitudinal count must not read None as a zero.
++        record = _verification_audit_record(
++            challenge_text="noise",
++            verification_code="moltbook_verify_v1",
++            solve_result=self._SOLVED,
++            verify_success=True,
++            error=None,
++        )
++
++        assert record["action"] is None
++        assert record["target_sha256"] is None
++        assert record["content_recorded"] is None
++
++    def test_columns_are_always_present_so_a_reader_can_count(self):
++        # Dense (always-emitted) rather than conditionally added: a reading
++        # that must divide "orphaned" by "all handshakes" cannot tell a missing
++        # key from an absent value.
++        record = _verification_audit_record(
++            challenge_text="noise",
++            verification_code="moltbook_verify_v1",
++            solve_result=self._SOLVED,
++            verify_success=True,
++            error=None,
++        )
++
++        assert {"action", "target_sha256", "content_recorded"} <= record.keys()
++
++
+ class TestRejectedAnswerSuppression:
+     """Round 8: a previously server-rejected answer is never resubmitted.
+ 
+diff --git a/tests/test_verification_chaos.py b/tests/test_verification_chaos.py
+index b09b665..00e3738 100644
+--- a/tests/test_verification_chaos.py
++++ b/tests/test_verification_chaos.py
+@@ -27,6 +27,13 @@ Fault catalog rows exercised here:
+ - F-VER-6 challenge-injected obedience (bare number, no EXPR)
+                                              -> fails closed, nothing submitted
+ - F-VER-7 corrupt rejected-answer audit log  -> fails open, solve still runs
++- F-VER-8 the audit WRITE fails               -> swallowed, but the remaining
++                                                warning still names the create
++                                                kind (weekly F1.2 2026-08-08:
++                                                the audit row is now the only
++                                                countable trace of an orphaned
++                                                publish, so losing it silently
++                                                re-opens the hole)
+ 
+ TDD contract (ADR-0062 twelfth amendment): F-VER-1 asserts a reason code that
+ did not exist when this file was written. The solver folded "the LLM
+@@ -44,6 +51,7 @@ shapes pinned as ``@example``, and no test sleeps.
+ from __future__ import annotations
+ 
+ import json
++import logging
+ import time
+ 
+ import pytest
+@@ -56,8 +64,10 @@ from contemplative_agent.adapters.moltbook.verification import (
+     _ABSTAIN_REASON_LLM_NONE,
+     _EXTRACT_NUM_PREDICT,
+     _sha256_text,
++    record_verification_audit,
+     solve_challenge,
+     solve_challenge_result,
++    unsolved_result,
+ )
+ from contemplative_agent.core.llm import configure, generate, reset_llm_config
+ from tests.chaos import (
+@@ -515,6 +525,99 @@ class TestCorruptRejectedLogFVer7:
+         assert result.answer == OK_ANSWER
+ 
+ 
++class TestUnwritableAuditLogFVer8:
++    """F-VER-8: the audit write itself is the thing that failed.
++
++    Weekly F1.2 2026-08-08 makes the audit row the countable trace of an
++    orphaned publish — a body created on-platform that the agent deliberately
++    does not record. That promotes the writer's own failure into a fault worth
++    a catalog row: if the row is lost, the remaining log line must still say
++    WHICH create kind was at stake, or a lost orphan is indistinguishable from
++    a handshake that never happened (precisely the uncountability this change
++    exists to close).
++
++    The write is best-effort by design — a full disk must not abort a session
++    mid-publish — so the desired behaviour is "swallow, but say enough".
++    """
++
++    def _failing_writer(self, monkeypatch):
++        from contemplative_agent.adapters.moltbook import verification as verification_mod
++
++        def _boom(path, record):
++            raise OSError("No space left on device")
++
++        monkeypatch.setattr(verification_mod, "append_jsonl_restricted", _boom)
++
++    def test_lost_audit_row_still_names_the_action(self, monkeypatch, caplog):
++        self._failing_writer(monkeypatch)
++
++        with caplog.at_level(logging.WARNING, logger="contemplative_agent"):
++            record_verification_audit(
++                challenge_text=NOISE_CHALLENGE,
++                verification_code="moltbook_verify_x",
++                solve_result=unsolved_result(NOISE_CHALLENGE),
++                verify_success=False,
++                error="solve_failed",
++                action="comment",
++                target_id="post1",
++                content_recorded=False,
++            )
++
++        messages = [r.getMessage() for r in caplog.records]
++        assert any("action=comment" in m for m in messages), messages
++
++    def test_lost_audit_row_for_a_non_create_handshake_says_so(self, monkeypatch, caplog):
++        # The counterpart reading: no body was at stake here, and the line must
++        # not imply one was.
++        self._failing_writer(monkeypatch)
++
++        with caplog.at_level(logging.WARNING, logger="contemplative_agent"):
++            record_verification_audit(
++                challenge_text=NOISE_CHALLENGE,
++                verification_code="moltbook_verify_x",
++                solve_result=unsolved_result(NOISE_CHALLENGE),
++                verify_success=False,
++                error="solve_failed",
++            )
++
++        messages = [r.getMessage() for r in caplog.records]
++        assert any("action=none" in m for m in messages), messages
++
++    def test_write_failure_never_escapes_to_the_publish_path(self, monkeypatch):
++        # Best-effort by contract: the handshake's own verdict, not the audit
++        # writer's, decides whether a body gets recorded.
++        self._failing_writer(monkeypatch)
++
++        record_verification_audit(
++            challenge_text=NOISE_CHALLENGE,
++            verification_code="moltbook_verify_x",
++            solve_result=unsolved_result(NOISE_CHALLENGE),
++            verify_success=False,
++            action="post",
++            target_id="new-post-123",
++            content_recorded=False,
++        )
++
++    def test_raw_target_id_stays_out_of_the_failure_line(self, monkeypatch, caplog):
++        # ADR-0083: the digest is joinable, the identifier is not emitted —
++        # including on the degraded path, which is the easy place to leak it.
++        self._failing_writer(monkeypatch)
++
++        with caplog.at_level(logging.WARNING, logger="contemplative_agent"):
++            record_verification_audit(
++                challenge_text=NOISE_CHALLENGE,
++                verification_code="moltbook_verify_x",
++                solve_result=unsolved_result(NOISE_CHALLENGE),
++                verify_success=False,
++                action="reply",
++                target_id="post-abc123",
++                content_recorded=False,
++            )
++
++        for record in caplog.records:
++            assert "post-abc123" not in record.getMessage()
++
++
+ class TestSolverNeverEscapesItsVocabulary:
+     """Property: whatever the backend does, the solver lands in a known state.
+ 
