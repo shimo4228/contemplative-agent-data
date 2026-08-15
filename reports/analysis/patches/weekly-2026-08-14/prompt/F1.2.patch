@@ -1,0 +1,242 @@
+diff --git a/docs/CODEMAPS/architecture.md b/docs/CODEMAPS/architecture.md
+index cc19745..5f8aeba 100644
+--- a/docs/CODEMAPS/architecture.md
++++ b/docs/CODEMAPS/architecture.md
+@@ -537,6 +537,8 @@ The drift scan (2026-08-06) diffs the per-endpoint response-key vocabulary the c
+ 
+ The sweep's signature is keyed on **level + message**, with the dotted `%(name)s` module path dropped for lines in the runtime's own log format, and hex-shaped ids squashed to `#` alongside digit runs. The 80-character cap is the reason: the module path alone runs to ~47 characters, so keying on it spent the budget on the address and truncated the predicate — `"reply on <id> created but verification failed"` rendered as `"reply on <id> created"`, a failure displayed as its own opposite (findings F1.1). Excluding the name also makes the instrument refactor-invariant: a pure module move (`7c96e0f`) used to reset every affected signature to 🆕, i.e. the Δ / 🆕 columns measured the codebase rather than the runtime (findings F1.2). The trade is that the same message from two subsystems now merges into one row, so the logger name is carried as a display-only `Origin` column — it never enters the signature, the state file or the novelty computation, so the reader keeps the distinction the key deliberately drops.
+ 
++Four message families end in **generated text** rather than a predicate — the three publish previews (`>> Reply to` / `>> Comment on` / `>> New post`, emitted as bounded single lines by `log_published`) and the distill `Added pattern (source=…)` line. For these the signature is cut at the payload boundary, so the key is the static head plus the counterparty address and nothing of the body (findings F1.2, 2026-08-15). Without the cut each published body and each distilled pattern minted its own one-off 🆕 row — the census counted bodies rather than events — and body-derived text, downstream of untrusted feed content, reached the state file and the prompt `weekly-analysis.sh` feeds to an LLM, which is the side channel ADR-0083 closed for episode logs. The producers are untouched: the bounded preview is the T-LOG-DEBUG-CONTENT repair and the operator's live tail still shows it; only the instrument's key is content-free. `>> New post` cuts before its char count rather than after, because that format puts the generated title ahead of the count. The cut is an allowlist of formats this repo emits, not a free-text filter — an unrecognised line keeps its whole predicate.
++
+ The sweep has **no time window**: it counts every line each allowed file currently holds, so a row's `Count` spans that file's lifetime — and the files rotate on different schedules (`ollama-serve.log` nightly since 2026-08-01, `agent-launchd.log` weekly via `backup-runtime.sh`, the one-shot `insight-` / `distill-launchd.log` never), which makes two rows of one table not necessarily commensurable. Rotation also moves the novelty baseline: lines leave the `*.log` glob, counts fall, and known signatures re-appear as 🆕 — once a rare footnote, the steady state since nightly rotation shipped. Filtering by timestamp would discard signal, so the instrument states its basis instead (findings F1.1, 2026-08-07): a per-file **corpus census** (name, lines read, signal lines) is written to a sidecar `<state>.corpus.tsv` — a sidecar because `read_state` silently drops any state-file line whose first field is not an int, so a header row there would vanish on read — and rendered above the table beside the previous sweep's three figures, with an explicit "🆕 and Δ are not comparable to last week's" sentence when the corpus lost more than 10% of its lines. The census is written *before* its snapshot (the snapshot's existence is the shell's "sweep completed" signal) and promoted in lockstep with it; if the pair breaks, the shell deletes the old census so the next run reports "no previous census" rather than asserting a comparison against a corpus that no longer exists.
+ 
+ Injection boundary: the sweep, the invariant check and the drift scan must never read episode logs (the drift scan reads only the self-written `api-audit.jsonl`; the platform-controlled key names it renders are Markdown-escaped and length-capped). The duplicate scan does, and is the only intake permitted to — it emits **only** 12-hex SHA-256 digests, counts, filename-derived dates and the fixed `{post, reply, comment}` vocabulary (ADR-0083, gated by `TestOutputBoundary`). The skill-selection reading (2026-08-08, findings F1.4) reads the self-written `skill-selection-*.jsonl` shadow log (ADR-0076): the *selected* middle link between *installed* (state diff) and *vocabulary in output* (section E) was already logged per publish action but never supplied to the report. Its records embed the selection situation — untrusted post bodies — so the renderer (`format_skill_selection_report`, the same one behind `report --skill-selection`) emits **catalog** names and counts only, never the situation strings (same ADR-0083 boundary; gated by `test_skill_selection_reading_reaches_the_prompt_names_only`). "Catalog names" is load-bearing since 2026-08-08, when the reading gained a per-name rejected-name tally: a *rejected* name is by definition a string that matched nothing in the catalog, i.e. free model output from a prompt that embeds untrusted post bodies — the 2026-08-08 backfill reading measured 12% of them as fragments bled in from elsewhere in the prompt. It is therefore the one string in this reading that is not drawn from a closed, self-written vocabulary, and `format_skill_selection_report` withholds it unless a caller passes `include_rejected_names=True`. **The default is the restrictive one**, so a new caller is safe by omission and the weekly script needs no knowledge of which side of the boundary it is on; only `report --skill-selection` (terminal, human reader — the reader the tally exists for) opts in. The weekly prompt still receives the tally's *shape* — distinct-name count, emissions, and each entry's nearest catalog name with its surface-similarity distance — because those are catalog-derived or numeric. Same choice ADR-0083's duplicate scan made: send the shape, not the content. All five are observability: a failure degrades to a "not available" stub and never breaks the report.
+diff --git a/scripts/log_anomaly_sweep.py b/scripts/log_anomaly_sweep.py
+index 615b263..3109e11 100755
+--- a/scripts/log_anomaly_sweep.py
++++ b/scripts/log_anomaly_sweep.py
+@@ -15,6 +15,10 @@ Security (load-bearing):
+   prompt-injection vector, and this output may be fed to an LLM.
+ - Output is normalized signatures (timestamps stripped, digits squashed,
+   truncated), not verbatim log bodies, to shrink the injection surface further.
++  Lines whose format ends in generated text — the bounded publish previews and
++  the distill pattern line — are additionally cut at their payload boundary
++  (``_PAYLOAD_CUT_RES``), so that text enters neither the key, the state file
++  nor the prompt.
+ 
+ State: a TSV ``count<TAB>signature`` snapshot of the previous sweep, used to
+ compute the NEW flag and the per-signature delta. Committing it is an
+@@ -111,6 +115,53 @@ _HEXID_RE = re.compile(r"\b(?=[0-9a-f]*\d)[0-9a-f]{6,}(?:-[0-9a-f]{4,})*\b")
+ 
+ _SIG_MAXLEN = 80
+ 
++# Message families whose tail is generated text: the three publish previews
++# (``log_published`` in ``adapters/moltbook/publish.py``, already bounded to a
++# single line by ``log_preview``) and the distill pattern line
++# (``core/distill.py``, ``pattern[:80]``). Leaving that tail in the key makes
++# every distinct body its own signature, so the census counts bodies rather
++# than events and each publish mints a one-off 🆕 row; it also carries
++# body-derived text — downstream of untrusted feed content — into the state
++# file and into the prompt ``weekly-analysis.sh`` feeds to an LLM, the same
++# side channel ADR-0083 closed for episode logs. The producers are correct as
++# they stand (the bounded preview is the T-LOG-DEBUG-CONTENT repair, and the
++# operator's live tail wants it); it is this instrument's *key* that must be
++# content-free.
++#
++# Each pattern matches the static head of its family up to and including the
++# boundary its payload starts after; the signature becomes that match, so a
++# family aggregates into one row. Matched against the already-normalized line
++# (lowercased, digit runs and hex ids squashed to ``#``) — hence the lowercase
++# level prefix and the ``#`` char count. Counterparty names are left in, in
++# keeping with the rule above that agent-name variation is not squashed: the
++# name is a fixed-shape address, not a body.
++#
++# ``>> new post`` cuts earlier than its two siblings by necessity: its format
++# is ``>> New post [%s] (id=%s): %d chars: %s``, which puts the generated
++# *title* ahead of the count, so cutting at ``chars:`` would keep one-off
++# generated text in the key — exactly what the cut exists to prevent.
++_LEVEL_PREFIX = r"(?:\[\w+\] )?"
++_PAYLOAD_CUT_RES: tuple[re.Pattern[str], ...] = (
++    re.compile(_LEVEL_PREFIX + r">> reply to .*? chars:"),
++    re.compile(_LEVEL_PREFIX + r">> comment on .*? chars:"),
++    re.compile(_LEVEL_PREFIX + r">> new post"),
++    re.compile(_LEVEL_PREFIX + r"added pattern \(source=[^)]*\):"),
++)
++
++
++def _cut_at_payload_boundary(s: str) -> str:
++    """Drop the generated tail of a known preview-bearing line, if any.
++
++    Returns *s* unchanged when no family matches: the cut is an allowlist of
++    formats this repo emits, not a general free-text filter, so an unknown
++    line keeps the full predicate the sweep exists to surface.
++    """
++    for pattern in _PAYLOAD_CUT_RES:
++        m = pattern.match(s)
++        if m is not None:
++            return m.group(0)
++    return s
++
+ 
+ @dataclass(frozen=True)
+ class Finding:
+@@ -182,6 +233,10 @@ def normalize_with_origin(line: str) -> tuple[str, str]:
+     per-item variation groups), and truncates. Agent-name variation *inside
+     the message* is intentionally not squashed; minor over-splitting is safer
+     than over-merging distinct anomalies.
++
++    For the known preview-bearing families (``_PAYLOAD_CUT_RES``) the line is
++    additionally cut at its payload boundary, so no generated body or pattern
++    text reaches the signature, the state file or the weekly prompt.
+     """
+     s = _TS_ISO_RE.sub("", line)
+     s = _TS_CLOCK_RE.sub("", s)
+@@ -195,6 +250,7 @@ def normalize_with_origin(line: str) -> tuple[str, str]:
+     s = _HEXID_RE.sub("#", s)
+     s = _DIGITS_RE.sub("#", s)
+     s = _WS_RE.sub(" ", s).strip()
++    s = _cut_at_payload_boundary(s)
+     return s[:_SIG_MAXLEN], origin
+ 
+ 
+@@ -441,7 +497,8 @@ def render_markdown(
+     lines.append("")
+     lines.append(
+         "_Signatures are normalized (timestamps and module paths stripped, "
+-        "digits and ids squashed). Origin is display-only — it does not enter "
++        "digits and ids squashed, generated bodies and pattern text cut at "
++        "their payload boundary). Origin is display-only — it does not enter "
+         "the signature, so a module rename cannot reset the Δ / 🆕 baseline, "
+         "and one row may list several subsystems emitting the same message. "
+         "Source: self-written logs only; episode logs are never read._"
+diff --git a/tests/test_log_anomaly_sweep.py b/tests/test_log_anomaly_sweep.py
+index 1db1137..33dee00 100644
+--- a/tests/test_log_anomaly_sweep.py
++++ b/tests/test_log_anomaly_sweep.py
+@@ -156,6 +156,126 @@ class TestOriginIsCarriedButNotKeyed:
+         assert re.fullmatch(r"[A-Za-z_]\w*(?:\.\w+)+", ok)
+ 
+ 
++class TestGeneratedTextDoesNotEnterTheKey:
++    """Preview-bearing families are cut at their payload boundary.
++
++    The producers are correct: ``log_published`` emits a bounded single-line
++    preview on purpose (T-LOG-DEBUG-CONTENT). The residue was on this side —
++    free text survived into the signature, so every published body and every
++    distilled pattern minted its own 🆕 row and body-derived text (downstream
++    of untrusted feed content) reached the state file and the weekly LLM
++    prompt, the side channel ADR-0083 closed for episode logs (findings F1.2
++    2026-08-15).
++
++    Bodies here mention ``backoff`` because that is how an INFO preview
++    reaches the sweep at all: ``_is_signal`` admits it through
++    ``_CRITICAL_RE``, not through its level.
++    """
++
++    # Post ids are written as ``post_id[:12]`` by both publish paths, so the
++    # fixtures carry that truncated shape rather than a whole uuid fragment.
++    # The A/B pairs share an id: body variation is what this class is about.
++    REPLY_A = (
++        "09:12:33 [INFO] contemplative_agent.adapters.moltbook.reply_handler: "
++        ">> Reply to budget_skynet on 836e1237-a5b: 61 chars: "
++        "the observation regarding silence held through the backoff"
++    )
++    REPLY_B = (
++        "10:41:02 [INFO] contemplative_agent.adapters.moltbook.reply_handler: "
++        ">> Reply to budget_skynet on 836e1237-a5b: 48 chars: "
++        "a wholly different sentence about backoff and rest"
++    )
++    COMMENT_A = (
++        "09:12:33 [INFO] contemplative_agent.adapters.moltbook.feed_manager: "
++        ">> Comment on 836e1237-a5b: 33 chars: one body mentioning backoff"
++    )
++    COMMENT_B = (
++        "09:44:10 [INFO] contemplative_agent.adapters.moltbook.feed_manager: "
++        ">> Comment on 836e1237-a5b: 39 chars: another body mentioning backoff"
++    )
++    POST_A = (
++        "09:12:33 [INFO] contemplative_agent.adapters.moltbook.post_pipeline: "
++        ">> New post [On Waiting Without Backoff] (id=836e1237-a5b2): 900 chars: "
++        "the opening line of the post"
++    )
++    POST_B = (
++        "11:03:20 [INFO] contemplative_agent.adapters.moltbook.post_pipeline: "
++        ">> New post [A Note On Backoff And Silence] (id=91ab77de-0c31): 750 chars: "
++        "a different opening line"
++    )
++    PATTERN_A = (
++        "09:12:33 [INFO] contemplative_agent.core.distill: "
++        "Added pattern (source=self_reflection): "
++        "I tend to retry past the point where backoff is the honest answer"
++    )
++    PATTERN_B = (
++        "09:12:34 [INFO] contemplative_agent.core.distill: "
++        "Added pattern (source=self_reflection): "
++        "Silence reads as backoff to a counterparty who cannot see the queue"
++    )
++
++    def test_two_reply_bodies_reach_one_signature(self):
++        assert las.normalize(self.REPLY_A) == las.normalize(self.REPLY_B)
++
++    def test_reply_body_text_does_not_survive_into_the_signature(self):
++        sig = las.normalize(self.REPLY_A)
++        assert "observation" not in sig
++        assert "silence" not in sig
++        assert sig.endswith("chars:")
++
++    def test_the_static_predicate_and_counterparty_survive_the_cut(self):
++        """The cut removes the body, not the event. A row must still say what
++        happened and to whom, or the census stops being readable."""
++        sig = las.normalize(self.REPLY_A)
++        assert sig.startswith("[info] >> reply to budget_skynet on ")
++        assert "chars:" in sig
++
++    def test_comment_previews_aggregate_into_one_row(self):
++        findings = las.analyze([self.COMMENT_A, self.COMMENT_B], {})
++        assert len(findings) == 1
++        assert findings[0].count == 2
++        assert "mentioning" not in findings[0].signature
++
++    def test_generated_post_titles_do_not_survive(self):
++        """``>> New post`` puts the generated title *ahead* of the char count,
++        so cutting at ``chars:`` would have left one-off text in the key."""
++        assert las.normalize(self.POST_A) == las.normalize(self.POST_B)
++        sig = las.normalize(self.POST_A)
++        assert "waiting" not in sig
++        assert "silence" not in sig
++
++    def test_distilled_patterns_aggregate_and_keep_their_source(self):
++        findings = las.analyze([self.PATTERN_A, self.PATTERN_B], {})
++        assert len(findings) == 1
++        sig = findings[0].signature
++        assert findings[0].count == 2
++        assert sig.endswith("(source=self_reflection):")
++        assert "retry" not in sig and "counterparty" not in sig
++
++    def test_a_distinct_source_still_splits_the_pattern_rows(self):
++        other = self.PATTERN_A.replace("source=self_reflection", "source=activity")
++        assert las.normalize(self.PATTERN_A) != las.normalize(other)
++
++    def test_body_text_reaches_neither_the_state_file_nor_the_render(self, tmp_path):
++        """The two carriers the finding names: the snapshot that persists week
++        to week, and the table ``weekly-analysis.sh`` feeds to an LLM."""
++        findings = las.analyze([self.REPLY_A, self.POST_A, self.PATTERN_A], {})
++        state = tmp_path / "sweep.tsv"
++        las.write_state(state, findings)
++        written = state.read_text(encoding="utf-8")
++        rendered = las.render_markdown(findings, top=25, corpus=CORPUS)
++        for leaked in ("observation", "waiting", "opening line", "counterparty"):
++            assert leaked not in written
++            assert leaked not in rendered
++
++    def test_an_unrelated_line_mentioning_chars_is_not_cut(self):
++        """The cut is an allowlist of formats this repo emits, not a general
++        free-text filter: an unknown predicate must survive whole."""
++        line = "09:12:33 [WARNING] mod.name: request body 4000 chars: rejected upstream"
++        sig = las.normalize(line)
++        assert "rejected upstream" in sig
++
++
+ class TestAnalyze:
+     def test_non_signal_lines_ignored(self):
+         lines = ["just a normal info line", "starting session", "all good"]
