@@ -1,0 +1,19 @@
+{
+  "tool": "vulture",
+  "report_prefixes": [
+    "src/",
+    "scripts/"
+  ],
+  "count": 1,
+  "candidates": [
+    {
+      "file": "src/contemplative_agent/core/domain.py",
+      "line": 69,
+      "message": "unused variable 'constitution_synthesize'",
+      "confidence": 60
+    }
+  ],
+  "parsed_total": 170,
+  "unparsed_lines": 0,
+  "stderr_lines": 0
+}

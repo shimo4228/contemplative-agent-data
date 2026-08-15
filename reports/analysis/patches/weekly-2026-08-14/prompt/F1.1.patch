@@ -1,0 +1,1019 @@
+diff --git a/config/prompts/weekly-analysis.md b/config/prompts/weekly-analysis.md
+index ec03b51..b167920 100644
+--- a/config/prompts/weekly-analysis.md
++++ b/config/prompts/weekly-analysis.md
+@@ -32,6 +32,10 @@ Summarize changes to the agent's internal state during this period:
+ - **Skills**: List all skills at period end. Note any added/removed/modified.
+ - **Rules**: List all rules at period end. Note any added/removed/modified.
+ - **Knowledge**: Pattern count at start vs end. Carry the source label the input gives you — the state diff reports *committed snapshots of the data repo* (with commit sha and date), the invariant check reports the *live store at report-generation time* (whose `total` includes tombstones). These answer different questions and legitimately differ; report each with its label rather than treating the gap as a contradiction or picking one as canonical.
++- **Approval provenance** (from the **Approval provenance** block inside each state-diff section): every value-layer diff above is annotated with the in-window `logs/audit.jsonl` rows for that section (ADR-0012 gate; `ts` / `command` / `decision` / `source` / `content_hash`). Read it before writing the Identity / Constitution / Skills / Rules bullets, and state which of these three the section is — do not report a change as unverifiable when the block answers it:
++  - **approved rows present** — say so and cite the `ts` and `content_hash` of the matching row(s);
++  - **⚠️ NO APPROVED RECORD while the section shows a diff** — this is the alarm condition, and the strongest thing B can report. State it plainly, and state it as an observation: a sync lag or an approval made before the window's start commit produces the same shape, so it is "no approval row in this window", not a proven gate bypass;
++  - **unavailable (reason=…)** — the instrument could not read the log. Report the reason code. Never convert this into a claim that no approval exists.
+ - **Operational drift** (from the provided *Log Anomaly Sweep* and *State Invariant Check*): surface any anomaly type flagged 🆕 (new since last sweep) or sharply spiking (high Δ), and any invariant at ⚠️ WARN or ❌ FAIL. These are deterministic signals — report them as observations (what changed, how much); proposing fixes belongs to the downstream diagnosis step, not this report.
+ - **Skill selection** (from the provided *Skill-selection shadow reading*): which skills pass-1 actually selected this week — selection frequency, verdict distribution (judged vs fail-open), hallucination rate, never-selected tail. This is the measured middle link between *installed* (state diff) and *vocabulary in output* (E): when A or E attributes output vocabulary to a skill, check the attribution against this list instead of inferring selection from vocabulary. Report the reading as observations; it carries names and counts only.
+ 
+@@ -101,7 +105,7 @@ The "Typical" bucket is required. A 70% middle band that is invisible in good/pr
+ The following data will be provided:
+ 1. **Methodological Principles** (`principles.md`) — Principle 3 (quote-based depth) applies to this report. Other principles apply to the downstream diagnosis step.
+ 2. **Daily comment reports** for the analysis period
+-3. **Agent state diffs** (identity, constitution, skills, rules, knowledge count) — if available
++3. **Agent state diffs** (identity, constitution, skills, rules, knowledge count) — if available. Each value-layer section carries an **Approval provenance** block: the deterministic join of that section's directory to the in-window ADR-0012 approval rows in `logs/audit.jsonl` (dense fields only — no lineage lists, no free text, no target paths); read it for B's approval-provenance note
+ 4. **Log Anomaly Sweep** — deterministic ranking of log anomalies by novelty (🆕 = new since last sweep) then frequency delta; read it for B's operational-drift note
+ 5. **State Invariant Check** — deterministic ✅/⚠️/❌ checks over knowledge.json / agents.json; read it for B's operational-drift note
+ 6. **Skill-selection shadow reading** — deterministic aggregate of the pass-1 skill-selection log (selected skill names with frequency, verdict distribution, hallucination rate, never-selected tail; names and counts only); read it for B's skill-selection note
+diff --git a/docs/CODEMAPS/architecture.md b/docs/CODEMAPS/architecture.md
+index cc19745..2b5d56b 100644
+--- a/docs/CODEMAPS/architecture.md
++++ b/docs/CODEMAPS/architecture.md
+@@ -513,10 +513,11 @@ carry the signal; the CLI prints that note with every reading.
+ 
+ ### weekly-analysis  [`scripts/weekly-analysis.sh`, ADR-0040]
+ 
+-Runs outside the agent process (launchd → `claude -p`), assembling a prompt from operator-facing artifacts plus **five deterministic intakes**, then a diagnosis companion (`weekly-report-diagnosis` skill) produces the F sections.
++Runs outside the agent process (launchd → `claude -p`), assembling a prompt from operator-facing artifacts plus **six deterministic intakes**, then a diagnosis companion (`weekly-report-diagnosis` skill) produces the F sections.
+ 
+ ```text
+ collect: daily comment-reports + data-repo state diff + previous N reports
++       + value_layer_approval_join.py (per state-diff section: audit.jsonl approval rows)
+        + log_anomaly_sweep.py    (event stream: *.log + audit.jsonl; novelty state + corpus census)
+        + state_invariant_check.py (accumulated state: knowledge.json / agents.json)
+        + cross_day_duplicate_scan.py (published-body identity: episode logs → digests)
+@@ -531,7 +532,9 @@ promote:  mv tmp → weekly-<end>.md        (atomic; a failure leaves the prior
+ translate: best-effort .ja.md (sonnet); failure never rolls back the promotes
+ ```
+ 
+-Order is load-bearing. The sweep's Δ / 🆕 columns and the drift scan's new/removed pairs are defined against their last committed snapshots, so both run `--no-update --emit-state` and their baselines are committed after the report lands — a run that produces nothing must spend nothing (findings F1.2; two consecutive weeks lost). The invariant check, the duplicate scan and the skill-selection reading hold no state and are absolute readings, so they need no such ordering.
++Order is load-bearing. The sweep's Δ / 🆕 columns and the drift scan's new/removed pairs are defined against their last committed snapshots, so both run `--no-update --emit-state` and their baselines are committed after the report lands — a run that produces nothing must spend nothing (findings F1.2; two consecutive weeks lost). The invariant check, the duplicate scan, the skill-selection reading and the approval join hold no state and are absolute readings, so they need no such ordering.
++
++The approval join (2026-08-15, findings F1.1) annotates **each value-layer section of the state diff** — `identity.md`, `constitution/`, `skills/`, `rules/` — with the in-window ADR-0012 approval rows from `logs/audit.jsonl` whose `path` falls under that section's directory. It closes a gap in the diff itself: the diff showed *what* changed and nothing about *whether it passed the gate*, so the 2026-08-15 report's strongest claim ("whether it passed through the `amend-constitution` approval path is not visible in the operator-facing data supplied here") was bounded by missing data rather than by analysis, in a chain that already reads that file for the ADR-0091 identity-cadence due. Three renderings, deliberately distinct: approved rows present (citable `ts` + `content_hash`), **no approved row while the section shows a diff** (the alarm — reported as an observation, since a sync lag or a pre-window approval produces the same shape), and `unavailable (reason=…)` when the log is missing or unreadable — an unavailable instrument must never render as the alarm, or the report manufactures a gate-bypass claim out of its own blindness (gated by `test_a_missing_audit_log_never_reads_as_a_missing_approval`). Window: the two data-repo **commit timestamps**, half-open (`start < ts <= end`) — anything approved at or before the start commit is already inside that commit's tree and so is not part of the diff; the calendar bounds would mis-window by the sync lag. Rendered fields are `ts` / `command` / `decision` / `source` / `content_hash` only: `reason` is operator free text, `source_ids` an unbounded lineage list, and target paths carry skill filenames slugified from distilled pattern text — all three stay out (same send-the-shape choice as ADR-0083).
+ 
+ The drift scan (2026-08-06) diffs the per-endpoint response-key vocabulary the client already records in `api-audit.jsonl` (2xx envelopes only, so outages do not read as schema changes) and tracks the `POST /verify` consecutive-failure run against the platform's 10-failure suspension rule. It exists because the platform ships API changes unannounced (observed: the `check_in` key appearing on `/home` in 2026-08, carrying role "standing instructions" — a third-party injection channel the adapter deliberately never consumes, gated by `tests/test_home_field_allowlist.py`). The spec (`skill.md`) is untrusted external text: it is never fetched in the unattended chain, and on drift the rendered section directs the re-read to the Saturday gate.
+ 
+@@ -539,7 +542,7 @@ The sweep's signature is keyed on **level + message**, with the dotted `%(name)s
+ 
+ The sweep has **no time window**: it counts every line each allowed file currently holds, so a row's `Count` spans that file's lifetime — and the files rotate on different schedules (`ollama-serve.log` nightly since 2026-08-01, `agent-launchd.log` weekly via `backup-runtime.sh`, the one-shot `insight-` / `distill-launchd.log` never), which makes two rows of one table not necessarily commensurable. Rotation also moves the novelty baseline: lines leave the `*.log` glob, counts fall, and known signatures re-appear as 🆕 — once a rare footnote, the steady state since nightly rotation shipped. Filtering by timestamp would discard signal, so the instrument states its basis instead (findings F1.1, 2026-08-07): a per-file **corpus census** (name, lines read, signal lines) is written to a sidecar `<state>.corpus.tsv` — a sidecar because `read_state` silently drops any state-file line whose first field is not an int, so a header row there would vanish on read — and rendered above the table beside the previous sweep's three figures, with an explicit "🆕 and Δ are not comparable to last week's" sentence when the corpus lost more than 10% of its lines. The census is written *before* its snapshot (the snapshot's existence is the shell's "sweep completed" signal) and promoted in lockstep with it; if the pair breaks, the shell deletes the old census so the next run reports "no previous census" rather than asserting a comparison against a corpus that no longer exists.
+ 
+-Injection boundary: the sweep, the invariant check and the drift scan must never read episode logs (the drift scan reads only the self-written `api-audit.jsonl`; the platform-controlled key names it renders are Markdown-escaped and length-capped). The duplicate scan does, and is the only intake permitted to — it emits **only** 12-hex SHA-256 digests, counts, filename-derived dates and the fixed `{post, reply, comment}` vocabulary (ADR-0083, gated by `TestOutputBoundary`). The skill-selection reading (2026-08-08, findings F1.4) reads the self-written `skill-selection-*.jsonl` shadow log (ADR-0076): the *selected* middle link between *installed* (state diff) and *vocabulary in output* (section E) was already logged per publish action but never supplied to the report. Its records embed the selection situation — untrusted post bodies — so the renderer (`format_skill_selection_report`, the same one behind `report --skill-selection`) emits **catalog** names and counts only, never the situation strings (same ADR-0083 boundary; gated by `test_skill_selection_reading_reaches_the_prompt_names_only`). "Catalog names" is load-bearing since 2026-08-08, when the reading gained a per-name rejected-name tally: a *rejected* name is by definition a string that matched nothing in the catalog, i.e. free model output from a prompt that embeds untrusted post bodies — the 2026-08-08 backfill reading measured 12% of them as fragments bled in from elsewhere in the prompt. It is therefore the one string in this reading that is not drawn from a closed, self-written vocabulary, and `format_skill_selection_report` withholds it unless a caller passes `include_rejected_names=True`. **The default is the restrictive one**, so a new caller is safe by omission and the weekly script needs no knowledge of which side of the boundary it is on; only `report --skill-selection` (terminal, human reader — the reader the tally exists for) opts in. The weekly prompt still receives the tally's *shape* — distinct-name count, emissions, and each entry's nearest catalog name with its surface-similarity distance — because those are catalog-derived or numeric. Same choice ADR-0083's duplicate scan made: send the shape, not the content. All five are observability: a failure degrades to a "not available" stub and never breaks the report.
++Injection boundary: the sweep, the invariant check and the drift scan must never read episode logs (the drift scan reads only the self-written `api-audit.jsonl`; the platform-controlled key names it renders are Markdown-escaped and length-capped). The duplicate scan does, and is the only intake permitted to — it emits **only** 12-hex SHA-256 digests, counts, filename-derived dates and the fixed `{post, reply, comment}` vocabulary (ADR-0083, gated by `TestOutputBoundary`). The skill-selection reading (2026-08-08, findings F1.4) reads the self-written `skill-selection-*.jsonl` shadow log (ADR-0076): the *selected* middle link between *installed* (state diff) and *vocabulary in output* (section E) was already logged per publish action but never supplied to the report. Its records embed the selection situation — untrusted post bodies — so the renderer (`format_skill_selection_report`, the same one behind `report --skill-selection`) emits **catalog** names and counts only, never the situation strings (same ADR-0083 boundary; gated by `test_skill_selection_reading_reaches_the_prompt_names_only`). "Catalog names" is load-bearing since 2026-08-08, when the reading gained a per-name rejected-name tally: a *rejected* name is by definition a string that matched nothing in the catalog, i.e. free model output from a prompt that embeds untrusted post bodies — the 2026-08-08 backfill reading measured 12% of them as fragments bled in from elsewhere in the prompt. It is therefore the one string in this reading that is not drawn from a closed, self-written vocabulary, and `format_skill_selection_report` withholds it unless a caller passes `include_rejected_names=True`. **The default is the restrictive one**, so a new caller is safe by omission and the weekly script needs no knowledge of which side of the boundary it is on; only `report --skill-selection` (terminal, human reader — the reader the tally exists for) opts in. The weekly prompt still receives the tally's *shape* — distinct-name count, emissions, and each entry's nearest catalog name with its surface-similarity distance — because those are catalog-derived or numeric. Same choice ADR-0083's duplicate scan made: send the shape, not the content. The approval join reads only the self-written `audit.jsonl` and renders five closed-vocabulary fields, still squashed of non-printables, length-capped and pipe-escaped — a record is durable state, so a malformed row must not break out of its table cell into report prose. All six are observability: a failure degrades to a "not available" stub and never breaks the report.
+ 
+ ### weekly-pipeline  [`scripts/weekly-pipeline.sh`, ADR-0085]
+ 
+diff --git a/scripts/value_layer_approval_join.py b/scripts/value_layer_approval_join.py
+new file mode 100644
+index 0000000..ca69dcb
+--- /dev/null
++++ b/scripts/value_layer_approval_join.py
+@@ -0,0 +1,327 @@
++#!/usr/bin/env python3
++"""Join value-layer state diffs to their ADR-0012 approval records (read-only).
++
++The weekly state diff shows *what* changed in identity / constitution /
++skills / rules, and nothing about *whether the change passed the approval
++gate*. That gap produced the loudest — and unresolvable — claim in the
++2026-08-15 report: "whether it passed through the ``amend-constitution``
++approval path is not visible in the operator-facing data supplied here".
++``logs/audit.jsonl`` had already answered it. This renders that answer next
++to each diff section, so a value-layer change arrives either matched to an
++approval row or explicitly flagged as having none.
++
++The *absence* of an approved row for a section that shows a diff is the
++alarm condition. It is therefore distinguished, in the rendering, from the
++two states that must never read as that alarm:
++
++- the audit log is missing or unreadable (``unavailable``, with a reason
++  code) — an unavailable instrument reads zero, not clean (ADR-0077);
++- the section shows no diff (``none (no diff either)``).
++
++Windowing: ``--start`` / ``--end`` are the *commit timestamps* of the two
++data-repo snapshots the diff is taken between, not the report's calendar
++bounds. The interval is half-open, ``start < ts <= end``: anything approved
++at or before the start commit is already inside that commit's tree and so
++is not part of the diff. Passing calendar dates instead would mis-window by
++the sync lag.
++
++Security / boundary (load-bearing):
++- Reads ONLY ``audit.jsonl``, which the agent writes itself (never episode
++  logs — injection boundary).
++- Renders five dense fields per row: ``ts``, ``command``, ``decision``,
++  ``source``, ``content_hash``. ``reason`` is operator free text and
++  ``source_ids`` is an unbounded lineage list; neither is ever rendered.
++  Target paths are not rendered either — skill filenames are slugified from
++  distilled pattern text, so they are the one structural field in a record
++  that carries content-derived bytes.
++- The five rendered fields are written by this codebase from closed
++  vocabularies, but are still squashed of non-printables, length-capped and
++  pipe-escaped at render: a record is durable state, and a malformed row
++  must not break out of its table cell into report prose.
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++from dataclasses import dataclass
++from datetime import datetime, timezone
++from pathlib import Path, PurePosixPath
++from typing import Any
++
++# Which path shapes belong to which state-diff section. Matched on path
++# components rather than a prefix: the audit log records absolute paths from
++# whatever MOLTBOOK_HOME was live at write time, which is not necessarily the
++# home this scan runs against (backfill runs, relocated data dirs).
++_SECTIONS = ("identity", "constitution", "skills", "rules")
++
++_FIELD_CAP = 80
++_DEFAULT_TOP = 25
++
++
++class JoinUnavailable(Exception):
++    """The reading cannot be produced. Carries a reason code, never zero."""
++
++    def __init__(self, reason: str) -> None:
++        super().__init__(reason)
++        self.reason = reason
++
++
++# ``order=True`` is load-bearing: Row is the tie-breaker in the (ts, row) sort
++# below, so same-second records would raise on comparison without it.
++@dataclass(frozen=True, order=True)
++class Row:
++    ts: str
++    command: str
++    decision: str
++    source: str
++    content_hash: str
++
++
++@dataclass(frozen=True)
++class Reading:
++    section: str
++    changed: bool
++    rows: tuple[Row, ...]
++    approved: int
++    staged: int
++    rejected: int
++    other: int
++    unparsable: int
++    truncated: int
++    window_start: str
++    window_end: str
++
++
++def _parse_ts(raw: object) -> datetime | None:
++    """ISO-8601 -> aware UTC. Naive input is read as UTC.
++
++    The ``Z`` replace exists for the ``requires-python = ">=3.10"`` floor;
++    3.11+ ``fromisoformat`` accepts it natively.
++    """
++    if not isinstance(raw, str):
++        return None
++    try:
++        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
++    except ValueError:
++        return None
++    if parsed.tzinfo is None:
++        return parsed.replace(tzinfo=timezone.utc)
++    return parsed.astimezone(timezone.utc)
++
++
++def _matches_section(raw_path: object, section: str) -> bool:
++    if not isinstance(raw_path, str) or not raw_path:
++        return False
++    parts = PurePosixPath(raw_path).parts
++    if not parts:
++        return False
++    if section == "identity":
++        return parts[-1] == "identity.md"
++    # A directory-shaped section: some *parent* component carries the name.
++    # Checking parents only keeps a file literally named ``skills`` out.
++    return section in parts[:-1]
++
++
++def _clean(value: object) -> str:
++    """Render one audit field: non-printables squashed, capped, pipe-escaped."""
++    if value is None:
++        return "—"
++    text = "".join(ch if ch.isprintable() else " " for ch in str(value)).strip()
++    if not text:
++        return "—"
++    if len(text) > _FIELD_CAP:
++        text = text[: _FIELD_CAP - 1] + "…"
++    return text.replace("|", "\\|")
++
++
++def load_records(audit_path: Path) -> tuple[list[dict[str, Any]], int]:
++    """Read audit.jsonl -> (records, unparsable line count).
++
++    A missing or unreadable log raises rather than returning empty: "no
++    records" and "cannot tell" are the two states this instrument exists to
++    keep apart.
++    """
++    if not audit_path.is_file():
++        raise JoinUnavailable("audit-log-missing")
++    try:
++        text = audit_path.read_text(encoding="utf-8", errors="replace")
++    except OSError:
++        raise JoinUnavailable("audit-log-unreadable") from None
++    records: list[dict[str, Any]] = []
++    unparsable = 0
++    for line in text.splitlines():
++        line = line.strip()
++        if not line:
++            continue
++        try:
++            record = json.loads(line)
++        except ValueError:
++            unparsable += 1
++            continue
++        if isinstance(record, dict):
++            records.append(record)
++        else:
++            unparsable += 1
++    return records, unparsable
++
++
++def build_reading(
++    records: list[dict[str, Any]],
++    *,
++    section: str,
++    changed: bool,
++    start: datetime,
++    end: datetime,
++    unparsable: int = 0,
++    top: int = _DEFAULT_TOP,
++) -> Reading:
++    """Select the section's in-window rows and tally decisions.
++
++    Pure: takes already-loaded records so the join is reproducible offline
++    from the same inputs.
++    """
++    selected: list[tuple[datetime, Row]] = []
++    counts = {"approved": 0, "staged": 0, "rejected": 0, "other": 0}
++    for record in records:
++        if not _matches_section(record.get("path"), section):
++            continue
++        # Pre-2026-04 records use ``timestamp``; value_layer_due_check.py
++        # recognizes both, so this must too or the two readings disagree.
++        raw_ts = record.get("ts") or record.get("timestamp")
++        parsed = _parse_ts(raw_ts)
++        if parsed is None:
++            unparsable += 1
++            continue
++        if not (start < parsed <= end):
++            continue
++        decision = record.get("decision")
++        counts[decision if decision in counts else "other"] += 1
++        selected.append(
++            (
++                parsed,
++                Row(
++                    ts=_clean(raw_ts),
++                    command=_clean(record.get("command")),
++                    decision=_clean(decision),
++                    source=_clean(record.get("source")),
++                    content_hash=_clean(record.get("content_hash")),
++                ),
++            )
++        )
++    # Sort on the parsed timestamp, with the rendered tuple as tie-breaker so
++    # same-second rows keep a stable order across runs.
++    selected.sort(key=lambda item: (item[0], item[1]))
++    if top <= 0 or len(selected) <= top:
++        shown = selected
++    else:
++        # The cap must never spend itself on rows that do not answer the
++        # question. A busy skills week is ~110 rows dominated by same-second
++        # `staged` batches, so a plain head-of-list slice hid all 8 approved
++        # rows behind 25 staged ones — while the prompt asks the report to
++        # cite an approving row's ts and content_hash. Approved rows are
++        # reserved first, the remaining slots go to the earliest others, and
++        # the shown set is re-sorted chronologically so the table still reads
++        # as a timeline.
++        approved_rows = [item for item in selected if item[1].decision == "approved"]
++        others = [item for item in selected if item[1].decision != "approved"]
++        shown = approved_rows[:top]
++        shown.extend(others[: top - len(shown)])
++        shown.sort(key=lambda item: (item[0], item[1]))
++    return Reading(
++        section=section,
++        changed=changed,
++        rows=tuple(row for _, row in shown),
++        approved=counts["approved"],
++        staged=counts["staged"],
++        rejected=counts["rejected"],
++        other=counts["other"],
++        unparsable=unparsable,
++        truncated=len(selected) - len(shown),
++        window_start=_clean(start.isoformat()),
++        window_end=_clean(end.isoformat()),
++    )
++
++
++def format_unavailable(reason: str) -> str:
++    return (
++        f"**Approval provenance**: unavailable (reason={reason}). "
++        "This is NOT evidence that the change above lacks an approval record — "
++        "the instrument could not read `logs/audit.jsonl`."
++    )
++
++
++def format_reading(reading: Reading) -> str:
++    total = reading.approved + reading.staged + reading.rejected + reading.other
++    lines = [
++        f"**Approval provenance** (`logs/audit.jsonl`, ADR-0012 gate; window "
++        f"{reading.window_start} → {reading.window_end}, exclusive of the start "
++        f"commit): {total} record(s) — approved {reading.approved}, staged "
++        f"{reading.staged}, rejected {reading.rejected}, other {reading.other}."
++    ]
++    if reading.changed and reading.approved == 0:
++        lines.append(
++            "⚠️ NO APPROVED RECORD for a section that shows a diff. The state above "
++            "changed with no matching approval row in this window — report it as the "
++            "observation it is, not as a confirmed gate bypass (a sync lag or a "
++            "pre-window approval also produces this shape)."
++        )
++    elif not reading.changed and total == 0:
++        lines.append("No diff and no approval records — nothing to reconcile.")
++    if reading.rows:
++        lines.append("")
++        lines.append("| ts | command | decision | source | content_hash |")
++        lines.append("|---|---|---|---|---|")
++        lines.extend(
++            f"| {row.ts} | {row.command} | {row.decision} | {row.source} | {row.content_hash} |"
++            for row in reading.rows
++        )
++    if reading.truncated:
++        lines.append("")
++        lines.append(f"({reading.truncated} further record(s) not shown — `--top` cap.)")
++    if reading.unparsable:
++        lines.append("")
++        lines.append(f"({reading.unparsable} audit line(s) unparsable and excluded.)")
++    return "\n".join(lines)
++
++
++def main(argv: list[str] | None = None) -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--audit", required=True, type=Path, help="path to audit.jsonl")
++    parser.add_argument("--section", required=True, choices=_SECTIONS)
++    parser.add_argument(
++        "--diff",
++        required=True,
++        choices=("changed", "unchanged"),
++        help="whether the state-diff section this annotates shows a change",
++    )
++    parser.add_argument("--start", required=True, help="ISO-8601 start-commit timestamp")
++    parser.add_argument("--end", required=True, help="ISO-8601 end-commit timestamp")
++    parser.add_argument("--top", type=int, default=_DEFAULT_TOP, help="max rows rendered")
++    args = parser.parse_args(argv)
++
++    try:
++        start = _parse_ts(args.start)
++        end = _parse_ts(args.end)
++        if start is None or end is None:
++            raise JoinUnavailable("window-unparsable")
++        records, unparsable = load_records(args.audit)
++    except JoinUnavailable as exc:
++        print(format_unavailable(exc.reason))
++        return 0
++
++    reading = build_reading(
++        records,
++        section=args.section,
++        changed=args.diff == "changed",
++        start=start,
++        end=end,
++        unparsable=unparsable,
++        top=args.top,
++    )
++    print(format_reading(reading))
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/scripts/weekly-analysis.sh b/scripts/weekly-analysis.sh
+index 472752d..d5b540a 100755
+--- a/scripts/weekly-analysis.sh
++++ b/scripts/weekly-analysis.sh
+@@ -92,6 +92,33 @@ if [[ -d "$DATA_REPO/.git" ]]; then
+     if [[ -n "$start_commit" ]] && [[ -n "$end_commit" ]] && [[ "$start_commit" != "$end_commit" ]]; then
+         echo "State diff: $start_commit (start) -> $end_commit (end)"
+ 
++        # Commit timestamps bound the approval join below (and label the
++        # knowledge count further down). Computed once so the two readings
++        # cannot drift apart.
++        start_cdate=$(git log -1 --format=%cI "$start_commit" 2>/dev/null || echo "unknown")
++        end_cdate=$(git log -1 --format=%cI "$end_commit" 2>/dev/null || echo "unknown")
++
++        # Approval provenance join (ADR-0012 / ADR-0050, added 2026-08-15).
++        # A value-layer diff alone cannot say whether the change passed the
++        # approval gate — last week's report raised its loudest alarm on
++        # exactly that gap while logs/audit.jsonl (self-written, already read
++        # by this chain's value-layer due check) held the answer. Renders five
++        # dense fields per matching row; never source_ids, never free text,
++        # never target paths. Observability only — a failure must not break
++        # the weekly report, but it must also never read as "no approval",
++        # hence the explicit unavailable line instead of an empty string.
++        approval_join() {  # $1 = section, $2 = changed|unchanged
++            local out
++            out=$(python3 "$PROJECT_ROOT/scripts/value_layer_approval_join.py" \
++                --audit "$MOLTBOOK_HOME/logs/audit.jsonl" \
++                --section "$1" --diff "$2" \
++                --start "$start_cdate" --end "$end_cdate" 2>/dev/null || true)
++            if [[ -z "$out" ]]; then
++                out="**Approval provenance**: unavailable (reason=join-failed). This is NOT evidence that the change above lacks an approval record."
++            fi
++            printf '%s\n' "$out"
++        }
++
+         STATE_DIFF+="## Agent State Diff ($START_DATE -> $END_DATE)"$'\n\n'
+ 
+         # Identity
+@@ -99,8 +126,10 @@ if [[ -d "$DATA_REPO/.git" ]]; then
+         id_diff=$(git diff "$start_commit" "$end_commit" -- identity.md 2>/dev/null || true)
+         if [[ -n "$id_diff" ]]; then
+             STATE_DIFF+='```diff'$'\n'"$id_diff"$'\n''```'$'\n\n'
++            STATE_DIFF+="$(approval_join identity changed)"$'\n\n'
+         else
+             STATE_DIFF+="No changes."$'\n\n'
++            STATE_DIFF+="$(approval_join identity unchanged)"$'\n\n'
+         fi
+ 
+         # Constitution
+@@ -108,8 +137,10 @@ if [[ -d "$DATA_REPO/.git" ]]; then
+         const_diff=$(git diff "$start_commit" "$end_commit" -- constitution/ 2>/dev/null || true)
+         if [[ -n "$const_diff" ]]; then
+             STATE_DIFF+='```diff'$'\n'"$const_diff"$'\n''```'$'\n\n'
++            STATE_DIFF+="$(approval_join constitution changed)"$'\n\n'
+         else
+             STATE_DIFF+="No changes."$'\n\n'
++            STATE_DIFF+="$(approval_join constitution unchanged)"$'\n\n'
+         fi
+ 
+         # Skills
+@@ -123,8 +154,10 @@ if [[ -d "$DATA_REPO/.git" ]]; then
+             if [[ -n "$skills_diff" ]]; then
+                 STATE_DIFF+='```diff'$'\n'"$skills_diff"$'\n''```'$'\n\n'
+             fi
++            STATE_DIFF+="$(approval_join skills changed)"$'\n\n'
+         else
+             STATE_DIFF+="No changes. Files: $(echo "$skills_end" | tr '\n' ', ')"$'\n\n'
++            STATE_DIFF+="$(approval_join skills unchanged)"$'\n\n'
+         fi
+ 
+         # Rules
+@@ -138,8 +171,10 @@ if [[ -d "$DATA_REPO/.git" ]]; then
+             if [[ -n "$rules_diff" ]]; then
+                 STATE_DIFF+='```diff'$'\n'"$rules_diff"$'\n''```'$'\n\n'
+             fi
++            STATE_DIFF+="$(approval_join rules changed)"$'\n\n'
+         else
+             STATE_DIFF+="No changes. Files: $(echo "$rules_end" | tr '\n' ', ')"$'\n\n'
++            STATE_DIFF+="$(approval_join rules unchanged)"$'\n\n'
+         fi
+ 
+         # Knowledge pattern count
+@@ -156,8 +191,8 @@ if [[ -d "$DATA_REPO/.git" ]]; then
+         count_end=$(git show "$end_commit":knowledge.json 2>/dev/null | python3 -c "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "N/A")
+         start_sha=$(git rev-parse --short=7 "$start_commit" 2>/dev/null || echo "unknown")
+         end_sha=$(git rev-parse --short=7 "$end_commit" 2>/dev/null || echo "unknown")
+-        start_cdate=$(git log -1 --format=%cI "$start_commit" 2>/dev/null || echo "unknown")
+-        end_cdate=$(git log -1 --format=%cI "$end_commit" 2>/dev/null || echo "unknown")
++        # start_cdate / end_cdate come from the approval-join block above —
++        # the same two timestamps label this count and bound that window.
+         STATE_DIFF+="Pattern count (data repo, committed snapshots — rows in knowledge.json, tombstones included):"$'\n'
+         STATE_DIFF+="$count_start (start, commit $start_sha @ $start_cdate) -> $count_end (end, commit $end_sha @ $end_cdate)"$'\n\n'
+         STATE_DIFF+="Not comparable to the State Invariant Check totals below, which read the live store at report-generation time."$'\n\n'
+diff --git a/tests/test_value_layer_approval_join.py b/tests/test_value_layer_approval_join.py
+new file mode 100644
+index 0000000..05ad6d7
+--- /dev/null
++++ b/tests/test_value_layer_approval_join.py
+@@ -0,0 +1,387 @@
++"""Tests for scripts/value_layer_approval_join.py (approval-provenance join).
++
++The weekly state diff shows *what* changed in the value layer and said
++nothing about *whether it passed the ADR-0012 gate*, so the 2026-08-15
++report raised its loudest alarm on a question ``logs/audit.jsonl`` had
++already answered. This join renders that answer next to each diff section.
++
++What is pinned here is the three-state distinction the instrument exists
++for — an approved row present, an approved row *absent while the section
++shows a diff* (the alarm), and the log being unreadable (never the alarm) —
++plus the render boundary: ``reason`` is operator free text and ``source_ids``
++is an unbounded lineage list, and neither may ever reach the prompt.
++
++Fault column (ADR-0077): a missing or unreadable audit log renders an
++explicit ``unavailable (reason=…)`` line. An unavailable instrument that
++rendered as "no approval record" would manufacture the exact false alarm
++this finding set out to make impossible.
++"""
++
++from __future__ import annotations
++
++import json
++import subprocess
++import sys
++from datetime import datetime, timezone
++from pathlib import Path
++
++sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
++import value_layer_approval_join as vlaj  # noqa: E402  # pyright: ignore[reportMissingImports]
++
++SCRIPT = Path(__file__).resolve().parent.parent / "scripts" / "value_layer_approval_join.py"
++
++HOME = "/Users/someone/.config/moltbook"
++START = "2026-08-01T23:00:00+09:00"
++END = "2026-08-08T23:00:00+09:00"
++
++
++def _ts(raw: str) -> datetime:
++    parsed = vlaj._parse_ts(raw)
++    assert parsed is not None
++    return parsed
++
++
++# ``path`` is deliberately ``object``: one test feeds a non-string to pin that a
++# malformed record is skipped rather than crashing the whole reading.
++def _record(
++    path: object, ts: str, *, command: str = "insight", decision: str = "approved", **extra
++):
++    return {
++        "ts": ts,
++        "command": command,
++        "path": path,
++        "decision": decision,
++        "source": "direct",
++        "content_hash": "abc123def4567890",
++        **extra,
++    }
++
++
++def _reading(records, *, section="skills", changed=True, top=vlaj._DEFAULT_TOP, unparsable=0):
++    return vlaj.build_reading(
++        records,
++        section=section,
++        changed=changed,
++        start=_ts(START),
++        end=_ts(END),
++        unparsable=unparsable,
++        top=top,
++    )
++
++
++class TestSectionMatching:
++    def test_each_section_claims_only_its_own_paths(self):
++        records = [
++            _record(f"{HOME}/identity.md", "2026-08-03T01:00:00+00:00"),
++            _record(f"{HOME}/constitution/contemplative-axioms.md", "2026-08-03T02:00:00+00:00"),
++            _record(f"{HOME}/skills/a-skill.md", "2026-08-03T03:00:00+00:00"),
++            _record(f"{HOME}/rules/a-rule.md", "2026-08-03T04:00:00+00:00"),
++            _record(f"{HOME}/knowledge.json", "2026-08-03T05:00:00+00:00"),
++        ]
++        for section in ("identity", "constitution", "skills", "rules"):
++            reading = _reading(records, section=section)
++            assert len(reading.rows) == 1, section
++            assert reading.approved == 1, section
++
++    def test_knowledge_json_belongs_to_no_value_layer_section(self):
++        records = [_record(f"{HOME}/knowledge.json", "2026-08-03T05:00:00+00:00")]
++        for section in ("identity", "constitution", "skills", "rules"):
++            assert _reading(records, section=section).rows == ()
++
++    def test_a_file_named_like_a_section_is_not_that_section(self):
++        """Only a *parent* component names a directory section.
++
++        Matching the whole path would let ``.../notes/skills`` (a file) count
++        as a skills approval and quietly satisfy the alarm.
++        """
++        records = [_record(f"{HOME}/notes/skills", "2026-08-03T03:00:00+00:00")]
++        assert _reading(records, section="skills").rows == ()
++
++    def test_a_relocated_home_still_matches(self):
++        """Records carry whatever MOLTBOOK_HOME was live at write time."""
++        records = [
++            _record("/mnt/backup/moltbook-2025/skills/a-skill.md", "2026-08-03T03:00:00+00:00")
++        ]
++        assert len(_reading(records, section="skills").rows) == 1
++
++    def test_a_non_string_path_is_skipped_not_crashed(self):
++        assert _reading([_record(None, "2026-08-03T03:00:00+00:00")]).rows == ()
++
++
++class TestWindowing:
++    def test_window_is_half_open_on_the_start_commit(self):
++        """A record stamped at the start commit is already inside its tree.
++
++        Counting it would credit the *previous* week's approval to this
++        week's diff.
++        """
++        at_start = _reading([_record(f"{HOME}/skills/s.md", START)])
++        assert at_start.rows == ()
++
++        just_after = _reading([_record(f"{HOME}/skills/s.md", "2026-08-01T23:00:01+09:00")])
++        assert len(just_after.rows) == 1
++
++    def test_window_is_closed_on_the_end_commit(self):
++        assert len(_reading([_record(f"{HOME}/skills/s.md", END)]).rows) == 1
++        after = _reading([_record(f"{HOME}/skills/s.md", "2026-08-08T23:00:01+09:00")])
++        assert after.rows == ()
++
++    def test_mixed_offsets_compare_on_the_instant_not_the_string(self):
++        """``2026-08-02T00:30:00+09:00`` is inside a window whose start is
++        ``2026-08-01T23:00:00+09:00`` — a lexical compare would agree here,
++        but the same instant written as UTC (``2026-08-01T15:30:00Z``) sorts
++        before the start string while being after it in time."""
++        reading = _reading([_record(f"{HOME}/skills/s.md", "2026-08-01T15:30:00Z")])
++        assert len(reading.rows) == 1
++
++    def test_pre_2026_04_timestamp_key_is_recognized(self):
++        """The audit log carries schema drift the due-check already handles;
++        the two readings must not disagree about which rows exist."""
++        legacy = {
++            "timestamp": "2026-08-03T01:00:00+00:00",
++            "command": "distill-identity-ca",
++            "path": f"{HOME}/identity.md",
++            "decision": "approved",
++            "content_hash": "0123456789abcdef",
++        }
++        reading = _reading([legacy], section="identity")
++        assert len(reading.rows) == 1
++        assert reading.rows[0].source == "—", "a missing source must render, not vanish"
++
++
++class TestAlarmCondition:
++    def test_changed_with_no_approved_row_is_the_alarm(self):
++        rendered = vlaj.format_reading(_reading([], changed=True))
++        assert "NO APPROVED RECORD" in rendered
++
++    def test_a_staged_row_alone_does_not_satisfy_the_gate(self):
++        """``staged`` is a deferred decision, not an approval (ADR-0074)."""
++        records = [_record(f"{HOME}/skills/s.md", "2026-08-03T03:00:00+00:00", decision="staged")]
++        reading = _reading(records, changed=True)
++        assert reading.staged == 1
++        assert reading.approved == 0
++        assert "NO APPROVED RECORD" in vlaj.format_reading(reading)
++
++    def test_a_rejected_row_alone_does_not_satisfy_the_gate(self):
++        records = [_record(f"{HOME}/skills/s.md", "2026-08-03T03:00:00+00:00", decision="rejected")]
++        reading = _reading(records, changed=True)
++        assert reading.rejected == 1
++        assert "NO APPROVED RECORD" in vlaj.format_reading(reading)
++
++    def test_an_approved_row_clears_the_alarm_and_is_citable(self):
++        records = [_record(f"{HOME}/skills/s.md", "2026-08-03T03:00:00+00:00")]
++        rendered = vlaj.format_reading(_reading(records, changed=True))
++        assert "NO APPROVED RECORD" not in rendered
++        assert "abc123def4567890" in rendered
++        assert "2026-08-03T03:00:00+00:00" in rendered
++
++    def test_no_diff_and_no_rows_is_not_an_alarm(self):
++        rendered = vlaj.format_reading(_reading([], changed=False))
++        assert "NO APPROVED RECORD" not in rendered
++        assert "nothing to reconcile" in rendered
++
++    def test_rows_without_a_diff_are_still_rendered(self):
++        """Approved but absent from the diff is its own signal (sync lag)."""
++        records = [_record(f"{HOME}/skills/s.md", "2026-08-03T03:00:00+00:00")]
++        rendered = vlaj.format_reading(_reading(records, changed=False))
++        assert "abc123def4567890" in rendered
++        assert "NO APPROVED RECORD" not in rendered
++
++
++class TestRenderBoundary:
++    def test_reason_and_source_ids_never_reach_the_render(self):
++        records = [
++            _record(
++                f"{HOME}/skills/s.md",
++                "2026-08-03T03:00:00+00:00",
++                reason="FREE-TEXT-MARKER typed by the operator",
++                source_ids=["LINEAGE-MARKER-1", "LINEAGE-MARKER-2"],
++                epistemic_counts={"generated": 3},
++            )
++        ]
++        rendered = vlaj.format_reading(_reading(records))
++        assert "FREE-TEXT-MARKER" not in rendered
++        assert "LINEAGE-MARKER-1" not in rendered
++
++    def test_target_paths_never_reach_the_render(self):
++        """Skill filenames are slugified from distilled pattern text."""
++        records = [
++            _record(f"{HOME}/skills/SLUG-MARKER-from-a-post.md", "2026-08-03T03:00:00+00:00")
++        ]
++        rendered = vlaj.format_reading(_reading(records))
++        assert "SLUG-MARKER" not in rendered
++
++    def test_a_newline_in_a_field_cannot_break_out_of_its_cell(self):
++        records = [
++            _record(
++                f"{HOME}/skills/s.md",
++                "2026-08-03T03:00:00+00:00",
++                command="insight\n## Forged Heading",
++            )
++        ]
++        rendered = vlaj.format_reading(_reading(records))
++        assert "\n## Forged Heading" not in rendered
++        assert "## Forged Heading" in rendered.replace("\\|", "|")
++
++    def test_a_pipe_in_a_field_cannot_forge_a_table_column(self):
++        records = [_record(f"{HOME}/skills/s.md", "2026-08-03T03:00:00+00:00", command="a|b")]
++        row_line = [
++            ln for ln in vlaj.format_reading(_reading(records)).splitlines() if "a\\|b" in ln
++        ]
++        assert row_line, "pipe was not escaped"
++        assert row_line[0].count("|") - row_line[0].count("\\|") == 6
++
++    def test_an_overlong_field_is_capped(self):
++        records = [_record(f"{HOME}/skills/s.md", "2026-08-03T03:00:00+00:00", command="x" * 500)]
++        rendered = vlaj.format_reading(_reading(records))
++        assert "x" * 500 not in rendered
++        assert "…" in rendered
++
++
++class TestCapsAndCountsAreDeclared:
++    def test_truncation_is_stated_never_silent(self):
++        records = [
++            _record(f"{HOME}/skills/s{i}.md", f"2026-08-03T03:00:{i:02d}+00:00") for i in range(5)
++        ]
++        reading = _reading(records, top=2)
++        assert len(reading.rows) == 2
++        assert reading.approved == 5, "the tally counts every match, not just the shown ones"
++        assert "3 further record(s) not shown" in vlaj.format_reading(reading)
++
++    def test_the_cap_reserves_the_approved_rows(self):
++        """The rows that answer the question survive truncation.
++
++        Observed on the live log: a skills week is ~110 rows dominated by
++        same-second ``staged`` batches, so a head-of-list slice showed 25
++        staged rows and hid all 8 approved ones — while the prompt asks B to
++        cite an approving row's ``ts`` and ``content_hash``.
++        """
++        records = [
++            _record(f"{HOME}/skills/s{i}.md", f"2026-08-03T03:00:{i:02d}+00:00", decision="staged")
++            for i in range(30)
++        ]
++        records.append(
++            _record(
++                f"{HOME}/skills/approved.md",
++                "2026-08-03T03:59:00+00:00",
++                content_hash="APPROVEDHASH0001",
++            )
++        )
++        reading = _reading(records, top=5, changed=True)
++        rendered = vlaj.format_reading(reading)
++        assert "APPROVEDHASH0001" in rendered
++        assert len(reading.rows) == 5
++        assert "26 further record(s) not shown" in rendered
++        # The shown set still reads as a timeline, not approved-first.
++        assert [row.ts for row in reading.rows] == sorted(row.ts for row in reading.rows)
++
++    def test_unparsable_lines_are_counted_in_the_render(self):
++        reading = _reading([], changed=False, unparsable=2)
++        assert "2 audit line(s) unparsable" in vlaj.format_reading(reading)
++
++    def test_same_second_rows_sort_without_raising(self):
++        records = [
++            _record(f"{HOME}/skills/b.md", "2026-08-03T03:00:00+00:00", command="zzz"),
++            _record(f"{HOME}/skills/a.md", "2026-08-03T03:00:00+00:00", command="aaa"),
++        ]
++        reading = _reading(records)
++        assert [row.command for row in reading.rows] == ["aaa", "zzz"]
++
++
++class TestUnavailableIsNotTheAlarm:
++    def test_missing_audit_log_renders_a_reason_code(self, tmp_path):
++        result = _run_cli(tmp_path / "absent.jsonl", "--diff", "changed")
++        assert result.returncode == 0, result.stderr
++        assert "unavailable (reason=audit-log-missing)" in result.stdout
++        assert "NO APPROVED RECORD" not in result.stdout
++
++    def test_unreadable_audit_log_renders_a_reason_code(self, tmp_path):
++        audit = tmp_path / "audit.jsonl"
++        audit.write_text("{}\n", encoding="utf-8")
++        audit.chmod(0o000)
++        try:
++            result = _run_cli(audit, "--diff", "changed")
++        finally:
++            audit.chmod(0o600)
++        assert result.returncode == 0, result.stderr
++        assert "unavailable (reason=" in result.stdout
++        assert "NO APPROVED RECORD" not in result.stdout
++
++    def test_unparsable_window_renders_a_reason_code(self, tmp_path):
++        audit = tmp_path / "audit.jsonl"
++        audit.write_text("", encoding="utf-8")
++        result = _run_cli(audit, "--diff", "changed", start="unknown")
++        assert result.returncode == 0, result.stderr
++        assert "unavailable (reason=window-unparsable)" in result.stdout
++        assert "NO APPROVED RECORD" not in result.stdout
++
++    def test_load_records_raises_rather_than_returning_empty(self, tmp_path):
++        try:
++            vlaj.load_records(tmp_path / "absent.jsonl")
++        except vlaj.JoinUnavailable as exc:
++            assert exc.reason == "audit-log-missing"
++        else:  # pragma: no cover - the point of the test
++            raise AssertionError("a missing log must not read as zero records")
++
++    def test_malformed_lines_degrade_to_a_count(self, tmp_path):
++        audit = tmp_path / "audit.jsonl"
++        audit.write_text(
++            "\n".join(
++                [
++                    json.dumps(_record(f"{HOME}/skills/s.md", "2026-08-03T03:00:00+00:00")),
++                    "{not json",
++                    "[1, 2, 3]",
++                    "",
++                ]
++            ),
++            encoding="utf-8",
++        )
++        records, unparsable = vlaj.load_records(audit)
++        assert len(records) == 1
++        assert unparsable == 2
++
++
++def _run_cli(audit: Path, *extra: str, start: str = START) -> subprocess.CompletedProcess[str]:
++    return subprocess.run(
++        [
++            sys.executable,
++            str(SCRIPT),
++            "--audit",
++            str(audit),
++            "--section",
++            "skills",
++            "--start",
++            start,
++            "--end",
++            END,
++            *extra,
++        ],
++        capture_output=True,
++        text=True,
++        timeout=60,
++    )
++
++
++class TestCli:
++    def test_end_to_end_render_over_a_real_file(self, tmp_path):
++        audit = tmp_path / "audit.jsonl"
++        audit.write_text(
++            json.dumps(
++                _record(
++                    f"{HOME}/skills/s.md",
++                    "2026-08-03T03:00:00+00:00",
++                    reason="FREE-TEXT-MARKER",
++                )
++            )
++            + "\n",
++            encoding="utf-8",
++        )
++        result = _run_cli(audit, "--diff", "changed")
++        assert result.returncode == 0, result.stderr
++        assert "**Approval provenance**" in result.stdout
++        assert "abc123def4567890" in result.stdout
++        assert "FREE-TEXT-MARKER" not in result.stdout
++
++    def test_timezone_naive_stamps_are_read_as_utc(self):
++        parsed = vlaj._parse_ts("2026-08-03T03:00:00")
++        assert parsed == datetime(2026, 8, 3, 3, 0, tzinfo=timezone.utc)
+diff --git a/tests/test_weekly_analysis_shell.py b/tests/test_weekly_analysis_shell.py
+index 7550bff..26737f3 100644
+--- a/tests/test_weekly_analysis_shell.py
++++ b/tests/test_weekly_analysis_shell.py
+@@ -336,6 +336,134 @@ class TestPromptAssembly:
+         # The label that makes the count usable: which store, measured when.
+         assert "live store at report-generation time" in prompt
+ 
++    def test_state_diff_sections_carry_their_approval_provenance(self, tmp_path):
++        """findings F1.1: the state diff showed value-layer changes with no
++        approval column, so the report's loudest claim ("whether it passed the
++        approval path is not visible in the data supplied here") was bounded by
++        a data gap that ``logs/audit.jsonl`` had already closed.
++
++        Both halves are pinned: a section with an approved row carries a citable
++        hash, and a section that changed with *no* approved row says so — that
++        absence is the alarm the report could not previously distinguish from
++        the presence. The record's free text (``reason``) and lineage list
++        (``source_ids``) must not ride along into the prompt.
++        """
++        home = _make_home(tmp_path)
++        data_repo = tmp_path / "fakehome" / "MyAI_Lab" / "contemplative-agent-data"
++        (data_repo / "skills").mkdir(parents=True)
++
++        def git(*a: str, when: str | None = None) -> None:
++            env = {
++                **os.environ,
++                "GIT_CONFIG_GLOBAL": "/dev/null",
++                "GIT_CONFIG_SYSTEM": "/dev/null",
++            }
++            if when:
++                env["GIT_AUTHOR_DATE"] = when
++                env["GIT_COMMITTER_DATE"] = when
++            subprocess.run(["git", *a], cwd=data_repo, check=True, capture_output=True, env=env)
++
++        git("init", "-q")
++        git("config", "user.email", "t@example.com")
++        git("config", "user.name", "t")
++        (data_repo / "identity.md").write_text("v1\n", encoding="utf-8")
++        (data_repo / "skills" / "kept.md").write_text("kept\n", encoding="utf-8")
++        git("add", "-A")
++        git("commit", "-qm", "start", when="2026-07-18T00:00:00+0900")
++        # identity.md changed *with* an approval row; skills/ changed without.
++        (data_repo / "identity.md").write_text("v2\n", encoding="utf-8")
++        (data_repo / "skills" / "unapproved.md").write_text("new\n", encoding="utf-8")
++        git("add", "-A")
++        git("commit", "-qm", "end", when=f"{END_DATE}T00:00:00+0900")
++
++        (home / "logs" / "audit.jsonl").write_text(
++            json.dumps(
++                {
++                    "ts": "2026-07-20T02:00:00+00:00",
++                    "command": "distill-identity",
++                    "path": f"{home}/identity.md",
++                    "decision": "approved",
++                    "source": "stage-adopted",
++                    "content_hash": "IDHASH0000000000",
++                    "reason": "FREE-TEXT-MARKER typed by the operator",
++                    "source_ids": ["LINEAGE-MARKER-1"],
++                }
++            )
++            + "\n",
++            encoding="utf-8",
++        )
++
++        captured = tmp_path / "prompt.txt"
++        bin_dir = tmp_path / "bin"
++        bin_dir.mkdir(exist_ok=True)
++        stub = bin_dir / "claude"
++        stub.write_text(
++            f'#!/bin/bash\ncat >> "{captured}"\nprintf "# Weekly\\n"\n', encoding="utf-8"
++        )
++        stub.chmod(0o755)
++
++        result = _run(home, bin_dir, tmp_path)
++
++        assert result.returncode == 0, result.stderr
++        prompt = captured.read_text(encoding="utf-8")
++        state_diff = prompt.split("## Log Anomaly Sweep")[0]
++        # One block per value-layer section: identity, constitution, skills, rules.
++        assert state_diff.count("**Approval provenance**") == 4
++        assert "IDHASH0000000000" in state_diff
++        assert "NO APPROVED RECORD" in state_diff
++        # The instrument read the log; nothing degraded to "cannot tell".
++        assert "unavailable (reason=" not in state_diff
++        # The record's free text and lineage list stay out of the prompt.
++        assert "FREE-TEXT-MARKER" not in prompt
++        assert "LINEAGE-MARKER-1" not in prompt
++
++    def test_a_missing_audit_log_never_reads_as_a_missing_approval(self, tmp_path):
++        """An unavailable instrument reads zero, not clean (ADR-0077). With no
++        audit log at all, every section must say so with a reason code — the
++        alarm string must never appear, or the weekly report would manufacture
++        a gate-bypass claim out of its own blindness."""
++        home = _make_home(tmp_path)
++        data_repo = tmp_path / "fakehome" / "MyAI_Lab" / "contemplative-agent-data"
++        data_repo.mkdir(parents=True)
++
++        def git(*a: str, when: str | None = None) -> None:
++            env = {
++                **os.environ,
++                "GIT_CONFIG_GLOBAL": "/dev/null",
++                "GIT_CONFIG_SYSTEM": "/dev/null",
++            }
++            if when:
++                env["GIT_AUTHOR_DATE"] = when
++                env["GIT_COMMITTER_DATE"] = when
++            subprocess.run(["git", *a], cwd=data_repo, check=True, capture_output=True, env=env)
++
++        git("init", "-q")
++        git("config", "user.email", "t@example.com")
++        git("config", "user.name", "t")
++        (data_repo / "identity.md").write_text("v1\n", encoding="utf-8")
++        git("add", "-A")
++        git("commit", "-qm", "start", when="2026-07-18T00:00:00+0900")
++        (data_repo / "identity.md").write_text("v2\n", encoding="utf-8")
++        git("commit", "-qam", "end", when=f"{END_DATE}T00:00:00+0900")
++
++        assert not (home / "logs" / "audit.jsonl").exists()
++
++        captured = tmp_path / "prompt.txt"
++        bin_dir = tmp_path / "bin"
++        bin_dir.mkdir(exist_ok=True)
++        stub = bin_dir / "claude"
++        stub.write_text(
++            f'#!/bin/bash\ncat >> "{captured}"\nprintf "# Weekly\\n"\n', encoding="utf-8"
++        )
++        stub.chmod(0o755)
++
++        result = _run(home, bin_dir, tmp_path)
++
++        assert result.returncode == 0, result.stderr
++        state_diff = captured.read_text(encoding="utf-8").split("## Log Anomaly Sweep")[0]
++        assert "unavailable (reason=audit-log-missing)" in state_diff
++        assert "NO APPROVED RECORD" not in state_diff
++
+ 
+ class TestPreflight:
+     def test_missing_claude_fails_before_the_collection_pass(self, tmp_path):

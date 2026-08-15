@@ -1,0 +1,31 @@
+{
+  "watches": [
+    {
+      "task": "T-OLLAMA-TOKENIZE",
+      "type": "gh-pr",
+      "target": "ollama/ollama#12030",
+      "status": "open",
+      "fired": false,
+      "reason": null
+    },
+    {
+      "task": "T-OLLAMA-TOKENIZE",
+      "type": "http-post-status",
+      "target": "http://localhost:11434/api/tokenize 404",
+      "status": "http_404",
+      "fired": false,
+      "reason": null
+    },
+    {
+      "task": "T-CLOUD-REVIEW-FIXES",
+      "type": "file-exists",
+      "target": "~/.config/moltbook/cloud.env",
+      "status": "absent",
+      "fired": false,
+      "reason": null
+    }
+  ],
+  "watch_count": 3,
+  "fired_count": 0,
+  "errors": []
+}
