@@ -1,0 +1,84 @@
+{
+  "findings": [
+    {
+      "check": "notes_ref",
+      "file": "docs/adr/0093-repo-plane-deterministic-intakes.ja.md",
+      "line": 171,
+      "detail": ".notes/ is gitignored — broken in every clone"
+    },
+    {
+      "check": "notes_ref",
+      "file": "docs/adr/0093-repo-plane-deterministic-intakes.ja.md",
+      "line": 172,
+      "detail": ".notes/ is gitignored — broken in every clone"
+    },
+    {
+      "check": "notes_ref",
+      "file": "docs/adr/0093-repo-plane-deterministic-intakes.md",
+      "line": 193,
+      "detail": ".notes/ is gitignored — broken in every clone"
+    },
+    {
+      "check": "notes_ref",
+      "file": "docs/adr/0093-repo-plane-deterministic-intakes.md",
+      "line": 194,
+      "detail": ".notes/ is gitignored — broken in every clone"
+    }
+  ],
+  "count": 4,
+  "readings": {
+    "codemaps": [
+      {
+        "file": "docs/CODEMAPS/INDEX.md",
+        "generated": "2026-08-17",
+        "source_commit": null,
+        "commits_behind": null,
+        "days_old": 5
+      },
+      {
+        "file": "docs/CODEMAPS/adapters-moltbook.md",
+        "generated": "2026-08-16",
+        "source_commit": null,
+        "commits_behind": null,
+        "days_old": 6
+      },
+      {
+        "file": "docs/CODEMAPS/architecture.md",
+        "generated": "2026-08-16",
+        "source_commit": null,
+        "commits_behind": null,
+        "days_old": 6
+      },
+      {
+        "file": "docs/CODEMAPS/core-modules.md",
+        "generated": "2026-08-17",
+        "source_commit": null,
+        "commits_behind": null,
+        "days_old": 5
+      },
+      {
+        "file": "docs/CODEMAPS/dependencies.md",
+        "generated": "2026-08-09",
+        "source_commit": null,
+        "commits_behind": null,
+        "days_old": 13
+      },
+      {
+        "file": "docs/CODEMAPS/moltbook-agent.md",
+        "generated": "2026-08-17",
+        "source_commit": null,
+        "commits_behind": null,
+        "days_old": 5
+      },
+      {
+        "file": "docs/CYCLES.md",
+        "generated": "2026-08-16",
+        "source_commit": "b74382a",
+        "commits_behind": 32,
+        "days_old": 6
+      }
+    ]
+  },
+  "errors": [],
+  "scanned_files": 262
+}

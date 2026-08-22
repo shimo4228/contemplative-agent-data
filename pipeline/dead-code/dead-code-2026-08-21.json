@@ -1,0 +1,19 @@
+{
+  "tool": "vulture",
+  "report_prefixes": [
+    "src/",
+    "scripts/"
+  ],
+  "count": 1,
+  "candidates": [
+    {
+      "file": "src/contemplative_agent/core/domain.py",
+      "line": 61,
+      "message": "unused variable 'insight_worth'",
+      "confidence": 60
+    }
+  ],
+  "parsed_total": 173,
+  "unparsed_lines": 0,
+  "stderr_lines": 0
+}

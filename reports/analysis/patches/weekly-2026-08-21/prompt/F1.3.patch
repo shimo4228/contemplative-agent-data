@@ -1,0 +1,314 @@
+diff --git a/docs/CODEMAPS/architecture.md b/docs/CODEMAPS/architecture.md
+index acce1c4..934b524 100644
+--- a/docs/CODEMAPS/architecture.md
++++ b/docs/CODEMAPS/architecture.md
+@@ -713,6 +713,8 @@ collect: daily comment-reports + data-repo state diff + previous N reports
+        + skill-selection reading (pass-1 selection log: skill-selection-*.jsonl → names
+                                   and counts; package renderer via `uv run --no-sync`)
+ generate: claude -p → weekly-<end>.md.tmp
++gate:     tmp must carry all five section anchors (## A. … ## E.);
++          else exit 1, reason=REPORT_INCOMPLETE missing=<csv>
+ promote:  mv tmp → weekly-<end>.md        (atomic; a failure leaves the prior report)
+        →  mv sweep-state.pending → sweep-state   (novelty baseline committed ONLY here)
+        →  mv sweep-state.pending.corpus.tsv → sweep-state.corpus.tsv  (lockstep; see below)
+@@ -720,6 +722,8 @@ promote:  mv tmp → weekly-<end>.md        (atomic; a failure leaves the prior
+ translate: best-effort .ja.md (sonnet); failure never rolls back the promotes
+ ```
+ 
++The promote gate is structural, not `-s` (2026-08-21, findings F1.3). A report that passes `-s` can still be head-truncated: `claude -p --output-format text` prints only the last assistant turn, so a two-turn response promoted a 37,409-byte file that began mid-sentence with A, B and C absent — translated, cited by the diagnosis for figures it did not contain, and queued as next week's `$PREV_REPORTS` baseline. The anchors are the section headings `config/prompts/weekly-analysis.md` defines, matched on the letter prefix only — the trailing wording stays the model's. Nothing beyond them is required, and deliberately not a level-1 title: the prompt's own `# ` lines are prompt-internal headings rather than an instruction to emit one, and `weekly-2026-07-11.md` is a complete A–E report that opens with a preamble and carries no `# ` line at all (gated by `test_a_report_without_a_title_is_still_complete`). Same predicate discipline as the two artifacts downstream of it — `findings_complete()` and the insight review's `RECOMMEND:` grep — and the failure handling is the emptiness branch's: non-zero exit, prior report untouched, nothing spent, and a reason code the pipeline's stage accounting can name.
++
+ Order is load-bearing. The sweep's Δ / 🆕 columns and the drift scan's new/removed pairs are defined against their last committed snapshots, so both run `--no-update --emit-state` and their baselines are committed after the report lands — a run that produces nothing must spend nothing (findings F1.2; two consecutive weeks lost). The invariant check, the duplicate scan, the skill-selection reading and the approval join hold no state and are absolute readings, so they need no such ordering.
+ 
+ The approval join (2026-08-15, findings F1.1) annotates **each value-layer section of the state diff** — `identity.md`, `constitution/`, `skills/`, `rules/` — with the in-window ADR-0012 approval rows from `logs/audit.jsonl` whose `path` falls under that section's directory. It closes a gap in the diff itself: the diff showed *what* changed and nothing about *whether it passed the gate*, so the 2026-08-15 report's strongest claim ("whether it passed through the `amend-constitution` approval path is not visible in the operator-facing data supplied here") was bounded by missing data rather than by analysis, in a chain that already reads that file for the ADR-0091 identity-cadence due. Three renderings, deliberately distinct: approved rows present (citable `ts` + `content_hash`), **no approved row while the section shows a diff** (the alarm — reported as an observation, since a sync lag or a pre-window approval produces the same shape), and `unavailable (reason=…)` when the log is missing or unreadable — an unavailable instrument must never render as the alarm, or the report manufactures a gate-bypass claim out of its own blindness (gated by `test_a_missing_audit_log_never_reads_as_a_missing_approval`). Window: the two data-repo **commit timestamps**, half-open (`start < ts <= end`) — anything approved at or before the start commit is already inside that commit's tree and so is not part of the diff; the calendar bounds would mis-window by the sync lag. Rendered fields are `ts` / `command` / `decision` / `source` / `content_hash` only: `reason` is operator free text, `source_ids` an unbounded lineage list, and target paths carry skill filenames slugified from distilled pattern text — all three stay out (same send-the-shape choice as ADR-0083).
+diff --git a/scripts/weekly-analysis.sh b/scripts/weekly-analysis.sh
+index 0e05f9f..378c65c 100755
+--- a/scripts/weekly-analysis.sh
++++ b/scripts/weekly-analysis.sh
+@@ -560,6 +560,42 @@ $DAILY_REPORTS_FRAMED"
+ mkdir -p "$REPORT_DIR"
+ OUTPUT="$REPORT_DIR/weekly-${END_DATE}.md"
+ 
++# `report_missing_parts <file>` — the report's machine contract, as a csv of the
++# parts that are absent (empty output = complete). Size is not that contract:
++# 2026-08-21 promoted a 37,409-byte report whose first line began mid-sentence
++# ("ior statement implied…") with A, B and C gone, because `claude -p
++# --output-format text` prints only its last assistant turn and the response
++# spanned more than one. It passed `-s`, was translated, was cited by the
++# diagnosis for figures that were not in it, and would have returned as next
++# week's $PREV_REPORTS trend baseline. Whatever truncates the stream, a report
++# missing A-C must read as unavailable rather than as clean (ADR-0077).
++#
++# The two artifacts downstream of this one already have such a predicate —
++# `findings_complete()` and the insight review's `RECOMMEND:` grep, both in
++# weekly-pipeline.sh — and this is the input to both.
++#
++# The anchors are the five section headings this repo's own prompt file defines
++# (config/prompts/weekly-analysis.md, "## A." … "## E."), matched on the letter
++# prefix only: the trailing wording of a heading is the model's to vary, the
++# letter is the format's. They are structure, not content-surface phrases.
++#
++# Nothing else is required — in particular not a level-1 title. The prompt's
++# "# " lines are its own internal headings, never an instruction to emit a
++# document title, and weekly-2026-07-11.md is a complete A-E report that opens
++# with a preamble and no title at all. Requiring one would discard that shape
++# while adding no detection power: the truncation this guard exists for takes
++# the title and A-C together.
++#
++# Plain string accumulation, not an array: /bin/bash on macOS is 3.2, where
++# `${#arr[@]}` on an empty array trips `set -u`.
++report_missing_parts() {  # report_missing_parts <file>
++    local file="$1" letter missing=""
++    for letter in A B C D E; do
++        grep -q "^## $letter\." "$file" || missing="${missing:+$missing,}$letter"
++    done
++    printf '%s' "$missing"
++}
++
+ # --- Run claude ---
+ # Write to a temp file and promote on success. A direct `> "$OUTPUT"` truncates
+ # the target before the command runs, so any failure (or a run killed mid-flight)
+@@ -586,7 +622,19 @@ if ! echo "$USER_PROMPT" | with_timeout "$REPORT_TIMEOUT_SECONDS" claude -p \
+ fi
+ 
+ if [[ ! -s "$OUTPUT_TMP" ]]; then
+-    echo "ERROR: claude -p exited 0 but produced no output; $OUTPUT left untouched" >&2
++    echo "ERROR: claude -p exited 0 but produced no output; reason=REPORT_EMPTY; $OUTPUT left untouched" >&2
++    exit 1
++fi
++
++# Structural completeness, checked before the promote — see report_missing_parts
++# above for what the 0-byte guard cannot see. Same failure handling either way:
++# non-zero exit, previous $OUTPUT untouched, and a reason code in the message so
++# weekly-pipeline.sh's stage accounting can name it in report.log.
++MISSING_PARTS="$(report_missing_parts "$OUTPUT_TMP")"
++if [[ -n "$MISSING_PARTS" ]]; then
++    echo "ERROR: claude -p exited 0 but the report is structurally incomplete;" \
++        "reason=REPORT_INCOMPLETE missing=$MISSING_PARTS" \
++        "bytes=$(wc -c < "$OUTPUT_TMP" | tr -d ' '); $OUTPUT left untouched" >&2
+     exit 1
+ fi
+ 
+diff --git a/tests/test_weekly_analysis_shell.py b/tests/test_weekly_analysis_shell.py
+index 3db2aba..9d7e76c 100644
+--- a/tests/test_weekly_analysis_shell.py
++++ b/tests/test_weekly_analysis_shell.py
+@@ -36,6 +36,27 @@ END_DATE = "2026-07-24"
+ SEEDED_STATE = "7\t[warning] seeded signature\n"
+ SEEDED_CORPUS = "5000\t300\told-rotated.log\n"
+ 
++# The promote gate's contract: the five section anchors
++# config/prompts/weekly-analysis.md defines. Every stub that expects its report
++# to be promoted must emit them. The title line here is realistic padding (20 of
++# 21 past reports carry one), not part of the contract — see
++# test_a_report_without_a_title_is_still_complete.
++COMPLETE_REPORT = (
++    "# Weekly Analysis Report — Moltbook Agent\n\n"
++    "## A. Quantitative Summary\n\n"
++    "## B. Agent State Snapshot\n\n"
++    "## C. Engagement Patterns\n\n"
++    "## D. Change Points\n\n"
++    "## E. Qualitative Highlights — analytical center\n"
++)
++
++
++def _emit_complete_report(tmp_path: Path) -> str:
++    """A shell line printing a report the promote gate accepts."""
++    body_file = tmp_path / "complete-report.md"
++    body_file.write_text(COMPLETE_REPORT, encoding="utf-8")
++    return f'cat "{body_file}"\n'
++
+ 
+ def _make_home(tmp_path: Path) -> Path:
+     """A minimal MOLTBOOK_HOME: one daily report, one log, a seeded state."""
+@@ -122,14 +143,93 @@ class TestFailedRunSpendsNothing:
+         result = _run(home, _stub_claude(tmp_path, exit_code=0), tmp_path)
+ 
+         assert result.returncode != 0, result.stdout
++        assert "reason=REPORT_EMPTY" in result.stderr
++        assert _state(home).read_text(encoding="utf-8") == SEEDED_STATE
++        assert _pending_files(home) == []
++
++
++class TestStructuralCompleteness:
++    """findings F1.3: a head-truncated report passed the ``-s`` guard.
++
++    ``claude -p --output-format text`` prints only the last assistant turn, so a
++    response spanning two turns produced a 37,409-byte file whose first line
++    began mid-sentence with A, B and C missing. It was promoted, translated,
++    cited by the diagnosis for figures it did not contain, and queued as next
++    week's trend baseline. Size cannot see that failure; the section anchors
++    the report format defines can.
++    """
++
++    def test_head_truncated_report_is_not_promoted(self, tmp_path):
++        home = _make_home(tmp_path)
++        # The observed 2026-08-21 shape: the cut lands mid-sentence and
++        # everything after it — D, E — is intact and internally coherent.
++        truncated = (
++            "ior statement implied a sufficient separation between the "
++            "'query source' and the 'data retrieval process'.\n\n"
++            "## D. Change Points\n\nD1: something shifted.\n\n"
++            "## E. Qualitative Highlights — analytical center\n\nAn example.\n"
++        )
++        result = _run(home, _stub_claude(tmp_path, exit_code=0, body=truncated), tmp_path)
++
++        assert result.returncode != 0, result.stdout
++        assert not (home / "reports" / "analysis" / f"weekly-{END_DATE}.md").exists()
++        assert not (home / "reports" / "analysis" / f"weekly-{END_DATE}.ja.md").exists()
++        # A reason code the pipeline's stage accounting can name, and the parts
++        # that were missing.
++        assert "reason=REPORT_INCOMPLETE" in result.stderr
++        assert "missing=A,B,C" in result.stderr
++        # A failed run still spends nothing.
+         assert _state(home).read_text(encoding="utf-8") == SEEDED_STATE
++        assert _corpus(home).read_text(encoding="utf-8") == SEEDED_CORPUS
+         assert _pending_files(home) == []
+ 
++    def test_a_report_missing_only_its_last_section_is_not_promoted(self, tmp_path):
++        """Tail loss is the same defect from the other end."""
++        home = _make_home(tmp_path)
++        body = COMPLETE_REPORT.split("## E.")[0]
++        result = _run(home, _stub_claude(tmp_path, exit_code=0, body=body), tmp_path)
++
++        assert result.returncode != 0, result.stdout
++        assert "missing=E" in result.stderr
++        assert not (home / "reports" / "analysis" / f"weekly-{END_DATE}.md").exists()
++
++    def test_a_report_without_a_title_is_still_complete(self, tmp_path):
++        """The observed legitimate shape a title rule would have discarded.
++
++        ``weekly-2026-07-11.md`` opens with a preamble and goes straight to
++        ``## A.`` with no ``# `` line anywhere; it is complete A-E and was
++        consumed downstream. The format contract
++        (``config/prompts/weekly-analysis.md``) defines only the five section
++        headings — its own ``# `` lines are prompt-internal — so the gate must
++        require only those, or it fails closed on a good report and aborts
++        stage 1 with ``reason=REPORT_FAIL``.
++        """
++        home = _make_home(tmp_path)
++        body = "I have all seven daily reports in context. Per Principle 3 I authored this directly.\n\n---\n\n"
++        body += COMPLETE_REPORT.split("\n\n", 1)[1]
++        assert not body.startswith("# ") and "\n# " not in body
++        result = _run(home, _stub_claude(tmp_path, exit_code=0, body=body), tmp_path)
++
++        assert result.returncode == 0, result.stderr
++        report = home / "reports" / "analysis" / f"weekly-{END_DATE}.md"
++        assert report.read_text(encoding="utf-8") == body
++
++    def test_a_preamble_before_the_title_is_still_a_complete_report(self, tmp_path):
++        """The majority shape: an opening note, then the title, then A-E."""
++        home = _make_home(tmp_path)
++        body = "I have all seven daily reports in context. Here is the report.\n\n---\n\n"
++        body += COMPLETE_REPORT
++        result = _run(home, _stub_claude(tmp_path, exit_code=0, body=body), tmp_path)
++
++        assert result.returncode == 0, result.stderr
++        report = home / "reports" / "analysis" / f"weekly-{END_DATE}.md"
++        assert report.read_text(encoding="utf-8") == body
++
+ 
+ class TestSuccessfulRunCommits:
+     def test_report_promoted_and_sweep_state_updated(self, tmp_path):
+         home = _make_home(tmp_path)
+-        body = "# Weekly\n\nA. Volume\n\nB. Signals\n"
++        body = COMPLETE_REPORT
+         result = _run(home, _stub_claude(tmp_path, exit_code=0, body=body), tmp_path)
+ 
+         assert result.returncode == 0, result.stderr
+@@ -152,7 +252,7 @@ class TestSuccessfulRunCommits:
+         (home / "logs" / "agent.log").write_text(
+             "[10:00:00] INFO nothing wrong here\n[10:01:00] DEBUG idle\n", encoding="utf-8"
+         )
+-        result = _run(home, _stub_claude(tmp_path, exit_code=0, body="# Weekly\n"), tmp_path)
++        result = _run(home, _stub_claude(tmp_path, exit_code=0, body=COMPLETE_REPORT), tmp_path)
+ 
+         assert result.returncode == 0, result.stderr
+         assert _state(home).read_text(encoding="utf-8") == ""
+@@ -165,7 +265,7 @@ class TestSuccessfulRunCommits:
+         corpus that no longer exists, and assert the comparison as fact.
+         """
+         home = _make_home(tmp_path)
+-        result = _run(home, _stub_claude(tmp_path, exit_code=0, body="# Weekly\n"), tmp_path)
++        result = _run(home, _stub_claude(tmp_path, exit_code=0, body=COMPLETE_REPORT), tmp_path)
+ 
+         assert result.returncode == 0, result.stderr
+         assert _state(home).read_text(encoding="utf-8") != SEEDED_STATE
+@@ -190,7 +290,7 @@ class TestSuccessfulRunCommits:
+             "cat > /dev/null\n"
+             f"echo x >> {marker}\n"
+             f"if [[ $(wc -l < {marker}) -gt 1 ]]; then exit 1; fi\n"
+-            "printf '# Weekly\\n'\n",
++            f"{_emit_complete_report(tmp_path)}",
+             encoding="utf-8",
+         )
+         stub.chmod(0o755)
+@@ -220,7 +320,8 @@ class TestDailyReportFraming:
+         bin_dir.mkdir(exist_ok=True)
+         stub = bin_dir / "claude"
+         stub.write_text(
+-            f'#!/bin/bash\ncat >> "{captured}"\nprintf "# Weekly\\n"\n', encoding="utf-8"
++            f'#!/bin/bash\ncat >> "{captured}"\n{_emit_complete_report(tmp_path)}',
++            encoding="utf-8",
+         )
+         stub.chmod(0o755)
+ 
+@@ -250,7 +351,8 @@ class TestDailyReportFraming:
+         bin_dir.mkdir(exist_ok=True)
+         stub = bin_dir / "claude"
+         stub.write_text(
+-            f'#!/bin/bash\ncat >> "{captured}"\nprintf "# Weekly\\n"\n', encoding="utf-8"
++            f'#!/bin/bash\ncat >> "{captured}"\n{_emit_complete_report(tmp_path)}',
++            encoding="utf-8",
+         )
+         stub.chmod(0o755)
+ 
+@@ -284,7 +386,8 @@ class TestPromptAssembly:
+         bin_dir.mkdir(exist_ok=True)
+         stub = bin_dir / "claude"
+         stub.write_text(
+-            f'#!/bin/bash\ncat >> "{captured}"\nprintf "# Weekly\\n"\n', encoding="utf-8"
++            f'#!/bin/bash\ncat >> "{captured}"\n{_emit_complete_report(tmp_path)}',
++            encoding="utf-8",
+         )
+         stub.chmod(0o755)
+ 
+@@ -332,7 +435,8 @@ class TestPromptAssembly:
+         bin_dir.mkdir(exist_ok=True)
+         stub = bin_dir / "claude"
+         stub.write_text(
+-            f'#!/bin/bash\ncat >> "{captured}"\nprintf "# Weekly\\n"\n', encoding="utf-8"
++            f'#!/bin/bash\ncat >> "{captured}"\n{_emit_complete_report(tmp_path)}',
++            encoding="utf-8",
+         )
+         stub.chmod(0o755)
+ 
+@@ -385,7 +489,8 @@ class TestPromptAssembly:
+         bin_dir.mkdir(exist_ok=True)
+         stub = bin_dir / "claude"
+         stub.write_text(
+-            f'#!/bin/bash\ncat >> "{captured}"\nprintf "# Weekly\\n"\n', encoding="utf-8"
++            f'#!/bin/bash\ncat >> "{captured}"\n{_emit_complete_report(tmp_path)}',
++            encoding="utf-8",
+         )
+         stub.chmod(0o755)
+ 
+@@ -461,7 +566,8 @@ class TestPromptAssembly:
+         bin_dir.mkdir(exist_ok=True)
+         stub = bin_dir / "claude"
+         stub.write_text(
+-            f'#!/bin/bash\ncat >> "{captured}"\nprintf "# Weekly\\n"\n', encoding="utf-8"
++            f'#!/bin/bash\ncat >> "{captured}"\n{_emit_complete_report(tmp_path)}',
++            encoding="utf-8",
+         )
+         stub.chmod(0o755)
+ 
+@@ -516,7 +622,8 @@ class TestPromptAssembly:
+         bin_dir.mkdir(exist_ok=True)
+         stub = bin_dir / "claude"
+         stub.write_text(
+-            f'#!/bin/bash\ncat >> "{captured}"\nprintf "# Weekly\\n"\n', encoding="utf-8"
++            f'#!/bin/bash\ncat >> "{captured}"\n{_emit_complete_report(tmp_path)}',
++            encoding="utf-8",
+         )
+         stub.chmod(0o755)
+ 
