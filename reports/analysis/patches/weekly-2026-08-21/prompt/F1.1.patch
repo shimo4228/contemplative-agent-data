@@ -1,0 +1,402 @@
+diff --git a/docs/CODEMAPS/architecture.md b/docs/CODEMAPS/architecture.md
+index acce1c4..7b634c6 100644
+--- a/docs/CODEMAPS/architecture.md
++++ b/docs/CODEMAPS/architecture.md
+@@ -722,7 +722,7 @@ translate: best-effort .ja.md (sonnet); failure never rolls back the promotes
+ 
+ Order is load-bearing. The sweep's Δ / 🆕 columns and the drift scan's new/removed pairs are defined against their last committed snapshots, so both run `--no-update --emit-state` and their baselines are committed after the report lands — a run that produces nothing must spend nothing (findings F1.2; two consecutive weeks lost). The invariant check, the duplicate scan, the skill-selection reading and the approval join hold no state and are absolute readings, so they need no such ordering.
+ 
+-The approval join (2026-08-15, findings F1.1) annotates **each value-layer section of the state diff** — `identity.md`, `constitution/`, `skills/`, `rules/` — with the in-window ADR-0012 approval rows from `logs/audit.jsonl` whose `path` falls under that section's directory. It closes a gap in the diff itself: the diff showed *what* changed and nothing about *whether it passed the gate*, so the 2026-08-15 report's strongest claim ("whether it passed through the `amend-constitution` approval path is not visible in the operator-facing data supplied here") was bounded by missing data rather than by analysis, in a chain that already reads that file for the ADR-0091 identity-cadence due. Three renderings, deliberately distinct: approved rows present (citable `ts` + `content_hash`), **no approved row while the section shows a diff** (the alarm — reported as an observation, since a sync lag or a pre-window approval produces the same shape), and `unavailable (reason=…)` when the log is missing or unreadable — an unavailable instrument must never render as the alarm, or the report manufactures a gate-bypass claim out of its own blindness (gated by `test_a_missing_audit_log_never_reads_as_a_missing_approval`). Window: the two data-repo **commit timestamps**, half-open (`start < ts <= end`) — anything approved at or before the start commit is already inside that commit's tree and so is not part of the diff; the calendar bounds would mis-window by the sync lag. Rendered fields are `ts` / `command` / `decision` / `source` / `content_hash` only: `reason` is operator free text, `source_ids` an unbounded lineage list, and target paths carry skill filenames slugified from distilled pattern text — all three stay out (same send-the-shape choice as ADR-0083).
++The approval join (2026-08-15, findings F1.1) annotates **each value-layer section of the state diff** — `identity.md`, `constitution/`, `skills/`, `rules/` — with the in-window ADR-0012 approval rows from `logs/audit.jsonl` whose `path` falls under that section's directory — and, for `identity` (a single canonical file, not a directory), additionally any row written by an identity command (`distill-identity`, plus the shelved `distill-identity-ca` the append-only log still carries), whatever leaf the write landed on. That second arm is the 2026-08-22 repair (findings F1.1): the one defect class that matters here **renames the target**, and the H5 collision guard turned an approved `distill-identity` write into `identity-2.md`, which on a leaf-name-only match belonged to no section at all and was dropped from the tally, leaving `approved 0, staged 1, changed=True` — the exact predicate for the alarm below, i.e. the instrument's own maximum-severity output raised on a question the log had already answered. The command arm yields to the directory-shaped sections, so a mislabelled row lands in exactly one section rather than clearing two alarms; the command vocabulary is shared with the cadence reading (`scripts/_audit.py::IDENTITY_COMMANDS`, also read by `value_layer_due_check`) because reading and writing must not disagree about which command owns which section. The producer defect is closed (`803d9d7`, gated by `test_replacement_audit_path_matches_the_staged_target`), but the log is append-only, so those rows are in every future backfill or replay window. It closes a gap in the diff itself: the diff showed *what* changed and nothing about *whether it passed the gate*, so the 2026-08-15 report's strongest claim ("whether it passed through the `amend-constitution` approval path is not visible in the operator-facing data supplied here") was bounded by missing data rather than by analysis, in a chain that already reads that file for the ADR-0091 identity-cadence due. Four renderings, deliberately distinct: approved rows present (citable `ts` + `content_hash`), **no approved row while the section shows a diff** (the alarm — reported as an observation, since a sync lag or a pre-window approval produces the same shape), `unavailable (reason=…)` when the log is missing or unreadable — an unavailable instrument must never render as the alarm, or the report manufactures a gate-bypass claim out of its own blindness (gated by `test_a_missing_audit_log_never_reads_as_a_missing_approval`) — and a **residual** line (`N in-window audit row(s) matched no section`, 2026-08-22), so a path shape the selection predicate has not anticipated degrades to a visible "cannot tell" about those rows instead of quietly emptying the tally that drives the alarm (gated by `TestUnmatchedRowsAreVisible`). The residual covers rows whose timestamp parses; a row that is both unplaceable and undatable cannot be attributed to this window and is left out by design. Window: the two data-repo **commit timestamps**, half-open (`start < ts <= end`) — anything approved at or before the start commit is already inside that commit's tree and so is not part of the diff; the calendar bounds would mis-window by the sync lag. Rendered fields are `ts` / `command` / `decision` / `source` / `content_hash` only: `reason` is operator free text, `source_ids` an unbounded lineage list, and target paths carry skill filenames slugified from distilled pattern text — all three stay out (same send-the-shape choice as ADR-0083).
+ 
+ The drift scan (2026-08-06) diffs the per-endpoint response-key vocabulary the client already records in `api-audit.jsonl` (2xx envelopes only, so outages do not read as schema changes) and tracks the `POST /verify` consecutive-failure run against the platform's 10-failure suspension rule. It exists because the platform ships API changes unannounced (observed: the `check_in` key appearing on `/home` in 2026-08, carrying role "standing instructions" — a third-party injection channel the adapter deliberately never consumes, gated by `tests/test_home_field_allowlist.py`). The spec (`skill.md`) is untrusted external text: it is never fetched in the unattended chain, and on drift the rendered section directs the re-read to the Saturday gate.
+ 
+diff --git a/scripts/_audit.py b/scripts/_audit.py
+index 599afec..8cec64e 100644
+--- a/scripts/_audit.py
++++ b/scripts/_audit.py
+@@ -3,14 +3,15 @@
+ Sibling-imported like `_scan.py` and `_md.py` (the scripts/ dir is not a
+ package; `python3 scripts/<name>.py` puts it on sys.path).
+ 
+-Only the *line* grammar lives here — how a timestamp is spelled and what makes
+-a line a record. The abstain policy does not: `value_layer_due_check` refuses a
+-non-UTF-8 log (`AUDIT_UNREADABLE`) while `value_layer_approval_join` decodes
+-with `errors="replace"` and continues, and those are deliberate differences in
+-what each reading is for. What must NOT differ is the parse, because both feed
+-the same weekly packet: if they disagree about which records fall in the
+-window, §8 (cadence) and the approval-provenance annotation describe different
+-weeks under one heading.
++Only the *line* grammar lives here — how a timestamp is spelled, what makes a
++line a record, and the closed command vocabulary the log is written with. The
++abstain policy does not: `value_layer_due_check` refuses a non-UTF-8 log
++(`AUDIT_UNREADABLE`) while `value_layer_approval_join` decodes with
++`errors="replace"` and continues, and those are deliberate differences in what
++each reading is for. What must NOT differ is the parse, because both feed the
++same weekly packet: if they disagree about which records fall in the window,
++§8 (cadence) and the approval-provenance annotation describe different weeks
++under one heading.
+ """
+ 
+ from __future__ import annotations
+@@ -19,6 +20,15 @@ import json
+ from datetime import datetime, timezone
+ from typing import Any
+ 
++# Commands whose write targets the identity layer. `distill-identity-ca` is the
++# shelved ADR-0013 path, kept because the log is append-only. Shared rather
++# than restated per module: `value_layer_due_check` counts these rows to decide
++# the monthly cadence and `value_layer_approval_join` uses them to place a row
++# whose leaf name was renamed by the collision guard — a rename of the command
++# that reached only one of the two would silently re-open the 2026-08-15 drop
++# (a row counted by neither reading is invisible, not loud).
++IDENTITY_COMMANDS = frozenset({"distill-identity", "distill-identity-ca"})
++
+ 
+ def parse_ts(raw: object) -> datetime | None:
+     """ISO-8601 -> aware UTC. Naive input is read as UTC.
+diff --git a/scripts/value_layer_approval_join.py b/scripts/value_layer_approval_join.py
+index c4d0ee4..6cb6df5 100644
+--- a/scripts/value_layer_approval_join.py
++++ b/scripts/value_layer_approval_join.py
+@@ -12,11 +12,22 @@ approval row or explicitly flagged as having none.
+ 
+ The *absence* of an approved row for a section that shows a diff is the
+ alarm condition. It is therefore distinguished, in the rendering, from the
+-two states that must never read as that alarm:
++three states that must never read as that alarm:
+ 
+ - the audit log is missing or unreadable (``unavailable``, with a reason
+   code) — an unavailable instrument reads zero, not clean (ADR-0077);
+-- the section shows no diff (``none (no diff either)``).
++- the section shows no diff (``none (no diff either)``);
++- an in-window row matched no section at all — counted and rendered as a
++  residual, because a row this join cannot place is a "cannot tell" about
++  that row, and an unplaced *approved* row is precisely what turns this
++  instrument's own maximum-severity output into a false alarm (2026-08-15).
++  The residual covers rows whose timestamp parses, since windowing is what
++  makes "in-window" meaningful; a row that is *both* unplaceable and
++  undatable is dropped uncounted — the ``unparsable`` tally is section-scoped
++  and this join has no window to place such a row in. Known and left as a
++  caveat rather than a counter: an undatable row cannot be attributed to
++  *this* week's diff, so counting it here would spread one week's residual
++  across every window the log is ever read through.
+ 
+ Windowing: ``--start`` / ``--end`` are the *commit timestamps* of the two
+ data-repo snapshots the diff is taken between, not the report's calendar
+@@ -48,11 +59,18 @@ from datetime import datetime
+ from pathlib import Path, PurePosixPath
+ from typing import Any
+ 
+-from _audit import parse_records, parse_ts
++from _audit import IDENTITY_COMMANDS, parse_records, parse_ts
+ from _md import md_safe, printable
+ 
+-# Which path shapes belong to which state-diff section.
+-_SECTIONS = ("identity", "constitution", "skills", "rules")
++# Which path shapes belong to which state-diff section. ``identity`` is a
++# single canonical file; the other three are directories.
++_DIR_SECTIONS = ("constitution", "skills", "rules")
++_SECTIONS = ("identity", *_DIR_SECTIONS)
++
++# ``IDENTITY_COMMANDS`` (the commands that own the identity section by
++# construction, whatever leaf their write landed on) is imported from
++# ``_audit`` rather than restated: ``value_layer_due_check`` selects on the same
++# vocabulary and the two readings must not disagree about which rows exist.
+ 
+ _FIELD_CAP = 80
+ _DEFAULT_TOP = 25
+@@ -87,26 +105,49 @@ class Reading:
+     rejected: int
+     other: int
+     unparsable: int
++    unmatched: int
+     truncated: int
+     window_start: str
+     window_end: str
+ 
+ 
+-def _matches_section(raw_path: object, section: str) -> bool:
+-    """Does this audit record's path belong to `section`?
++def _matches_section(record: dict[str, Any], section: str) -> bool:
++    """Does this audit record belong to `section`?
+ 
+     Matched on path components rather than a prefix: the audit log records
+     absolute paths from whatever MOLTBOOK_HOME was live at write time, which is
+     not necessarily the home this scan runs against (backfill runs, relocated
+     data dirs).
++
++    The identity section is additionally selected by the *command's canonical
++    target*, not by leaf name alone. The one defect class that matters here
++    renames the target: the H5 collision guard turned an approved
++    ``distill-identity`` write into ``identity-2.md``
++    (``cli/adopt.py::_replaces_canonical_target``, live on 2026-08-15). On a
++    leaf-name match that approved row belongs to no section at all and is
++    dropped, leaving ``approved 0, staged 1, changed=True`` — the exact
++    predicate for ``NO APPROVED RECORD``. Reading and writing must not
++    disagree about which command owns which section. The producer defect is
++    closed, but this log is append-only: those rows are in every future
++    backfill or replay window.
++
++    The command-based arm yields to the directory-shaped sections, so a
++    mislabelled row lands in exactly one section rather than being counted
++    twice.
+     """
++    raw_path = record.get("path")
+     if not isinstance(raw_path, str) or not raw_path:
+         return False
+     parts = PurePosixPath(raw_path).parts
+     if not parts:
+         return False
+     if section == "identity":
+-        return parts[-1] == "identity.md"
++        if parts[-1] == "identity.md":
++            return True
++        command = record.get("command")
++        if not isinstance(command, str) or command not in IDENTITY_COMMANDS:
++            return False
++        return not any(other in parts[:-1] for other in _DIR_SECTIONS)
+     # A directory-shaped section: some *parent* component carries the name.
+     # Checking parents only keeps a file literally named ``skills`` out.
+     return section in parts[:-1]
+@@ -166,18 +207,29 @@ def build_reading(
+     """
+     selected: list[tuple[datetime, Row]] = []
+     counts = {"approved": 0, "staged": 0, "rejected": 0, "other": 0}
++    unmatched = 0
+     for record in records:
+-        if not _matches_section(record.get("path"), section):
+-            continue
++        mine = _matches_section(record, section)
++        # A row this join cannot place must not read as silence: an unplaced
++        # in-window row is counted and rendered, so a path shape the predicate
++        # has not anticipated degrades to a visible "cannot tell" instead of
++        # quietly emptying the tally that drives the alarm.
++        placed = mine or any(_matches_section(record, other) for other in _SECTIONS)
+         # Pre-2026-04 records use ``timestamp``; value_layer_due_check.py
+         # recognizes both, so this must too or the two readings disagree.
+         raw_ts = record.get("ts") or record.get("timestamp")
+         parsed = parse_ts(raw_ts)
+         if parsed is None:
+-            unparsable += 1
++            if mine:
++                unparsable += 1
+             continue
+         if not (start < parsed <= end):
+             continue
++        if not placed:
++            unmatched += 1
++            continue
++        if not mine:
++            continue
+         decision = record.get("decision")
+         counts[decision if decision in counts else "other"] += 1
+         selected.append(
+@@ -220,6 +272,7 @@ def build_reading(
+         rejected=counts["rejected"],
+         other=counts["other"],
+         unparsable=unparsable,
++        unmatched=unmatched,
+         truncated=len(selected) - len(shown),
+         window_start=_clean(start.isoformat()),
+         window_end=_clean(end.isoformat()),
+@@ -265,6 +318,13 @@ def format_reading(reading: Reading) -> str:
+     if reading.unparsable:
+         lines.append("")
+         lines.append(f"({reading.unparsable} audit line(s) unparsable and excluded.)")
++    if reading.unmatched:
++        lines.append("")
++        lines.append(
++            f"({reading.unmatched} in-window audit row(s) matched no section — path shapes "
++            "this join does not recognize. Their approvals, if any, are not in any tally "
++            "above.)"
++        )
+     return "\n".join(lines)
+ 
+ 
+diff --git a/scripts/value_layer_due_check.py b/scripts/value_layer_due_check.py
+index 7faac7e..d214176 100644
+--- a/scripts/value_layer_due_check.py
++++ b/scripts/value_layer_due_check.py
+@@ -41,9 +41,8 @@ from datetime import date, datetime
+ from pathlib import Path
+ from typing import Any
+ 
+-from _audit import parse_records, parse_ts
++from _audit import IDENTITY_COMMANDS, parse_records, parse_ts
+ 
+-_IDENTITY_COMMANDS = frozenset({"distill-identity", "distill-identity-ca"})
+ _AMEND_COMMAND = "amend-constitution"
+ 
+ # Audit sources written AT generation time, as opposed to later at the gate.
+@@ -210,7 +209,7 @@ def build_reading(
+ 
+     identity_last, identity_unparsable = _latest(
+         audit_records,
+-        commands=_IDENTITY_COMMANDS,
++        commands=IDENTITY_COMMANDS,
+         decisions=None,
+         sources=_GENERATION_SOURCES,
+     )
+diff --git a/tests/test_cli_adopt.py b/tests/test_cli_adopt.py
+index af63387..2fed79f 100644
+--- a/tests/test_cli_adopt.py
++++ b/tests/test_cli_adopt.py
+@@ -498,16 +498,24 @@ class TestAdoptStaged:
+         """What made the failure silent: the audit row honestly recorded the
+         renamed path, so `staged` (identity.md) and `approved` (identity-2.md)
+         pointed at different files for the same content hash — and neither
+-        shape of the ADR-0093 approval join catches that. Its identity section
+-        matches on the exact filename (`_matches_section`,
+-        `scripts/value_layer_approval_join.py:113-123`), so the `approved` row
+-        for `identity-2.md` belongs to **no** section and vanishes from the
+-        join entirely, leaving the identity section reading as if only a
+-        `staged` row existed; the constitution section is directory-shaped, so
+-        the `contemplative-axioms-2.md` twin lands in the right section and
+-        the alarm clears on a row that named a different file. Two different
+-        blind spots, one cause: the record must not be able to diverge from
+-        the staged target in the first place."""
++        shape of the ADR-0093 approval join caught that. Its identity section
++        matched on the exact filename, so the `approved` row for
++        `identity-2.md` belonged to **no** section and vanished from the join
++        entirely, leaving the identity section reading as if only a `staged`
++        row existed; the constitution section is directory-shaped, so the
++        `contemplative-axioms-2.md` twin lands in the right section and the
++        alarm clears on a row that named a different file. Two different blind
++        spots, one cause: the record must not be able to diverge from the
++        staged target in the first place.
++
++        The read side is closed too as of 2026-08-22 (findings F1.1):
++        `_matches_section` now also places an identity row by the command that
++        wrote it, and an in-window row matching no section is rendered as a
++        residual instead of vanishing (`tests/test_value_layer_approval_join.py`
++        :: `test_a_renamed_identity_leaf_still_belongs_to_the_identity_section`,
++        `TestUnmatchedRowsAreVisible`). This test still guards the producer:
++        the log is append-only, so a diverging record stays wrong forever in
++        every future backfill window, whatever the reader can recover."""
+         target = tmp_path / "identity.md"
+         target.write_text("# old identity", encoding="utf-8")
+         staged = self._stage_one(
+diff --git a/tests/test_value_layer_approval_join.py b/tests/test_value_layer_approval_join.py
+index 0c6aa3f..258a07c 100644
+--- a/tests/test_value_layer_approval_join.py
++++ b/tests/test_value_layer_approval_join.py
+@@ -26,7 +26,9 @@ from datetime import datetime, timezone
+ from pathlib import Path
+ 
+ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
++import _audit  # noqa: E402  # pyright: ignore[reportMissingImports]
+ import value_layer_approval_join as vlaj  # noqa: E402  # pyright: ignore[reportMissingImports]
++import value_layer_due_check as vldc  # noqa: E402  # pyright: ignore[reportMissingImports]
+ 
+ SCRIPT = Path(__file__).resolve().parent.parent / "scripts" / "value_layer_approval_join.py"
+ 
+@@ -107,6 +109,68 @@ class TestSectionMatching:
+     def test_a_non_string_path_is_skipped_not_crashed(self):
+         assert _reading([_record(None, "2026-08-03T03:00:00+00:00")]).rows == ()
+ 
++    def test_a_renamed_identity_leaf_still_belongs_to_the_identity_section(self):
++        """The one defect class that matters here renames the target.
++
++        Live on 2026-08-15: the H5 collision guard turned an approved
++        ``distill-identity`` write into ``identity-2.md``
++        (``cli/adopt.py::_replaces_canonical_target``). On a leaf-name match
++        that approved row belonged to no section, leaving ``approved 0,
++        staged 1, changed=True`` — this instrument's own maximum-severity
++        output, raised on a question ``audit.jsonl`` had answered.
++        """
++        records = [
++            _record(
++                f"{HOME}/identity.md",
++                "2026-08-03T04:03:59+00:00",
++                command="distill-identity",
++                decision="staged",
++            ),
++            _record(
++                f"{HOME}/identity-2.md",
++                "2026-08-03T04:20:00+00:00",
++                command="distill-identity",
++                content_hash="TWINHASH00000001",
++            ),
++        ]
++        reading = _reading(records, section="identity", changed=True)
++        assert reading.approved == 1
++        assert reading.staged == 1
++        assert reading.unmatched == 0, "a placed row is not also a residual"
++        rendered = vlaj.format_reading(reading)
++        assert "NO APPROVED RECORD" not in rendered
++        assert "TWINHASH00000001" in rendered
++
++    def test_the_identity_command_vocabulary_is_shared_with_the_cadence_reading(self):
++        """One set, not two copies.
++
++        The command arm above places a row the leaf name cannot. If a command
++        rename reached only one of the two readings, that row would be counted
++        by neither — invisible, which is the drop this join was repaired to
++        stop. Pinned on identity (`is`) rather than equality so a re-introduced
++        local copy fails here even while its contents still happen to agree.
++        """
++        assert vlaj.IDENTITY_COMMANDS is _audit.IDENTITY_COMMANDS
++        assert vldc.IDENTITY_COMMANDS is _audit.IDENTITY_COMMANDS
++
++    def test_the_command_arm_does_not_steal_a_directory_section_row(self):
++        """A row inside ``skills/`` stays a skills row whatever its command.
++
++        Counting it twice would let one approval clear two sections' alarms.
++        """
++        records = [
++            _record(
++                f"{HOME}/skills/a-skill.md",
++                "2026-08-03T03:00:00+00:00",
++                command="distill-identity",
++            )
++        ]
++        identity = _reading(records, section="identity")
++        assert identity.rows == ()
++        assert identity.approved == 0
++        assert len(_reading(records, section="skills").rows) == 1
++        assert identity.unmatched == 0
++
+ 
+ class TestWindowing:
+     def test_window_is_half_open_on_the_start_commit(self):
+@@ -188,6 +252,39 @@ class TestAlarmCondition:
+         assert "NO APPROVED RECORD" not in rendered
+ 
+ 
++class TestUnmatchedRowsAreVisible:
++    """A row this join cannot place must read as "cannot tell", not silence.
++
++    The 08-15 misfire was an *approved* row falling outside every section
++    predicate: the tally emptied and the alarm fired on the emptiness. Any
++    future unanticipated path shape must be visible in the render instead.
++    """
++
++    def test_an_unplaceable_in_window_row_is_counted_and_rendered(self):
++        records = [_record(f"{HOME}/knowledge.json", "2026-08-03T05:00:00+00:00")]
++        for section in ("identity", "constitution", "skills", "rules"):
++            reading = _reading(records, section=section)
++            assert reading.rows == (), section
++            assert reading.unmatched == 1, section
++            assert "matched no section" in vlaj.format_reading(reading), section
++
++    def test_a_malformed_path_is_a_residual_not_a_silent_drop(self):
++        reading = _reading([_record(None, "2026-08-03T03:00:00+00:00")])
++        assert reading.rows == ()
++        assert reading.unmatched == 1
++
++    def test_an_out_of_window_unplaceable_row_is_not_counted(self):
++        """The residual describes this window, like every other tally here."""
++        records = [_record(f"{HOME}/knowledge.json", "2026-08-09T05:00:00+00:00")]
++        assert _reading(records).unmatched == 0
++
++    def test_no_residual_line_when_every_row_is_placed(self):
++        records = [_record(f"{HOME}/skills/s.md", "2026-08-03T03:00:00+00:00")]
++        reading = _reading(records)
++        assert reading.unmatched == 0
++        assert "matched no section" not in vlaj.format_reading(reading)
++
++
+ class TestRenderBoundary:
+     def test_reason_and_source_ids_never_reach_the_render(self):
+         records = [

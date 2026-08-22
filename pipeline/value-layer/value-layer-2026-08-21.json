@@ -1,0 +1,21 @@
+{
+  "as_of": "2026-08-21",
+  "identity": {
+    "days_since": 6,
+    "interval_days": 27,
+    "due": false,
+    "reason": "NOT_DUE",
+    "last_run_ts": "2026-08-15T04:03:59+00:00"
+  },
+  "constitution": {
+    "days_since": 12,
+    "interval_days": 83,
+    "due": false,
+    "reason": "NOT_DUE",
+    "last_adopted_ts": "2026-08-09T12:10:35+00:00",
+    "patterns_since": 1127
+  },
+  "staging_pending": 46,
+  "malformed_audit_lines": 0,
+  "reasons": []
+}

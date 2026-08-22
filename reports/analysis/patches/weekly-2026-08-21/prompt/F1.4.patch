@@ -1,0 +1,347 @@
+diff --git a/docs/CODEMAPS/architecture.md b/docs/CODEMAPS/architecture.md
+index acce1c4..646c59b 100644
+--- a/docs/CODEMAPS/architecture.md
++++ b/docs/CODEMAPS/architecture.md
+@@ -87,8 +87,13 @@ The kill switch (`audit_dir` unset) is a different path — it removes the
+ corpus rather than injecting it, so it does not overflow),
+ `submolt-scope-YYYY-MM-DD.jsonl` (ADR-0086 read-only scope sweep, written by
+ `submolt-scan` only: one `scan_start` / N `score` / one `scan_end` per run,
+-per-post score + reason code (scored/empty_input/llm_unavailable/
+-unparseable/out_of_range) + `subscribed` label + post body base64+sha256;
++per-post score + reason code (scored/empty_input/no_scoreable_content/
++llm_unavailable/unparseable/out_of_range; `no_scoreable_content` is the
++`MIN_SCOREABLE_TOKENS` / `MIN_SCOREABLE_CHARS` floor in
++`llm_functions.score_relevance_detailed` — a body under 3 whitespace-separated
++tokens *and* under 18 characters scores 0.0 with no LLM call; either count
++clearing its floor is enough, so an unspaced CJK body still reaches the model)
+++ `subscribed` label + post body base64+sha256;
+ scan verdict completed/disabled/discovery_failed/no_submolts/
+ aborted_rate_limit/aborted_read_budget/aborted_scored_cap; read via
+ `report --submolt-scope`, wired to no gate), LLM telemetry
+diff --git a/docs/CONFIGURATION.ja.md b/docs/CONFIGURATION.ja.md
+index 93cc3dd..8c5d1f8 100644
+--- a/docs/CONFIGURATION.ja.md
++++ b/docs/CONFIGURATION.ja.md
+@@ -60,8 +60,11 @@ contemplative-agent report --days 30 --submolt-scope   # その読み値（購
+ 
+ 書き込みは自身の監査ログ (`submolt-scope-*.jsonl`) のみ。投稿本文は base64 +
+ sha256 で保存され、`reason` コード（`scored` / `empty_input` /
+-`llm_unavailable` / `unparseable` / `out_of_range`）により「低い判断」と
+-「壊れたスコアラ」が区別できる。エージェントが行動してよい submolt の範囲は
++`no_scoreable_content` / `llm_unavailable` / `unparseable` /
++`out_of_range`）により「低い判断」と「壊れたスコアラ」が区別できる
++（`no_scoreable_content` は本文が短すぎて採点対象になりえない場合 —
++`MIN_SCOREABLE_TOKENS` 未満かつ `MIN_SCOREABLE_CHARS` 未満で LLM を呼ばずに
++0.0）。エージェントが行動してよい submolt の範囲は
+ この計器では一切変わらない。`MOLTBOOK_SUBMOLT_SCOPE_DISABLE=1` を立てると、
+ launchd job を残したまま sweep だけを無効化できる。
+ 
+diff --git a/src/contemplative_agent/adapters/moltbook/llm_functions.py b/src/contemplative_agent/adapters/moltbook/llm_functions.py
+index de62f76..8b40a95 100644
+--- a/src/contemplative_agent/adapters/moltbook/llm_functions.py
++++ b/src/contemplative_agent/adapters/moltbook/llm_functions.py
+@@ -43,6 +43,33 @@ logger = logging.getLogger(__name__)
+ # 1.5 was rejected for axiom-label collapse.
+ COMMENT_TEMPERATURE = 1.3
+ 
++# Fewest whitespace-separated tokens a body needs before relevance scoring is a
++# question the LLM can answer at all. Below it there is no proposition to be
++# on-topic about, and `config/prompts/relevance.md` has no output state for
++# "nothing here" — its contract is one number on 0.0/0.5/1.0, so the model
++# scores the *prompt's own structure* instead and can return the ceiling
++# (observed 2026-08: a post whose entire body was `600-1100 символов` scored
++# 1.00, cleared the 0.80 gate in `config/domain.json`, and spent an internal
++# note, a comment generation and a published reply). The observed class is
++# <= 2 tokens (`test`, `30`, `600-1100 символов`), so 3 is the smallest floor
++# that covers it. Reads the input's size only — never its topic, author or
++# any phrase — and it gates the counterparty's input before any generation,
++# not the agent's output.
++#
++# Pending an operator sign-off at the weekly human gate; the tests pin both
++# numbers exactly so widening the floor cannot pass unnoticed.
++MIN_SCOREABLE_TOKENS = 3
++
++# Character escape hatch for scripts that do not delimit words with spaces
++# (Japanese / Chinese / Thai). Whitespace tokenisation reads a 300-character
++# unspaced body as one token, which the token floor alone would suppress
++# without an LLM call — the observed defect class was byte-short, not merely
++# token-short, so a body clears the floor on *either* count. 18 is the
++# smallest value that still covers the longest observed member
++# (`600-1100 символов`, 17 characters), i.e. it suppresses that class and
++# nothing longer.
++MIN_SCOREABLE_CHARS = 18
++
+ 
+ def _resolve_domain_prompt(template: str) -> str:
+     """Resolve a prompt template with the current domain config."""
+@@ -54,9 +81,9 @@ def _resolve_domain_prompt(template: str) -> str:
+ class RelevanceScore:
+     """One relevance judgment plus why it reads the way it does.
+ 
+-    ``score`` alone is lossy: four distinct events all produce 0.0 (empty
+-    body, LLM outage, unparseable answer, out-of-range answer) and only one
+-    of them is a judgment. Callers that gate on the number can ignore
++    ``score`` alone is lossy: five distinct events all produce 0.0 (empty
++    body, body below the scoreable token floor, LLM outage, unparseable
++    answer, out-of-range answer) and only one of them is a judgment. Callers that gate on the number can ignore
+     ``reason``; callers that *measure the distribution* must not, or an
+     Ollama outage reads as "uninteresting feed" (ADR-0075).
+     """
+@@ -73,8 +100,8 @@ def score_relevance_detailed(
+     """Score a post's relevance to domain topics (0.0 to 1.0), with a reason.
+ 
+     ``reason`` is ``scored`` for a real judgment; ``empty_input``,
+-    ``llm_unavailable``, ``unparseable`` and ``out_of_range`` each carry 0.0
+-    for a different cause.
++    ``no_scoreable_content``, ``llm_unavailable``, ``unparseable`` and
++    ``out_of_range`` each carry 0.0 for a different cause.
+ 
+     ``caller`` is the telemetry tag. It defaults to the production gate's
+     tag; observation-only callers pass their own so their volume stays
+@@ -87,8 +114,19 @@ def score_relevance_detailed(
+     class as the reply path's empty post section (weekly-2026-07-24 F1.1).
+     "Is there any text" is a structural property, so code answers it rather
+     than the LLM (skill: when-code-when-llm).
++
++    A body under ``MIN_SCOREABLE_TOKENS`` *and* under ``MIN_SCOREABLE_CHARS``
++    short-circuits the same way, with its own reason ``no_scoreable_content``:
++    "how much text is there" is the same structural property one notch up, and
++    asking the model to score a body with no proposition in it produced a 1.00
++    on the prompt's own structure. Either count clearing its floor is enough,
++    so an unspaced Japanese/Chinese/Thai body — one whitespace token however
++    long — still reaches the model. Kept as a separate reason code so it stays
++    separable from the judgment 0.0 and from the two failure sentinels in the
++    distribution ADR-0086's instrument reads.
+     """
+-    if not post_text.strip():
++    stripped = post_text.strip()
++    if not stripped:
+         # DEBUG, not WARNING: an empty feed post is a normal condition, and
+         # this 0.0 must stay distinguishable from the outage sentinel below —
+         # both land in the relevance distribution a retune reads.
+@@ -98,6 +136,18 @@ def score_relevance_detailed(
+         )
+         return RelevanceScore(0.0, "empty_input")
+ 
++    if len(post_text.split()) < MIN_SCOREABLE_TOKENS and len(stripped) < MIN_SCOREABLE_CHARS:
++        # DEBUG for the same reason as empty_input: a stub post is a normal
++        # feed condition, not a failure.
++        logger.debug(
++            "Post text below the scoreable floor (%d tokens / %d chars) — "
++            "scoring 0.0 without an LLM call "
++            "(reason=no_scoreable_content, not a low score)",
++            MIN_SCOREABLE_TOKENS,
++            MIN_SCOREABLE_CHARS,
++        )
++        return RelevanceScore(0.0, "no_scoreable_content")
++
+     prompt = _resolve_domain_prompt(RELEVANCE_PROMPT).format(
+         post_content=wrap_untrusted_content(post_text, max_input=1000),
+     )
+diff --git a/tests/test_llm.py b/tests/test_llm.py
+index 79e5d86..540b293 100644
+--- a/tests/test_llm.py
++++ b/tests/test_llm.py
+@@ -713,27 +713,27 @@ class TestScoreRelevanceParsing:
+     @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
+     def test_clean_number(self, mock_generate):
+         mock_generate.return_value = "0.75"
+-        assert score_relevance("test post") == 0.75
++        assert score_relevance("a test post") == 0.75
+ 
+     @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
+     def test_number_with_trailing_text(self, mock_generate):
+         mock_generate.return_value = "0.7\n\nThis post discusses"
+-        assert score_relevance("test post") == 0.7
++        assert score_relevance("a test post") == 0.7
+ 
+     @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
+     def test_number_with_leading_text(self, mock_generate):
+         mock_generate.return_value = "The score is 0.8"
+-        assert score_relevance("test post") == 0.8
++        assert score_relevance("a test post") == 0.8
+ 
+     @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
+     def test_no_number_returns_zero(self, mock_generate):
+         mock_generate.return_value = "This is not relevant"
+-        assert score_relevance("test post") == 0.0
++        assert score_relevance("a test post") == 0.0
+ 
+     @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
+     def test_none_returns_zero(self, mock_generate):
+         mock_generate.return_value = None
+-        assert score_relevance("test post") == 0.0
++        assert score_relevance("a test post") == 0.0
+ 
+     @pytest.mark.parametrize(
+         "output",
+@@ -750,17 +750,17 @@ class TestScoreRelevanceParsing:
+         answer, not a high score. Clamping it to 1.0 failed toward acting;
+         reject toward not acting instead."""
+         mock_generate.return_value = output
+-        assert score_relevance("test post") == 0.0
++        assert score_relevance("a test post") == 0.0
+ 
+     @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
+     def test_integer_score(self, mock_generate):
+         mock_generate.return_value = "1"
+-        assert score_relevance("test post") == 1.0
++        assert score_relevance("a test post") == 1.0
+ 
+     @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
+     def test_chinese_text_with_number(self, mock_generate):
+         mock_generate.return_value = "0.6 该内容讨论了冥想"
+-        assert score_relevance("test post") == 0.6
++        assert score_relevance("a test post") == 0.6
+ 
+     @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
+     def test_uses_identity_system_prompt(self, mock_generate, tmp_path):
+@@ -776,7 +776,7 @@ class TestScoreRelevanceParsing:
+         _configure_skills_marker(tmp_path)
+         try:
+             mock_generate.return_value = "0.5"
+-            score_relevance("test post")
++            score_relevance("a test post")
+             system = mock_generate.call_args.kwargs["system"]
+             assert system == get_identity_system_prompt()
+             assert "<learned_skills>" not in system
+@@ -820,6 +820,104 @@ class TestScoreRelevanceEmptyInput:
+         mock_generate.assert_called_once()
+ 
+ 
++class TestScoreRelevanceNoScoreableContent:
++    """weekly-2026-08-22 F1.4: non-empty, non-blank, and still nothing to score.
++    A body of `600-1100 символов` reached `config/prompts/relevance.md`, whose
++    output contract has no state for "there is no proposition here", and came
++    back 1.00 — above the 0.80 gate — spending an internal note, a comment
++    generation and a published reply on it. "How much text is there" is a
++    structural property, so code answers it (skill: when-code-when-llm)."""
++
++    @pytest.mark.parametrize(
++        "post_text",
++        ["600-1100 символов", "test", "30", "The stars", "  30\n"],
++        ids=["observed-ceiling-case", "one-word", "bare-number", "two-words", "padded"],
++    )
++    @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
++    def test_below_floor_scores_zero_without_llm_call(self, mock_generate, post_text):
++        result = score_relevance_detailed(post_text)
++        mock_generate.assert_not_called()
++        assert result.score == 0.0
++        assert result.reason == "no_scoreable_content"
++
++    @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
++    def test_at_the_floor_still_calls_the_llm(self, mock_generate):
++        """The floor rejects strictly below MIN_SCOREABLE_TOKENS; a body at it
++        is still the model's call to make."""
++        from contemplative_agent.adapters.moltbook.llm_functions import (
++            MIN_SCOREABLE_TOKENS,
++        )
++
++        mock_generate.return_value = "0.9"
++        post_text = " ".join(["word"] * MIN_SCOREABLE_TOKENS)
++        assert score_relevance(post_text) == 0.9
++        mock_generate.assert_called_once()
++
++    @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
++    def test_unspaced_script_body_still_reaches_the_llm(self, mock_generate):
++        """A Japanese/Chinese/Thai body is one whitespace token however long.
++        The token floor alone would suppress a real post with no LLM call and
++        only a DEBUG line, so the character floor is the escape hatch: this
++        body is 1 token and 25 characters, and it is the model's call."""
++        mock_generate.return_value = "0.9"
++        post_text = "瞑想の実践について今日気づいたことを書いておきたい"
++        assert len(post_text.split()) == 1
++        assert score_relevance(post_text) == 0.9
++        mock_generate.assert_called_once()
++
++    @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
++    def test_at_the_character_floor_still_calls_the_llm(self, mock_generate):
++        """Strict-`<` on the character count too: one token at exactly
++        MIN_SCOREABLE_CHARS reaches the model, one character below does not."""
++        from contemplative_agent.adapters.moltbook.llm_functions import (
++            MIN_SCOREABLE_CHARS,
++        )
++
++        mock_generate.return_value = "0.4"
++        assert score_relevance("あ" * MIN_SCOREABLE_CHARS) == 0.4
++        mock_generate.assert_called_once()
++
++        mock_generate.reset_mock()
++        result = score_relevance_detailed("あ" * (MIN_SCOREABLE_CHARS - 1))
++        assert result.score == 0.0
++        assert result.reason == "no_scoreable_content"
++        mock_generate.assert_not_called()
++
++    def test_floor_covers_the_observed_class(self):
++        """The operator-decision numbers, pinned exactly rather than as a
++        one-sided bound: the observed class is <= 2 tokens and <= 17 chars, so
++        3 / 18 are the smallest floors that cover it. A later widening (5, 10)
++        would suppress a large share of real short posts, so it must fail here
++        and be re-signed-off at the human gate rather than pass silently."""
++        from contemplative_agent.adapters.moltbook.llm_functions import (
++            MIN_SCOREABLE_CHARS,
++            MIN_SCOREABLE_TOKENS,
++        )
++
++        assert MIN_SCOREABLE_TOKENS == 3
++        assert MIN_SCOREABLE_CHARS == 18
++
++    @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
++    def test_a_ceiling_answer_cannot_reach_the_gate(self, mock_generate):
++        """The defect end-to-end: even if the model would answer 1.00, a stub
++        body never gets to ask it, so nothing clears the 0.80 relevance gate."""
++        mock_generate.return_value = "1.0"
++        assert score_relevance("600-1100 символов") == 0.0
++        mock_generate.assert_not_called()
++
++    @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
++    def test_short_circuit_is_logged_below_the_outage_warning(self, mock_generate, caplog):
++        # Same register as empty_input: a stub post is a normal feed condition,
++        # not a failure, so it must not masquerade as one — nor be silent.
++        with caplog.at_level(logging.DEBUG):
++            score_relevance("test")
++        assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
++        assert any(
++            r.levelno == logging.DEBUG and "no_scoreable_content" in r.getMessage()
++            for r in caplog.records
++        )
++
++
+ class TestGenerateInternalNote:
+     """Pre-action reflection note: single-responsibility plain-text call."""
+ 
+@@ -2662,7 +2760,7 @@ class TestRelevancePromptContract:
+     @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
+     def test_prompt_carries_post_and_scoring_contract(self, mock_gen):
+         mock_gen.return_value = "0.9"
+-        score_relevance("test post")
++        score_relevance("a test post")
+         prompt = mock_gen.call_args[0][0]
+         # Post body is wrapped and embedded.
+         assert "test post" in prompt
+@@ -3169,7 +3267,7 @@ class TestScoreRelevanceOutageVisibility:
+ 
+         mock_generate.return_value = None
+         with caplog.at_level(_logging.WARNING):
+-            assert score_relevance("test post") == 0.0
++            assert score_relevance("a test post") == 0.0
+         assert "llm_unavailable" in caplog.text
+ 
+ 
+@@ -3260,6 +3358,16 @@ class TestScoreRelevanceReasonCodes:
+         assert result.score == 0.0
+         assert result.reason == "empty_input"
+ 
++    def test_stub_body_is_separable_from_empty_input(self):
++        """A body with text but no proposition is its own event: it must not
++        collapse into empty_input, into the judgment 0.0, or into either
++        failure sentinel in the distribution the instrument reads."""
++        with patch("contemplative_agent.adapters.moltbook.llm_functions.generate") as mock_generate:
++            result = score_relevance_detailed("600-1100 символов")
++        mock_generate.assert_not_called()
++        assert result.score == 0.0
++        assert result.reason == "no_scoreable_content"
++
+     @patch("contemplative_agent.adapters.moltbook.llm_functions.generate")
+     def test_llm_outage_is_distinguishable(self, mock_generate):
+         mock_generate.return_value = None

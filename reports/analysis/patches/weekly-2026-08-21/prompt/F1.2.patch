@@ -1,0 +1,908 @@
+diff --git a/docs/CODEMAPS/architecture.md b/docs/CODEMAPS/architecture.md
+index acce1c4..c1a5e4e 100644
+--- a/docs/CODEMAPS/architecture.md
++++ b/docs/CODEMAPS/architecture.md
+@@ -705,7 +705,9 @@ Runs outside the agent process (launchd → `claude -p`), assembling a prompt fr
+ 
+ ```text
+ collect: daily comment-reports + data-repo state diff + previous N reports
+-       + value_layer_approval_join.py (per state-diff section: audit.jsonl approval rows)
++       + value_layer_approval_join.py (per state-diff section: audit.jsonl approval rows
++                                  + live-text reconciliation — sha256(live file)[:16] vs the
++                                  approved rows' content_hash, three named states)
+        + log_anomaly_sweep.py    (event stream: *.log + audit.jsonl; novelty state + corpus census)
+        + state_invariant_check.py (accumulated state: knowledge.json / agents.json)
+        + cross_day_duplicate_scan.py (published-body identity: episode logs → digests)
+@@ -724,6 +726,8 @@ Order is load-bearing. The sweep's Δ / 🆕 columns and the drift scan's new/re
+ 
+ The approval join (2026-08-15, findings F1.1) annotates **each value-layer section of the state diff** — `identity.md`, `constitution/`, `skills/`, `rules/` — with the in-window ADR-0012 approval rows from `logs/audit.jsonl` whose `path` falls under that section's directory. It closes a gap in the diff itself: the diff showed *what* changed and nothing about *whether it passed the gate*, so the 2026-08-15 report's strongest claim ("whether it passed through the `amend-constitution` approval path is not visible in the operator-facing data supplied here") was bounded by missing data rather than by analysis, in a chain that already reads that file for the ADR-0091 identity-cadence due. Three renderings, deliberately distinct: approved rows present (citable `ts` + `content_hash`), **no approved row while the section shows a diff** (the alarm — reported as an observation, since a sync lag or a pre-window approval produces the same shape), and `unavailable (reason=…)` when the log is missing or unreadable — an unavailable instrument must never render as the alarm, or the report manufactures a gate-bypass claim out of its own blindness (gated by `test_a_missing_audit_log_never_reads_as_a_missing_approval`). Window: the two data-repo **commit timestamps**, half-open (`start < ts <= end`) — anything approved at or before the start commit is already inside that commit's tree and so is not part of the diff; the calendar bounds would mis-window by the sync lag. Rendered fields are `ts` / `command` / `decision` / `source` / `content_hash` only: `reason` is operator free text, `source_ids` an unbounded lineage list, and target paths carry skill filenames slugified from distilled pattern text — all three stay out (same send-the-shape choice as ADR-0083).
+ 
++The **live-text reconciliation** (2026-08-22, findings F1.2) sits in the same block and answers the question the row tally cannot: `audit.jsonl` records *approvals*, not *writes*, so a hand repair, a restore from backup or an out-of-band edit changes the live layer while leaving a clean tally. Since the row's `content_hash` is `sha256(bytes actually written)[:16]` (`cli/approval.py:161`, invariant stated at `cli/adopt.py:323-326`), the join hashes each live file the runtime loads — `identity.md` for identity, `*.md` under the directory for the other three — and names three further states: live text matching an approved row, **live text matching no approved row in the whole log** (bytes that never passed the gate), and **an in-window approved row with no live file carrying its hash** (approved and written, but not what the runtime reads — a sibling like `identity-2.md`, or a later supersession). The live side is compared against approved rows from the *whole* log, not the window, or every untouched file would read as forged; the orphan side is window-scoped, because "approved this week and yet not live" is the claim worth making. Two digests per file, because `adopt` writes the approved text plus a trailing newline it did not hash. Only digests and counts are rendered — never a live file's content or path — and an unhashable live layer renders `unavailable (reason=live-…)`, never the accusation. **"Matches no approved row" is not a synonym for "bypassed the gate"**: `contemplative-agent init` copies the template value layer into `MOLTBOOK_HOME` writing no audit row at all (`cli/session_cmds.py:66` for the three directories, `:88` for `identity.md`), and an approval older than the retained log reads the same, so a shipped default never amended in place sits in that state permanently and benignly — the rendering names that fourth cause beside the three write-time ones and directs the reader to a *rise* in the count rather than the count. Two further calibrations of the live set: a section directory that exists but holds no `*.md` abstains with `reason=live-dir-empty` rather than reading "0 hashed, 0 unmatched" (an empty scan is not a reconciled one), and the constitution block states the scope it cannot verify — the runtime reads `<home>/constitution` only when started without `--constitution-dir` and without `--no-axioms` (`cli/runtime.py:104-105`), and this reading has no way to know which flags the scheduled run used.
++
+ The drift scan (2026-08-06) diffs the per-endpoint response-key vocabulary the client already records in `api-audit.jsonl` (2xx envelopes only, so outages do not read as schema changes) and tracks the `POST /verify` consecutive-failure run against the platform's 10-failure suspension rule. It exists because the platform ships API changes unannounced (observed: the `check_in` key appearing on `/home` in 2026-08, carrying role "standing instructions" — a third-party injection channel the adapter deliberately never consumes, gated by `tests/test_home_field_allowlist.py`). The spec (`skill.md`) is untrusted external text: it is never fetched in the unattended chain, and on drift the rendered section directs the re-read to the Saturday gate.
+ 
+ The sweep's signature is keyed on **level + message**, with the dotted `%(name)s` module path dropped for lines in the runtime's own log format, and hex-shaped ids squashed to `#` alongside digit runs. The 80-character cap is the reason: the module path alone runs to ~47 characters, so keying on it spent the budget on the address and truncated the predicate — `"reply on <id> created but verification failed"` rendered as `"reply on <id> created"`, a failure displayed as its own opposite (findings F1.1). Excluding the name also makes the instrument refactor-invariant: a pure module move (`7c96e0f`) used to reset every affected signature to 🆕, i.e. the Δ / 🆕 columns measured the codebase rather than the runtime (findings F1.2). The trade is that the same message from two subsystems now merges into one row, so the logger name is carried as a display-only `Origin` column — it never enters the signature, the state file or the novelty computation, so the reader keeps the distinction the key deliberately drops.
+diff --git a/scripts/value_layer_approval_join.py b/scripts/value_layer_approval_join.py
+index c4d0ee4..baeb41b 100644
+--- a/scripts/value_layer_approval_join.py
++++ b/scripts/value_layer_approval_join.py
+@@ -18,6 +18,49 @@ two states that must never read as that alarm:
+   code) — an unavailable instrument reads zero, not clean (ADR-0077);
+ - the section shows no diff (``none (no diff either)``).
+ 
++Live-text reconciliation (weekly 2026-08-22 F1.2): the tally above answers
++"was there an approval row", never "do the bytes in place now match one".
++``audit.jsonl`` records *approvals*, not *writes*, so a hand repair, a
++restore from backup or an out-of-band edit changes the live layer while
++leaving a clean tally. The audit row's ``content_hash`` is
++``sha256(bytes written)[:16]`` (``cli/approval.py:161``, invariant stated at
++``cli/adopt.py:323-326``), so the live file's provenance is decidable by
++hashing it. Three named states are rendered, of which the last two are
++today indistinguishable in the tally alone:
++
++- a live file's hash matches an approved row (the normal case);
++- a live file matches NO approved row — those bytes never passed the gate;
++- an in-window approved row has no live file carrying its hash — approved
++  and written, but not what the runtime reads now.
++
++"Live" means the files the runtime actually loads: ``identity.md`` for
++identity (``core/llm/prompting.py:213``), ``*.md`` under the section
++directory for constitution / skills / rules (``core/domain.py:332``,
++``core/llm/prompting.py:178``, ``core/skill_selection.py:141``,
++``core/text_utils.py:190``). A sibling written beside the canonical name
++(``identity-2.md``) is therefore not a live file and shows up as the third
++state, which is exactly what it is.
++
++Calibration of the second state (review, 2026-08-22): "matches no approved
++row" is *not* a synonym for "bypassed the gate". ``contemplative-agent
++init`` copies the template value layer into MOLTBOOK_HOME writing no audit
++row at all (``cli/session_cmds.py:66`` for the three directories, ``:88``
++for ``identity.md``), and an approval older than the retained log reads the
++same way. A shipped default never amended in place therefore sits in this
++state permanently and benignly, so the rendering names that cause beside
++the three write-time ones instead of asserting a bypass. What carries
++signal is a *rise* in the count, not the count.
++
++Scope of the constitution scan: the runtime reads ``<home>/constitution``
++only when started without ``--constitution-dir`` and without
++``--no-axioms`` (``cli/runtime.py:104-105``). Under an override it loads a
++different tree, and this reading — which has no way to know which flags the
++scheduled run used — would describe files nobody read. That assumption is
++rendered with the section rather than left implicit. An existing but empty
++section directory reads ``unavailable (reason=live-dir-empty)``: zero files
++hashed is the one shape an override and a genuinely empty layer share, and
++neither is a clean bill of health.
++
+ Windowing: ``--start`` / ``--end`` are the *commit timestamps* of the two
+ data-repo snapshots the diff is taken between, not the report's calendar
+ bounds. The interval is half-open, ``start < ts <= end``: anything approved
+@@ -38,11 +81,15 @@ Security / boundary (load-bearing):
+   vocabularies, but are still squashed of non-printables, length-capped and
+   pipe-escaped at render: a record is durable state, and a malformed row
+   must not break out of its table cell into report prose.
++- The reconciliation reads live value-layer files but renders only
++  ``sha256(...)[:16]`` digests and counts — the same 16-hex shape already in
++  the log, one-way, and never the file's content or its path.
+ """
+ 
+ from __future__ import annotations
+ 
+ import argparse
++import hashlib
+ from dataclasses import dataclass
+ from datetime import datetime
+ from pathlib import Path, PurePosixPath
+@@ -56,6 +103,10 @@ _SECTIONS = ("identity", "constitution", "skills", "rules")
+ 
+ _FIELD_CAP = 80
+ _DEFAULT_TOP = 25
++# How many digests / timestamps one reconciliation line may name before it
++# degrades to a count. Same reason as `--top`: the line answers "which state",
++# and an unbounded list of them buries that answer.
++_RECON_CAP = 5
+ 
+ 
+ class JoinUnavailable(Exception):
+@@ -77,6 +128,49 @@ class Row:
+     content_hash: str
+ 
+ 
++@dataclass(frozen=True)
++class LiveFile:
++    """One live value-layer file reduced to digests. No path, no content.
++
++    Two digests, not one: ``_log_approval`` hashes the text it was handed
++    (``cli/approval.py:161``) while ``adopt`` writes that text plus a
++    trailing newline when it lacks one (``cli/adopt.py:335``). Hashing only
++    the bytes on disk would therefore report every newline-terminated adopt
++    as unapproved. ``digests[0]`` is the on-disk bytes and is the one shown.
++    """
++
++    digests: tuple[str, ...]
++
++
++@dataclass(frozen=True)
++class LiveScan:
++    """Result of hashing a section's live files.
++
++    ``reason`` non-None means the scan could not be performed: an
++    unavailable instrument reads *unavailable*, never "matches no approved
++    row" (ADR-0077) — that string is an accusation.
++    """
++
++    files: tuple[LiveFile, ...] = ()
++    unreadable: int = 0
++    reason: str | None = None
++
++
++@dataclass(frozen=True)
++class Reconciliation:
++    """Live bytes vs approved hashes, in the three states of the docstring."""
++
++    scanned: int
++    matched: int
++    latest_match_ts: str
++    unmatched_live: tuple[str, ...]
++    unmatched_live_total: int
++    orphan_rows: tuple[str, ...]
++    orphan_rows_total: int
++    unreadable: int
++    reason: str | None = None
++
++
+ @dataclass(frozen=True)
+ class Reading:
+     section: str
+@@ -90,6 +184,7 @@ class Reading:
+     truncated: int
+     window_start: str
+     window_end: str
++    reconciliation: Reconciliation | None = None
+ 
+ 
+ def _matches_section(raw_path: object, section: str) -> bool:
+@@ -149,6 +244,107 @@ def load_records(audit_path: Path) -> tuple[list[dict[str, Any]], int]:
+     return parse_records(text)
+ 
+ 
++def _digests(data: bytes) -> tuple[str, ...]:
++    """The hashes an approval row could carry for these bytes on disk."""
++    hashes = [hashlib.sha256(data).hexdigest()[:16]]
++    if data.endswith(b"\n"):
++        # The adopt path logs the text *before* its newline terminator.
++        hashes.append(hashlib.sha256(data[:-1]).hexdigest()[:16])
++    return tuple(hashes)
++
++
++def scan_live(home: Path, section: str) -> LiveScan:
++    """Hash the files the runtime actually loads for `section`.
++
++    Identity is one canonical file; the other three sections are a ``*.md``
++    glob over the section directory — matching the loaders cited in the
++    module docstring. A sibling like ``identity-2.md`` is deliberately NOT
++    scanned: the runtime never reads it, so an approval that landed there is
++    the third state, not the first.
++
++    Per-file OSErrors degrade to a count rather than abstaining: one
++    unreadable skill should cost that file's legibility, not the reading.
++
++    A section directory that exists but holds no ``*.md`` abstains with
++    ``live-dir-empty`` instead of reading "0 hashed, 0 unmatched": that
++    shape is also what a run redirected by ``--constitution-dir`` leaves
++    behind, and an empty scan must not read as reconciled.
++    """
++    if not home.is_dir():
++        return LiveScan(reason="live-home-missing")
++    if section == "identity":
++        paths = [home / "identity.md"]
++        if not paths[0].is_file():
++            return LiveScan(reason="live-identity-missing")
++    else:
++        directory = home / section
++        if not directory.is_dir():
++            return LiveScan(reason="live-dir-missing")
++        paths = sorted(p for p in directory.glob("*.md") if p.is_file())
++        if not paths:
++            return LiveScan(reason="live-dir-empty")
++    files: list[LiveFile] = []
++    unreadable = 0
++    for path in paths:
++        try:
++            data = path.read_bytes()
++        except OSError:
++            unreadable += 1
++            continue
++        files.append(LiveFile(digests=_digests(data)))
++    return LiveScan(files=tuple(files), unreadable=unreadable)
++
++
++def _reconcile(
++    live: LiveScan,
++    approved_by_hash: dict[str, tuple[datetime, str]],
++    window_approved: list[tuple[datetime, str, str]],
++) -> Reconciliation:
++    """Compare live digests to approved hashes. Pure.
++
++    ``approved_by_hash`` spans the *whole* log, not the window: bytes
++    approved a month ago are still approved bytes, and window-scoping this
++    side would report every untouched file as unapproved. ``window_approved``
++    is window-scoped, because "approved this week and yet not live" is the
++    claim worth making — the same row a year ago is just superseded history.
++    """
++    if live.reason is not None:
++        return Reconciliation(
++            scanned=0,
++            matched=0,
++            latest_match_ts="—",
++            unmatched_live=(),
++            unmatched_live_total=0,
++            orphan_rows=(),
++            orphan_rows_total=0,
++            unreadable=live.unreadable,
++            reason=live.reason,
++        )
++    matched = 0
++    latest: tuple[datetime, str] | None = None
++    unmatched_live: list[str] = []
++    for file in live.files:
++        hit = next((approved_by_hash[d] for d in file.digests if d in approved_by_hash), None)
++        if hit is None:
++            unmatched_live.append(file.digests[0])
++            continue
++        matched += 1
++        if latest is None or hit[0] > latest[0]:
++            latest = hit
++    live_digests = {digest for file in live.files for digest in file.digests}
++    orphans = [raw_ts for _, raw_ts, digest in window_approved if digest not in live_digests]
++    return Reconciliation(
++        scanned=len(live.files),
++        matched=matched,
++        latest_match_ts=_clean(latest[1]) if latest is not None else "—",
++        unmatched_live=tuple(unmatched_live[:_RECON_CAP]),
++        unmatched_live_total=len(unmatched_live),
++        orphan_rows=tuple(_clean(ts) for ts in orphans[:_RECON_CAP]),
++        orphan_rows_total=len(orphans),
++        unreadable=live.unreadable,
++    )
++
++
+ def build_reading(
+     records: list[dict[str, Any]],
+     *,
+@@ -158,14 +354,19 @@ def build_reading(
+     end: datetime,
+     unparsable: int = 0,
+     top: int = _DEFAULT_TOP,
++    live: LiveScan | None = None,
+ ) -> Reading:
+     """Select the section's in-window rows and tally decisions.
+ 
+-    Pure: takes already-loaded records so the join is reproducible offline
+-    from the same inputs.
++    Pure: takes already-loaded records — and already-hashed live files — so
++    the join is reproducible offline from the same inputs (ADR-0075). All
++    file I/O lives in `load_records` / `scan_live`.
+     """
+     selected: list[tuple[datetime, Row]] = []
+     counts = {"approved": 0, "staged": 0, "rejected": 0, "other": 0}
++    # Every approved hash in the log, newest wins; and the in-window subset.
++    approved_by_hash: dict[str, tuple[datetime, str]] = {}
++    window_approved: list[tuple[datetime, str, str]] = []
+     for record in records:
+         if not _matches_section(record.get("path"), section):
+             continue
+@@ -176,9 +377,21 @@ def build_reading(
+         if parsed is None:
+             unparsable += 1
+             continue
+-        if not (start < parsed <= end):
+-            continue
+         decision = record.get("decision")
++        in_window = start < parsed <= end
++        digest = record.get("content_hash")
++        if decision == "approved" and isinstance(digest, str) and digest.strip():
++            # Collected before the window filter: bytes approved before the
++            # start commit are still approved bytes, and the live file
++            # carrying them must not read as unapproved.
++            digest = digest.strip().lower()
++            previous = approved_by_hash.get(digest)
++            if previous is None or parsed > previous[0]:
++                approved_by_hash[digest] = (parsed, str(raw_ts))
++            if in_window:
++                window_approved.append((parsed, str(raw_ts), digest))
++        if not in_window:
++            continue
+         counts[decision if decision in counts else "other"] += 1
+         selected.append(
+             (
+@@ -223,6 +436,9 @@ def build_reading(
+         truncated=len(selected) - len(shown),
+         window_start=_clean(start.isoformat()),
+         window_end=_clean(end.isoformat()),
++        reconciliation=(
++            None if live is None else _reconcile(live, approved_by_hash, window_approved)
++        ),
+     )
+ 
+ 
+@@ -234,6 +450,68 @@ def format_unavailable(reason: str) -> str:
+     )
+ 
+ 
++def format_reconciliation(recon: Reconciliation, section: str) -> list[str]:
++    """Render the three named states. Digests and counts only."""
++    if recon.reason is not None:
++        return [
++            "",
++            f"**Live-text reconciliation**: unavailable (reason={recon.reason}). "
++            "This is NOT evidence that the live text lacks an approval record — "
++            "the instrument could not hash the live value-layer files.",
++        ]
++    lines = [
++        "",
++        "**Live-text reconciliation** (`sha256(live file)[:16]` vs the "
++        "`content_hash` of every approved row, whole log): "
++        f"{recon.scanned} live file(s) hashed, {recon.matched} match an approved "
++        f"row (latest @{recon.latest_match_ts}).",
++    ]
++    if section == "constitution":
++        lines.append(
++            "(Scope: the `constitution/*.md` of the home given to this scan, which "
++            "the runtime loads only when started without `--constitution-dir` and "
++            "without `--no-axioms` (`cli/runtime.py:104-105`). This reading cannot "
++            "see which flags a run used; under an override it describes files the "
++            "runtime did not read.)"
++        )
++    if recon.unmatched_live_total:
++        shown = ", ".join(recon.unmatched_live)
++        more = recon.unmatched_live_total - len(recon.unmatched_live)
++        suffix = f", +{more} more" if more else ""
++        lines.append(
++            f"⚠️ {recon.unmatched_live_total} live file(s) match NO approved row "
++            f"(sha256[:16] {shown}{suffix}). The bytes the runtime reads did not come "
++            "from a logged approval. FOUR causes produce this and the hash cannot "
++            "tell them apart: a hand repair, a restore from backup, an out-of-band "
++            "edit — and a file that never had a row to begin with, which is the "
++            "expected, permanent state of a shipped default (`contemplative-agent "
++            "init` copies the template value layer in without writing any audit row, "
++            "`cli/session_cmds.py:66,88`) and of an approval older than the retained "
++            "log. Do not report a steady count as a gate bypass; a RISE in it is the "
++            "signal. All four leave the tally above clean — this line is about the "
++            "bytes, not about the window."
++        )
++    if recon.orphan_rows_total:
++        shown = ", ".join(f"@{ts}" for ts in recon.orphan_rows)
++        more = recon.orphan_rows_total - len(recon.orphan_rows)
++        suffix = f", +{more} more" if more else ""
++        lines.append(
++            f"⚠️ {recon.orphan_rows_total} approved row(s) in this window have no "
++            f"live file carrying that hash ({shown}{suffix}). Approved and "
++            "written, but not what the runtime reads now — superseded by a later "
++            "approval, written beside the canonical name (`identity-2.md`), or "
++            "reverted."
++        )
++    if not recon.unmatched_live_total and not recon.orphan_rows_total and recon.scanned:
++        lines.append(
++            "Every live file traces to an approved row, and every approved row in "
++            "this window is live."
++        )
++    if recon.unreadable:
++        lines.append(f"({recon.unreadable} live file(s) could not be hashed and are excluded.)")
++    return lines
++
++
+ def format_reading(reading: Reading) -> str:
+     total = reading.approved + reading.staged + reading.rejected + reading.other
+     lines = [
+@@ -251,6 +529,8 @@ def format_reading(reading: Reading) -> str:
+         )
+     elif not reading.changed and total == 0:
+         lines.append("No diff and no approval records — nothing to reconcile.")
++    if reading.reconciliation is not None:
++        lines.extend(format_reconciliation(reading.reconciliation, reading.section))
+     if reading.rows:
+         lines.append("")
+         lines.append("| ts | command | decision | source | content_hash |")
+@@ -281,6 +561,14 @@ def main(argv: list[str] | None = None) -> int:
+     parser.add_argument("--start", required=True, help="ISO-8601 start-commit timestamp")
+     parser.add_argument("--end", required=True, help="ISO-8601 end-commit timestamp")
+     parser.add_argument("--top", type=int, default=_DEFAULT_TOP, help="max rows rendered")
++    parser.add_argument(
++        "--home",
++        type=Path,
++        default=None,
++        help="MOLTBOOK_HOME whose live value-layer files are hashed and reconciled "
++        "against the approved rows; omitted renders the reconciliation as "
++        "unavailable rather than silently skipping it",
++    )
+     args = parser.parse_args(argv)
+ 
+     try:
+@@ -293,6 +581,11 @@ def main(argv: list[str] | None = None) -> int:
+         print(format_unavailable(exc.reason))
+         return 0
+ 
++    live = (
++        LiveScan(reason="live-home-not-given")
++        if args.home is None
++        else scan_live(args.home, args.section)
++    )
+     reading = build_reading(
+         records,
+         section=args.section,
+@@ -301,6 +594,7 @@ def main(argv: list[str] | None = None) -> int:
+         end=end,
+         unparsable=unparsable,
+         top=args.top,
++        live=live,
+     )
+     print(format_reading(reading))
+     return 0
+diff --git a/scripts/weekly-analysis.sh b/scripts/weekly-analysis.sh
+index 0e05f9f..0544201 100755
+--- a/scripts/weekly-analysis.sh
++++ b/scripts/weekly-analysis.sh
+@@ -243,10 +243,17 @@ if [[ -d "$DATA_REPO/.git" ]]; then
+         # never target paths. Observability only — a failure must not break
+         # the weekly report, but it must also never read as "no approval",
+         # hence the explicit unavailable line instead of an empty string.
++        #
++        # --home adds the live-text reconciliation (2026-08-22 F1.2): the row
++        # tally answers "was there an approval", the hash comparison answers
++        # "are these the approved bytes". A hand repair leaves the first clean
++        # and only the second can see it. Renders digests and counts, never a
++        # live file's content or path.
+         approval_join() {  # $1 = section, $2 = changed|unchanged
+             local out
+             out=$(python3 "$PROJECT_ROOT/scripts/value_layer_approval_join.py" \
+                 --audit "$MOLTBOOK_HOME/logs/audit.jsonl" \
++                --home "$MOLTBOOK_HOME" \
+                 --section "$1" --diff "$2" \
+                 --start "$start_cdate" --end "$end_cdate" 2>/dev/null || true)
+             if [[ -z "$out" ]]; then
+diff --git a/tests/test_value_layer_approval_join.py b/tests/test_value_layer_approval_join.py
+index 0c6aa3f..bcd9a76 100644
+--- a/tests/test_value_layer_approval_join.py
++++ b/tests/test_value_layer_approval_join.py
+@@ -11,20 +11,39 @@ shows a diff* (the alarm), and the log being unreadable (never the alarm) —
+ plus the render boundary: ``reason`` is operator free text and ``source_ids``
+ is an unbounded lineage list, and neither may ever reach the prompt.
+ 
++The live-text reconciliation (2026-08-22 F1.2) is pinned beside it: the row
++tally answers "was there an approval row", never "are these the approved
++bytes", so a hand-repaired value layer reads identical to an untouched one.
++The three named states — live text matching an approved row, live text
++matching none, and an approved row with no live file carrying its hash —
++are asserted separately, together with the fact that the tally stays clean
++in the second case (which is why the hash comparison has to exist).
++
++Calibration is pinned beside the states (review, 2026-08-22): the second
++state is also where a shipped default permanently sits — ``init`` copies
++the template value layer in with no audit row — so the rendering must name
++that cause instead of asserting a bypass, and an empty section directory
++must abstain rather than read as reconciled.
++
+ Fault column (ADR-0077): a missing or unreadable audit log renders an
+-explicit ``unavailable (reason=…)`` line. An unavailable instrument that
+-rendered as "no approval record" would manufacture the exact false alarm
+-this finding set out to make impossible.
++explicit ``unavailable (reason=…)`` line, and so does an unhashable live
++layer. An unavailable instrument that rendered as "no approval record" (or
++as "matches NO approved row") would manufacture the exact false alarm this
++finding set out to make impossible.
+ """
+ 
+ from __future__ import annotations
+ 
++import hashlib
+ import json
++import os
+ import subprocess
+ import sys
+ from datetime import datetime, timezone
+ from pathlib import Path
+ 
++import pytest
++
+ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+ import value_layer_approval_join as vlaj  # noqa: E402  # pyright: ignore[reportMissingImports]
+ 
+@@ -33,6 +52,9 @@ SCRIPT = Path(__file__).resolve().parent.parent / "scripts" / "value_layer_appro
+ HOME = "/Users/someone/.config/moltbook"
+ START = "2026-08-01T23:00:00+09:00"
+ END = "2026-08-08T23:00:00+09:00"
++# More live files than one reconciliation line may name, so the overflow is
++# exercised rather than assumed.
++_CAP_OVERFLOW = 8
+ 
+ 
+ def _ts(raw: str) -> datetime:
+@@ -57,7 +79,9 @@ def _record(
+     }
+ 
+ 
+-def _reading(records, *, section="skills", changed=True, top=vlaj._DEFAULT_TOP, unparsable=0):
++def _reading(
++    records, *, section="skills", changed=True, top=vlaj._DEFAULT_TOP, unparsable=0, live=None
++):
+     return vlaj.build_reading(
+         records,
+         section=section,
+@@ -66,6 +90,7 @@ def _reading(records, *, section="skills", changed=True, top=vlaj._DEFAULT_TOP,
+         end=_ts(END),
+         unparsable=unparsable,
+         top=top,
++        live=live,
+     )
+ 
+ 
+@@ -295,6 +320,10 @@ class TestUnavailableIsNotTheAlarm:
+         assert "unavailable (reason=audit-log-missing)" in result.stdout
+         assert "NO APPROVED RECORD" not in result.stdout
+ 
++    @pytest.mark.skipif(
++        hasattr(os, "geteuid") and os.geteuid() == 0,
++        reason="chmod(0o000) does not block root, so the fault cannot be injected",
++    )
+     def test_unreadable_audit_log_renders_a_reason_code(self, tmp_path):
+         audit = tmp_path / "audit.jsonl"
+         audit.write_text("{}\n", encoding="utf-8")
+@@ -341,6 +370,271 @@ class TestUnavailableIsNotTheAlarm:
+         assert unparsable == 2
+ 
+ 
++def _digest(text: str) -> str:
++    """The hash ``cli/approval.py:161`` writes for `text`."""
++    return hashlib.sha256(text.encode()).hexdigest()[:16]
++
++
++def _live_home(tmp_path: Path, section: str, files: dict[str, str]) -> Path:
++    home = tmp_path / "home"
++    directory = home if section == "identity" else home / section
++    directory.mkdir(parents=True, exist_ok=True)
++    for name, text in files.items():
++        (home / name).parent.mkdir(parents=True, exist_ok=True)
++        (home / name).write_text(text, encoding="utf-8")
++    return home
++
++
++class TestLiveTextReconciliation:
++    """audit.jsonl records *approvals*, not *writes* (2026-08-22 F1.2)."""
++
++    def test_live_text_matching_an_approved_row_is_the_normal_case(self, tmp_path):
++        text = "approved body\n"
++        home = _live_home(tmp_path, "skills", {"skills/s.md": text})
++        records = [
++            _record(f"{HOME}/skills/s.md", "2026-08-03T03:00:00+00:00", content_hash=_digest(text))
++        ]
++        rendered = vlaj.format_reading(
++            _reading(records, live=vlaj.scan_live(home, "skills"), changed=True)
++        )
++        assert "1 live file(s) hashed, 1 match an approved row" in rendered
++        assert "match NO approved row" not in rendered
++        assert "no live file carrying that hash" not in rendered
++
++    def test_a_hand_repaired_file_matches_no_approved_row(self, tmp_path):
++        """The state the tally cannot see.
++
++        An approval row exists for the section (so the row-count alarm stays
++        silent), but the bytes the runtime reads are not the approved ones —
++        a hand edit, a restore, or an out-of-band write.
++        """
++        home = _live_home(tmp_path, "identity", {"identity.md": "hand-typed replacement\n"})
++        records = [
++            _record(
++                f"{HOME}/identity.md",
++                "2026-08-03T03:00:00+00:00",
++                content_hash=_digest("the text that was actually approved"),
++            )
++        ]
++        reading = _reading(
++            records, section="identity", live=vlaj.scan_live(home, "identity"), changed=True
++        )
++        rendered = vlaj.format_reading(reading)
++        assert reading.approved == 1, "the tally reads clean — that is the whole point"
++        assert "NO APPROVED RECORD" not in rendered
++        assert "1 live file(s) match NO approved row" in rendered
++        assert _digest("hand-typed replacement\n") in rendered
++
++    def test_an_approved_row_with_no_live_file_is_its_own_state(self, tmp_path):
++        """Approved and written, but not what the runtime reads now."""
++        live_text = "the older, still-live body\n"
++        home = _live_home(tmp_path, "skills", {"skills/s.md": live_text})
++        records = [
++            _record(
++                f"{HOME}/skills/s.md",
++                "2026-07-01T03:00:00+00:00",
++                content_hash=_digest(live_text),
++            ),
++            _record(
++                f"{HOME}/skills/s.md",
++                "2026-08-03T03:00:00+00:00",
++                content_hash=_digest("adopted somewhere the runtime does not read"),
++            ),
++        ]
++        rendered = vlaj.format_reading(
++            _reading(records, live=vlaj.scan_live(home, "skills"), changed=True)
++        )
++        assert "1 approved row(s) in this window have no live file carrying that hash" in rendered
++        assert "@2026-08-03T03:00:00+00:00" in rendered
++        assert "match NO approved row" not in rendered, "the live bytes were approved in July"
++
++    def test_a_pre_window_approval_still_counts_as_approved_bytes(self, tmp_path):
++        """Window-scoping the live side would call every untouched file forged."""
++        text = "approved long before the start commit\n"
++        home = _live_home(tmp_path, "rules", {"rules/r.md": text})
++        records = [
++            _record(f"{HOME}/rules/r.md", "2026-05-01T03:00:00+00:00", content_hash=_digest(text))
++        ]
++        rendered = vlaj.format_reading(
++            _reading(records, section="rules", live=vlaj.scan_live(home, "rules"), changed=False)
++        )
++        assert "1 match an approved row" in rendered
++        assert "match NO approved row" not in rendered
++
++    def test_the_adopt_newline_terminator_is_not_a_mismatch(self, tmp_path):
++        """``adopt`` hashes the text and writes it plus a newline.
++
++        Hashing only the bytes on disk would report every newline-terminated
++        adoption as an unapproved hand edit.
++        """
++        text = "body without a trailing newline"
++        home = _live_home(tmp_path, "skills", {"skills/s.md": text + "\n"})
++        records = [
++            _record(f"{HOME}/skills/s.md", "2026-08-03T03:00:00+00:00", content_hash=_digest(text))
++        ]
++        rendered = vlaj.format_reading(
++            _reading(records, live=vlaj.scan_live(home, "skills"), changed=True)
++        )
++        assert "1 match an approved row" in rendered
++        assert "match NO approved row" not in rendered
++
++    def test_a_sibling_beside_the_canonical_identity_is_not_live(self, tmp_path):
++        """``identity-2.md`` is written, approved, and never read by the runtime."""
++        home = _live_home(
++            tmp_path,
++            "identity",
++            {"identity.md": "live body\n", "identity-2.md": "the adopted body\n"},
++        )
++        scan = vlaj.scan_live(home, "identity")
++        assert len(scan.files) == 1
++        assert scan.files[0].digests[0] == _digest("live body\n")
++
++    def test_only_hashes_and_counts_are_rendered_never_content_or_names(self, tmp_path):
++        home = _live_home(
++            tmp_path, "skills", {"skills/SLUG-MARKER-from-a-post.md": "BODY-MARKER text\n"}
++        )
++        rendered = vlaj.format_reading(
++            _reading([], live=vlaj.scan_live(home, "skills"), changed=True)
++        )
++        assert "BODY-MARKER" not in rendered
++        assert "SLUG-MARKER" not in rendered
++        assert "match NO approved row" in rendered
++
++    def test_the_list_of_unmatched_digests_is_capped_not_silent(self, tmp_path):
++        home = _live_home(
++            tmp_path, "skills", {f"skills/s{i}.md": f"body {i}\n" for i in range(_CAP_OVERFLOW)}
++        )
++        rendered = vlaj.format_reading(
++            _reading([], live=vlaj.scan_live(home, "skills"), changed=True)
++        )
++        assert f"{_CAP_OVERFLOW} live file(s) match NO approved row" in rendered
++        assert f"+{_CAP_OVERFLOW - vlaj._RECON_CAP} more" in rendered
++
++    def test_a_never_approved_default_is_named_as_a_cause_not_a_bypass(self, tmp_path):
++        """``init`` copies the template value layer in with no audit row.
++
++        ``cli/session_cmds.py:66`` (constitution / skills / rules) and ``:88``
++        (identity) write no approval record at all, so a shipped default sits
++        in "matches NO approved row" permanently and benignly. Naming only
++        hand repair / restore / out-of-band edit would render that steady
++        state as an accusation every week.
++        """
++        home = _live_home(tmp_path, "constitution", {"constitution/axioms.md": "template body\n"})
++        rendered = vlaj.format_reading(
++            _reading(
++                [],
++                section="constitution",
++                live=vlaj.scan_live(home, "constitution"),
++                changed=False,
++            )
++        )
++        assert "1 live file(s) match NO approved row" in rendered
++        assert "contemplative-agent init" in rendered
++        assert "never had a row" in rendered
++        assert "RISE in it is the signal" in rendered
++
++    def test_the_constitution_scan_declares_the_override_it_cannot_see(self, tmp_path):
++        """``--constitution-dir`` redirects the runtime's read (`cli/runtime.py:105`).
++
++        The scan hashes ``<home>/constitution`` regardless, so the assumption
++        is rendered rather than left implicit. The other sections have no
++        such override and must not carry the caveat.
++        """
++        text = "approved body\n"
++        home = _live_home(tmp_path, "constitution", {"constitution/axioms.md": text})
++        records = [
++            _record(
++                f"{HOME}/constitution/axioms.md",
++                "2026-08-03T03:00:00+00:00",
++                content_hash=_digest(text),
++            )
++        ]
++        rendered = vlaj.format_reading(
++            _reading(
++                records,
++                section="constitution",
++                live=vlaj.scan_live(home, "constitution"),
++                changed=True,
++            )
++        )
++        assert "`--constitution-dir`" in rendered
++
++        skills_home = _live_home(tmp_path / "s", "skills", {"skills/s.md": text})
++        skills_rendered = vlaj.format_reading(
++            _reading([], live=vlaj.scan_live(skills_home, "skills"), changed=True)
++        )
++        assert "--constitution-dir" not in skills_rendered
++
++    @pytest.mark.skipif(
++        hasattr(os, "geteuid") and os.geteuid() == 0,
++        reason="chmod(0o000) does not block root, so the fault cannot be injected",
++    )
++    def test_an_unreadable_live_file_degrades_to_a_count(self, tmp_path):
++        text = "readable\n"
++        home = _live_home(tmp_path, "skills", {"skills/a.md": text, "skills/b.md": "secret\n"})
++        blocked = home / "skills" / "b.md"
++        blocked.chmod(0o000)
++        try:
++            scan = vlaj.scan_live(home, "skills")
++        finally:
++            blocked.chmod(0o600)
++        records = [
++            _record(f"{HOME}/skills/a.md", "2026-08-03T03:00:00+00:00", content_hash=_digest(text))
++        ]
++        rendered = vlaj.format_reading(_reading(records, live=scan, changed=True))
++        assert scan.unreadable == 1
++        assert "1 live file(s) could not be hashed" in rendered
++
++
++class TestReconciliationUnavailableIsNotTheAlarm:
++    def test_a_missing_home_renders_a_reason_code(self, tmp_path):
++        scan = vlaj.scan_live(tmp_path / "absent", "skills")
++        assert scan.reason == "live-home-missing"
++        rendered = vlaj.format_reading(_reading([], live=scan, changed=True))
++        assert "reason=live-home-missing" in rendered
++        assert "match NO approved row" not in rendered
++
++    def test_a_missing_section_directory_renders_a_reason_code(self, tmp_path):
++        home = tmp_path / "home"
++        home.mkdir()
++        scan = vlaj.scan_live(home, "skills")
++        assert scan.reason == "live-dir-missing"
++        assert "match NO approved row" not in vlaj.format_reading(_reading([], live=scan))
++
++    def test_an_empty_section_directory_renders_a_reason_code(self, tmp_path):
++        """Zero files hashed must not read as reconciled.
++
++        It is also the shape a run redirected by ``--constitution-dir``
++        leaves in the default tree, which this scan cannot detect.
++        """
++        home = _live_home(tmp_path, "constitution", {})
++        scan = vlaj.scan_live(home, "constitution")
++        assert scan.reason == "live-dir-empty"
++        rendered = vlaj.format_reading(
++            _reading([], section="constitution", live=scan, changed=True)
++        )
++        assert "reason=live-dir-empty" in rendered
++        assert "match NO approved row" not in rendered
++        assert "Every live file traces" not in rendered
++
++    def test_a_missing_identity_file_renders_a_reason_code(self, tmp_path):
++        home = tmp_path / "home"
++        home.mkdir()
++        scan = vlaj.scan_live(home, "identity")
++        assert scan.reason == "live-identity-missing"
++        assert "match NO approved row" not in vlaj.format_reading(
++            _reading([], section="identity", live=scan)
++        )
++
++    def test_omitting_home_on_the_cli_is_declared_not_skipped(self, tmp_path):
++        audit = tmp_path / "audit.jsonl"
++        audit.write_text("", encoding="utf-8")
++        result = _run_cli(audit, "--diff", "changed")
++        assert result.returncode == 0, result.stderr
++        assert "reason=live-home-not-given" in result.stdout
++        assert "match NO approved row" not in result.stdout
++
++
+ def _run_cli(audit: Path, *extra: str, start: str = START) -> subprocess.CompletedProcess[str]:
+     return subprocess.run(
+         [
+@@ -382,6 +676,27 @@ class TestCli:
+         assert "abc123def4567890" in result.stdout
+         assert "FREE-TEXT-MARKER" not in result.stdout
+ 
++    def test_end_to_end_reconciliation_over_a_real_home(self, tmp_path):
++        home = _live_home(tmp_path, "skills", {"skills/s.md": "hand-typed body\n"})
++        audit = tmp_path / "audit.jsonl"
++        audit.write_text(
++            json.dumps(
++                _record(
++                    f"{HOME}/skills/s.md",
++                    "2026-08-03T03:00:00+00:00",
++                    content_hash=_digest("the approved body\n"),
++                )
++            )
++            + "\n",
++            encoding="utf-8",
++        )
++        result = _run_cli(audit, "--diff", "changed", "--home", str(home))
++        assert result.returncode == 0, result.stderr
++        assert "**Live-text reconciliation**" in result.stdout
++        assert "1 live file(s) match NO approved row" in result.stdout
++        assert _digest("hand-typed body\n") in result.stdout
++        assert "hand-typed body" not in result.stdout
++
+     def test_timezone_naive_stamps_are_read_as_utc(self):
+         parsed = vlaj.parse_ts("2026-08-03T03:00:00")
+         assert parsed == datetime(2026, 8, 3, 3, 0, tzinfo=timezone.utc)
+diff --git a/tests/test_weekly_analysis_shell.py b/tests/test_weekly_analysis_shell.py
+index 3db2aba..049adc9 100644
+--- a/tests/test_weekly_analysis_shell.py
++++ b/tests/test_weekly_analysis_shell.py
+@@ -15,6 +15,7 @@ macOS-only: the script uses BSD ``date -j``.
+ 
+ from __future__ import annotations
+ 
++import hashlib
+ import json
+ import os
+ import re
+@@ -410,8 +411,21 @@ class TestPromptAssembly:
+         absence is the alarm the report could not previously distinguish from
+         the presence. The record's free text (``reason``) and lineage list
+         (``source_ids``) must not ride along into the prompt.
++
++        findings F1.2 adds the third half: ``--home`` must reach the join, so
++        the live bytes are hashed against the approved rows. Without that
++        wiring a hand-repaired value layer renders identically to an untouched
++        one, and the block below would only ever answer "was there a row".
+         """
+         home = _make_home(tmp_path)
++        # The live value layer the runtime reads (identity.md + the three
++        # section directories), so the reconciliation has bytes to hash.
++        identity_text = "the live identity body\n"
++        (home / "identity.md").write_text(identity_text, encoding="utf-8")
++        identity_hash = hashlib.sha256(identity_text.encode()).hexdigest()[:16]
++        for section in ("constitution", "skills", "rules"):
++            (home / section).mkdir()
++            (home / section / "a.md").write_text(f"{section} body\n", encoding="utf-8")
+         data_repo = tmp_path / "fakehome" / "MyAI_Lab" / "contemplative-agent-data"
+         (data_repo / "skills").mkdir(parents=True)
+ 
+@@ -447,7 +461,7 @@ class TestPromptAssembly:
+                     "path": f"{home}/identity.md",
+                     "decision": "approved",
+                     "source": "stage-adopted",
+-                    "content_hash": "IDHASH0000000000",
++                    "content_hash": identity_hash,
+                     "reason": "FREE-TEXT-MARKER typed by the operator",
+                     "source_ids": ["LINEAGE-MARKER-1"],
+                 }
+@@ -472,8 +486,14 @@ class TestPromptAssembly:
+         state_diff = prompt.split("## Log Anomaly Sweep")[0]
+         # One block per value-layer section: identity, constitution, skills, rules.
+         assert state_diff.count("**Approval provenance**") == 4
+-        assert "IDHASH0000000000" in state_diff
++        assert identity_hash in state_diff
+         assert "NO APPROVED RECORD" in state_diff
++        # The live bytes were hashed too, and the two answers are distinct:
++        # identity's live text traces to its approved row, while the skills /
++        # constitution / rules bytes trace to none.
++        assert state_diff.count("**Live-text reconciliation**") == 4
++        assert "1 live file(s) hashed, 1 match an approved row" in state_diff
++        assert "1 live file(s) match NO approved row" in state_diff
+         # The instrument read the log; nothing degraded to "cannot tell".
+         assert "unavailable (reason=" not in state_diff
+         # The record's free text and lineage list stay out of the prompt.
