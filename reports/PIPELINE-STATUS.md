@@ -1,11 +1,11 @@
 # Pipeline Status
 
-Last check: 2026-08-24 04:30 JST — `scripts/pipeline_watchdog.sh`
+Last check: 2026-08-25 04:30 JST — `scripts/pipeline_watchdog.sh`
 
-- ✅ distill — last run 08-24 03:51
+- ✅ distill — last run 08-25 03:53
 - ✅ insight — last run 08-22 09:19
 - ✅ weekly-report — weekly-2026-08-21.md (37409 bytes)
-- ✅ weekly-packet — weekly-2026-08-21-packet.md (145674 bytes)
-- ✅ backup — last run 08-17 10:00
+- ✅ weekly-findings — weekly-2026-08-21-findings.md (35854 bytes)
+- ✅ backup — last run 08-24 10:00
 
 All scheduled pipelines healthy.
