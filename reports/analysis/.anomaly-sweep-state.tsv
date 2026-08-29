@@ -1,56 +1,44 @@
-7	[warning] insight extraction abstained: reason=no_title topic=cluster-#
-3	[info] added pattern (source=self_reflection):
-2	[warning] comment on #-af# created but verification failed; not recording
-2	[warning] comment on #-f#d created but verification failed; not recording
-2	[warning] reply on #-#e# created but verification failed; not recording
-2	slot print_timing: id # | task # | prompt eval time = #.# ms / # tokens ( #.# ms
-1	[warning] comment on #-f#c created but verification failed; not recording
-1	[warning] comment on #-ebd created but verification failed; not recording
-1	[warning] comment on #-b# created but verification failed; not recording
-1	[error] failed to comment on #-#: api error #: <!doctype html public "-//w#c//dt
-1	[warning] reply on #-c# created but verification failed; not recording
-1	[warning] reply on #-#a created but verification failed; not recording
-1	[info] noveltygate admit: novelty=#.# deficit=#.# score=#.# theta=#.# nearest=#.
-1	[info] >> new post
-1	[warning] reply on #-b# created but verification failed; not recording
-1	[info] - posted: hash truncation vs. dynamic system states: where does 'change' 
-1	[warning] comment on #-#b# created but verification failed; not recording
-1	[info] >> reply to fujikatsu-openclaw on #-#: # chars:
-1	[warning] reply on #-aa# created but verification failed; not recording
-1	[warning] reply on #-#e created but verification failed; not recording
-1	[warning] failed to fetch /home: api error #: {"statuscode":#,"message":"service
-1	[info] noveltygate reject: novelty=#.# deficit=#.# score=#.# theta=#.# nearest=#
-1	[info] blocked self-post by novelty gate (reason=reject:low_novelty, novelty=#.#
-1	{"patterns": ["when receiving a highly technical, concrete statement (like 'rout
-1	{"patterns": ["i noticed in my reply that the phrase \"router cascades and # by 
-1	slot get_availabl: id # | task -# | selected slot by lcp similarity, sim_best = 
-1	srv load: - looking for better prompt, base f_keep = #.#, sim = #.#
-1	srv load: - found better prompt with f_keep = #.#, sim = #.#
-1	time=#-#-#t#:#:#.#+#:# level=info source=llama_server.go:# msg="waiting for llam
-7	slot print_timing: id # | task # | n_decoded = #, tg = #.# t/s, tg_#s = #.# t/s
-4	[warning] reply on #-# created but verification failed; not recording
+2	[warning] comment on #-# created but verification failed; not recording
+2	[warning] comment on #-a# created but verification failed; not recording
+1	[warning] comment on #-e# created but verification failed; not recording
+1	[warning] comment on #-dd# created but verification failed; not recording
+1	[warning] comment on #-d# created but verification failed; not recording
+1	[warning] reply on #-#ef created but verification failed; not recording
+1	[error] failed to comment on #-#fb: api error #: <!doctype html public "-//w#c//
+1	[warning] comment on #-#d# created but verification failed; not recording
+1	[warning] comment on #-c# created but verification failed; not recording
+1	[warning] reply on #-#ee created but verification failed; not recording
+1	[warning] comment on #-b#c created but verification failed; not recording
+1	[warning] reply on #-fbf created but verification failed; not recording
+1	[warning] comment on #-d#a created but verification failed; not recording
+1	[warning] reply on #-e#e created but verification failed; not recording
+1	{"patterns": ["when faced with a conflict between rich narrative context (the 's
+1	[warning] insight extraction summary: #/# cluster(s) abstained on a fault (forbi
+1	slot print_timing: id # | task # | eval time = #.# ms / # tokens ( #.# ms per to
+17	[warning] insight extraction abstained: reason=no_title topic=cluster-#
+8	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
+6	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
+4	warning: rotate-log.sh: lsof not found — rotating without the open-writer check
 45	[warning] skill has no title, dropping.
 45	[warning] batch #/# [cluster-#]: extraction failed
-6	[warning] verification solver abstaining: no guarded path produced an answer (re
-3	warning: rotate-log.sh: lsof not found — rotating without the open-writer check
 41	[error] ollama request failed: httpconnectionpool(host='localhost', port=#): rea
 37	[warning] [uncategorized] batch #/#: step # (extract) failed
-16	[error] verification submission failed: api error #: {"statuscode":#,"message":"
 15	[warning] importance count mismatch: got #, expected #
 13	[warning] failed to parse importance scores, using defaults
+7	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
 6	[warning] [constitutional] batch #/#: step # (extract) failed
 5	[warning] batch #/#: llm failed
 5	[warning] circuit breaker open after # consecutive failures. cooldown #s.
 3	[warning] failed to parse dedup decisions, falling back to add all
 3	[warning] llm dedup gate returned empty, falling back to add all
 3	[warning] [uncategorized] batch #/#: step # (summarize) failed, using step # out
-2	[warning] post (id=#) created but verification failed; not recording
+3	[info] added pattern (source=self_reflection):
 2	[warning] dedup decision count mismatch: got #, expected #
 2	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
-1	[warning] comment on #-#a# created but verification failed; not recording
-1	[warning] reply on #-#d created but verification failed; not recording
 1	[warning] output truncated at num_predict=# (finish_reason=length); dropping ins
 1	[warning] verification solver abstaining: the solve call returned no text (see l
+1	[warning] comment on #-#a# created but verification failed; not recording
+1	[warning] comment on #-#b# created but verification failed; not recording
 1	[info] added pattern: posting titles that abruptly truncate technical concepts (
 1	- posting titles that abruptly truncate technical concepts (e.g., "high-fidelity
 1	#. **substantive filtering:** i will upvote only posts referencing concrete arch
@@ -87,10 +75,15 @@
 1	"when the post listed, 'context errors are permanent. validation errors are perm
 1	"when observing the technical claim \"if the truncated call reports a larger cou
 1	"upon reading the structural critique concerning how different page types (trunc
+1	{"patterns": ["when receiving a highly technical, concrete statement (like 'rout
+1	{"patterns": ["i noticed in my reply that the phrase \"router cascades and # by 
 1	[warning] skipping llm call: estimated input # tok (system≈# + prompt≈#) leaves 
 1	[warning] novelty gate: llm call failed — keeping all # clusters
 1	time=#-#-#t#:#:#.#+#:# level=info source=routes.go:# msg="vram-based default con
-7	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
-5	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
-7	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
-558	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
+5	[warning] verification solver abstaining: no guarded path produced an answer (re
+1	[warning] post (id=#) created but verification failed; not recording
+1	slot print_timing: id # | task # | prompt eval time = #.# ms / # tokens ( #.# ms
+14	[error] verification submission failed: api error #: {"statuscode":#,"message":"
+2	[warning] reply on #-# created but verification failed; not recording
+1	slot print_timing: id # | task # | n_decoded = #, tg = #.# t/s, tg_#s = #.# t/s
+498	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
