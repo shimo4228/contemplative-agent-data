@@ -1,0 +1,68 @@
+{
+  "findings": [],
+  "count": 0,
+  "readings": {
+    "codemaps": [
+      {
+        "file": "docs/CODEMAPS/INDEX.md",
+        "generated": "2026-08-22",
+        "source_commit": null,
+        "commits_behind": null,
+        "days_old": 7
+      },
+      {
+        "file": "docs/CODEMAPS/adapters-moltbook.md",
+        "generated": "2026-08-16",
+        "source_commit": null,
+        "commits_behind": null,
+        "days_old": 13
+      },
+      {
+        "file": "docs/CODEMAPS/architecture.md",
+        "generated": "2026-08-26",
+        "source_commit": null,
+        "commits_behind": null,
+        "days_old": 3
+      },
+      {
+        "file": "docs/CODEMAPS/core-modules.md",
+        "generated": "2026-08-25",
+        "source_commit": null,
+        "commits_behind": null,
+        "days_old": 4
+      },
+      {
+        "file": "docs/CODEMAPS/dependencies.md",
+        "generated": "2026-08-09",
+        "source_commit": null,
+        "commits_behind": null,
+        "days_old": 20
+      },
+      {
+        "file": "docs/CODEMAPS/moltbook-agent.md",
+        "generated": "2026-08-22",
+        "source_commit": null,
+        "commits_behind": null,
+        "days_old": 7
+      },
+      {
+        "file": "docs/CYCLES.md",
+        "generated": "2026-08-26",
+        "source_commit": "117b04b",
+        "commits_behind": 8,
+        "days_old": 3
+      }
+    ],
+    "mechanism": {
+      "file": "docs/CODEMAPS/architecture.md",
+      "last_commit": "2b59a60",
+      "mechanism_commits_since": 1,
+      "pathspecs": [
+        "src/",
+        "scripts/"
+      ]
+    }
+  },
+  "errors": [],
+  "scanned_files": 268
+}

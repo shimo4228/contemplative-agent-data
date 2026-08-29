@@ -1,0 +1,31 @@
+{
+  "as_of": "2026-08-28",
+  "identity": {
+    "days_since": 13,
+    "interval_days": 27,
+    "due": false,
+    "reason": "NOT_DUE",
+    "last_run_ts": "2026-08-15T04:03:59+00:00"
+  },
+  "constitution": {
+    "days_since": 19,
+    "interval_days": 83,
+    "due": false,
+    "reason": "NOT_DUE",
+    "last_adopted_ts": "2026-08-09T12:10:35+00:00",
+    "patterns_since": 1733
+  },
+  "staging_pending": 0,
+  "malformed_audit_lines": 0,
+  "reasons": [],
+  "rules": {
+    "files": 2,
+    "newest_mtime": "2026-04-11T10:36:52.036165+00:00",
+    "unreadable_files": 0,
+    "empty_files": 0,
+    "issues": [],
+    "reason": "OK",
+    "path": "/Users/shimomoto_tatsuya/.config/moltbook/rules",
+    "days_since_newest": 139
+  }
+}
