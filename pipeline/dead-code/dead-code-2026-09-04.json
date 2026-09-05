@@ -1,0 +1,25 @@
+{
+  "tool": "vulture",
+  "report_prefixes": [
+    "src/",
+    "scripts/"
+  ],
+  "count": 2,
+  "candidates": [
+    {
+      "file": "src/contemplative_agent/core/domain.py",
+      "line": 80,
+      "message": "unused variable 'wiki_maintainer_system'",
+      "confidence": 60
+    },
+    {
+      "file": "src/contemplative_agent/core/domain.py",
+      "line": 82,
+      "message": "unused variable 'wiki_proposer_system'",
+      "confidence": 60
+    }
+  ],
+  "parsed_total": 161,
+  "unparsed_lines": 0,
+  "stderr_lines": 0
+}
