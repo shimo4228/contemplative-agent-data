@@ -1,0 +1,28 @@
+{
+  "command": "distill",
+  "ts": "2026-09-11T18:30:05Z",
+  "run_id": "7fd126e2610b450896de2fbb56c4eebf",
+  "generation_model": "gemma4:e4b",
+  "think": false,
+  "ollama_version": "0.30.11",
+  "generation_model_digest": "c6eb396dbd59",
+  "embedding_model_digest": "0a109f422b47",
+  "serving_environment_reason": "ok",
+  "embedding_model": "nomic-embed-text",
+  "embedding_dim": 768,
+  "thresholds": {
+    "SIM_DUPLICATE": 0.9,
+    "SIM_UPDATE": 0.8,
+    "DEDUP_IMPORTANCE_FLOOR": 0.05
+  },
+  "views": [
+    "constitutional",
+    "self_reflection"
+  ],
+  "views_dir": "/Users/shimomoto_tatsuya/.config/moltbook/views",
+  "constitution_dir": "/Users/shimomoto_tatsuya/.config/moltbook/constitution",
+  "prompts_dir": null,
+  "skills_dir": "/Users/shimomoto_tatsuya/.config/moltbook/skills",
+  "rules_dir": "/Users/shimomoto_tatsuya/.config/moltbook/rules",
+  "identity_path": "/Users/shimomoto_tatsuya/.config/moltbook/identity.md"
+}
