@@ -1,0 +1,19 @@
+{
+  "tool": "vulture",
+  "report_prefixes": [
+    "src/",
+    "scripts/"
+  ],
+  "count": 1,
+  "candidates": [
+    {
+      "file": "scripts/novelty_replay_ab.py",
+      "line": 99,
+      "message": "unused variable 'logged_verdict'",
+      "confidence": 60
+    }
+  ],
+  "parsed_total": 116,
+  "unparsed_lines": 0,
+  "stderr_lines": 0
+}

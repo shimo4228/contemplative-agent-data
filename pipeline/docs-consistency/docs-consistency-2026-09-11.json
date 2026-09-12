@@ -1,0 +1,23 @@
+{
+  "findings": [],
+  "count": 0,
+  "readings": {
+    "freshness": [
+      {
+        "file": "docs/CYCLES.md",
+        "generated": "2026-08-26",
+        "source_commit": "117b04b",
+        "commits_behind": 102,
+        "days_old": 17
+      }
+    ]
+  },
+  "errors": [
+    {
+      "check": "enja_drift",
+      "reason": "GIT_FAIL",
+      "detail": "no timestamp: docs/adr/0103-retire-the-wiki-mechanism.md"
+    }
+  ],
+  "scanned_files": 284
+}

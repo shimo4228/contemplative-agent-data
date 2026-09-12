@@ -1,0 +1,15 @@
+8054	87	agent-launchd.log
+4753	6	backup-launchd.log
+158	0	cron.log
+38162	180	distill-launchd.log
+1291	98	insight-launchd.log
+155	22	insight-manual-20260709.log
+387	0	mlx-server.log
+0	0	ollama-restart.log
+45863	1771	ollama-serve.log
+16	0	submolt-scan-launchd.log
+10002	0	sync-data-launchd.log
+65	0	watchdog-launchd.log
+154	0	weekly-analysis-launchd.log
+130	2	weekly-pipeline-launchd.log
+1339	0	audit.jsonl

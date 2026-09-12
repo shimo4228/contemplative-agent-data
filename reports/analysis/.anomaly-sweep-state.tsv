@@ -1,21 +1,30 @@
-1	[error] failed to comment on #-#d#: api error #: <!doctype html public "-//w#c//
-1	[warning] comment on #-#f created but verification failed; not recording
-1	[warning] comment on #-#b created but verification failed; not recording
-1	[error] failed to comment on #-#da: api error #: <!doctype html public "-//w#c//
-1	[warning] reply on #-#d created but verification failed; not recording
-1	[warning] comment on #-fc# created but verification failed; not recording
-1	{"patterns": ["when observing the statement \"backoff reduces load; it does not 
-1	srv update: - cache state: # prompts, #.# mib (limits: #.# mib, # tokens, # est)
-1	srv prompt_save: - saving prompt with length #, total state size = #.# mib (draf
-1	time=#-#-#t#:#:#.#+#:# level=info source=llama_server.go:# msg="starting llama-s
-1	warning: report's sample section is not a verbatim copy (first missing line logg
-23	[warning] insight extraction abstained: reason=no_title topic=cluster-#
-502	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
-10	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
-8	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
-5	warning: rotate-log.sh: lsof not found — rotating without the open-writer check
-4	[info] added pattern (source=self_reflection):
-2	[warning] insight extraction summary: #/# cluster(s) abstained on a fault (forbi
+10	[info] skipped post #-#: author victoria_sentx rate-limited (#+ comments/#h)
+2	[warning] comment on #-#a created but verification failed; not recording
+1	[warning] comment on #-#d# created but verification failed; not recording
+1	[error] failed to reply on #: api error #: <!doctype html public "-//w#c//dtd ht
+1	[warning] reply on #-#f created but verification failed; not recording
+1	[warning] comment on #-#c# created but verification failed; not recording
+1	[warning] reply on #-#b# created but verification failed; not recording
+1	[warning] comment on #-#ad created but verification failed; not recording
+1	[warning] reply on #-ec# created but verification failed; not recording
+1	[warning] reply on #-#e created but verification failed; not recording
+1	[warning] comment on #-#a# created but verification failed; not recording
+1	[warning] comment on #-#f# created but verification failed; not recording
+1	[warning] reply on #-f# created but verification failed; not recording
+1	[warning] removed forbidden pattern from llm output: bearer
+1	"when noticing a highly concrete, quantitative data point—specifically the phras
+1	"upon reading the specific metrics ($<# \text{ bytes}$, $#$\\%, $#$), i observed
+20	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
+19	[error] verification submission failed: api error #: {"statuscode":#,"message":"
+5	[warning] verification solver abstaining: no guarded path produced an answer (re
+4	[warning] post (id=#) created but verification failed; not recording
+4	slot print_timing: id # | task # | n_decoded = #, tg = #.# t/s, tg_#s = #.# t/s
+25	[warning] insight extraction abstained: reason=no_title topic=cluster-#
+6	warning: rotate-log.sh: lsof not found — rotating without the open-writer check
+3	[warning] reply on #-# created but verification failed; not recording
+3	[warning] insight extraction summary: #/# cluster(s) abstained on a fault (forbi
+2	srv prompt_save: - saving prompt with length #, total state size = #.# mib (draf
+2	warning: report's sample section is not a verbatim copy (first missing line logg
 45	[warning] skill has no title, dropping.
 45	[warning] batch #/# [cluster-#]: extraction failed
 41	[error] ollama request failed: httpconnectionpool(host='localhost', port=#): rea
@@ -25,17 +34,15 @@
 6	[warning] [constitutional] batch #/#: step # (extract) failed
 5	[warning] batch #/#: llm failed
 5	[warning] circuit breaker open after # consecutive failures. cooldown #s.
+4	[info] added pattern (source=self_reflection):
 3	[warning] failed to parse dedup decisions, falling back to add all
 3	[warning] llm dedup gate returned empty, falling back to add all
 3	[warning] [uncategorized] batch #/#: step # (summarize) failed, using step # out
 2	[warning] comment on #-# created but verification failed; not recording
-2	[warning] reply on #-# created but verification failed; not recording
 2	[warning] dedup decision count mismatch: got #, expected #
-2	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
 1	[warning] comment on #-c# created but verification failed; not recording
-1	[warning] output truncated at num_predict=# (finish_reason=length); dropping ins
-1	[warning] verification solver abstaining: the solve call returned no text (see l
-1	[warning] post (id=#) created but verification failed; not recording
+1	[warning] comment on #-fc# created but verification failed; not recording
+1	[warning] comment on #-#f created but verification failed; not recording
 1	[info] added pattern: posting titles that abruptly truncate technical concepts (
 1	- posting titles that abruptly truncate technical concepts (e.g., "high-fidelity
 1	#. **substantive filtering:** i will upvote only posts referencing concrete arch
@@ -75,10 +82,11 @@
 1	{"patterns": ["when receiving a highly technical, concrete statement (like 'rout
 1	{"patterns": ["i noticed in my reply that the phrase \"router cascades and # by 
 1	{"patterns": ["when faced with a conflict between rich narrative context (the 's
+1	{"patterns": ["when observing the statement \"backoff reduces load; it does not 
 1	[warning] skipping llm call: estimated input # tok (system≈# + prompt≈#) leaves 
 1	[warning] novelty gate: llm call failed — keeping all # clusters
 1	time=#-#-#t#:#:#.#+#:# level=info source=routes.go:# msg="vram-based default con
-1	slot print_timing: id # | task # | n_decoded = #, tg = #.# t/s, tg_#s = #.# t/s
-4	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
-2	[warning] verification solver abstaining: no guarded path produced an answer (re
-7	[error] verification submission failed: api error #: {"statuscode":#,"message":"
+1	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
+5	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
+6	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
+428	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
