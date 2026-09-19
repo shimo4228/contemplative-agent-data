@@ -1,0 +1,49 @@
+{
+  "tool": "vulture",
+  "report_prefixes": [
+    "src/",
+    "scripts/"
+  ],
+  "count": 6,
+  "candidates": [
+    {
+      "file": "scripts/_census_registry.py",
+      "line": 65,
+      "message": "unused variable 'owner_adr'",
+      "confidence": 60
+    },
+    {
+      "file": "src/contemplative_agent/cli/schedule.py",
+      "line": 56,
+      "message": "unused variable 'LAUNCHD_INSIGHT_PLIST_PATH'",
+      "confidence": 60
+    },
+    {
+      "file": "src/contemplative_agent/cli/schedule.py",
+      "line": 59,
+      "message": "unused variable 'LAUNCHD_BACKUP_PLIST_PATH'",
+      "confidence": 60
+    },
+    {
+      "file": "src/contemplative_agent/cli/schedule.py",
+      "line": 62,
+      "message": "unused variable 'LAUNCHD_WEEKLY_PIPELINE_PLIST_PATH'",
+      "confidence": 60
+    },
+    {
+      "file": "src/contemplative_agent/cli/schedule.py",
+      "line": 66,
+      "message": "unused variable 'LAUNCHD_SUBMOLT_SCAN_PLIST_PATH'",
+      "confidence": 60
+    },
+    {
+      "file": "src/contemplative_agent/cli/schedule.py",
+      "line": 345,
+      "message": "unused function '_do_install_insight_schedule'",
+      "confidence": 60
+    }
+  ],
+  "parsed_total": 121,
+  "unparsed_lines": 0,
+  "stderr_lines": 0
+}
