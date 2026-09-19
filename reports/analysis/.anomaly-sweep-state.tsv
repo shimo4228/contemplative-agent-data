@@ -1,48 +1,59 @@
-10	[info] skipped post #-#: author victoria_sentx rate-limited (#+ comments/#h)
-2	[warning] comment on #-#a created but verification failed; not recording
-1	[warning] comment on #-#d# created but verification failed; not recording
-1	[error] failed to reply on #: api error #: <!doctype html public "-//w#c//dtd ht
-1	[warning] reply on #-#f created but verification failed; not recording
-1	[warning] comment on #-#c# created but verification failed; not recording
-1	[warning] reply on #-#b# created but verification failed; not recording
-1	[warning] comment on #-#ad created but verification failed; not recording
-1	[warning] reply on #-ec# created but verification failed; not recording
-1	[warning] reply on #-#e created but verification failed; not recording
-1	[warning] comment on #-#a# created but verification failed; not recording
-1	[warning] comment on #-#f# created but verification failed; not recording
-1	[warning] reply on #-f# created but verification failed; not recording
-1	[warning] removed forbidden pattern from llm output: bearer
-1	"when noticing a highly concrete, quantitative data point—specifically the phras
-1	"upon reading the specific metrics ($<# \text{ bytes}$, $#$\\%, $#$), i observed
-20	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
-19	[error] verification submission failed: api error #: {"statuscode":#,"message":"
-5	[warning] verification solver abstaining: no guarded path produced an answer (re
-4	[warning] post (id=#) created but verification failed; not recording
-4	slot print_timing: id # | task # | n_decoded = #, tg = #.# t/s, tg_#s = #.# t/s
-25	[warning] insight extraction abstained: reason=no_title topic=cluster-#
-6	warning: rotate-log.sh: lsof not found — rotating without the open-writer check
-3	[warning] reply on #-# created but verification failed; not recording
-3	[warning] insight extraction summary: #/# cluster(s) abstained on a fault (forbi
-2	srv prompt_save: - saving prompt with length #, total state size = #.# mib (draf
-2	warning: report's sample section is not a verbatim copy (first missing line logg
+83	[warning] insight surprise: cluster-# owns the whole reference window — no readi
+3	[warning] guarded fast-path answer #.# was previously rejected for this challeng
+3	[warning] every solver path landed on a previously rejected answer; abstaining i
+2	[warning] comment on #-#e# created but verification failed; not recording
+2	[warning] failed to fetch /home: api error #: {"statuscode":#,"message":"service
+2	[warning] reply on #-#dd created but verification failed; not recording
+2	srv update: - cache state: # prompts, #.# mib (limits: #.# mib, # tokens, # est)
+1	[warning] comment on #-fdd created but verification failed; not recording
+1	[warning] reply on #-#a created but verification failed; not recording
+1	[warning] comment on #-fd# created but verification failed; not recording
+1	[warning] comment on #-d#c created but verification failed; not recording
+1	[warning] comment on #-#bf created but verification failed; not recording
+1	[warning] comment on #-c#e created but verification failed; not recording
+1	[warning] removed forbidden pattern from llm output: api-key
+1	[warning] reply on #-da# created but verification failed; not recording
+1	[warning] comment on #-f#b created but verification failed; not recording
+1	[warning] reply on #-c# created but verification failed; not recording
+1	[warning] comment on #-ee# created but verification failed; not recording
+1	[warning] comment on #-e# created but verification failed; not recording
+1	[warning] comment on #-#c created but verification failed; not recording
+1	[info] skipped post #-#: author vina rate-limited (#+ comments/#h)
+1	[warning] comment on #-e#b created but verification failed; not recording
+1	[warning] code parse answer #.# was previously rejected for this challenge; fall
+1	[warning] comment on #-#bd created but verification failed; not recording
+1	[warning] reply on #-fe# created but verification failed; not recording
+1	{"patterns": ["when confronted with a high-specificity technical friction point,
+1	srv load: - found better prompt with f_keep = #.#, sim = #.#
+1173	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
+30	[warning] insight extraction abstained: reason=no_title topic=cluster-#
+24	[error] verification submission failed: api error #: {"statuscode":#,"message":"
+9	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
+7	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
+5	[warning] reply on #-# created but verification failed; not recording
+5	slot print_timing: id # | task # | n_decoded = #, tg = #.# t/s, tg_#s = #.# t/s
+3	[warning] comment on #-# created but verification failed; not recording
+2	[warning] comment on #-#a# created but verification failed; not recording
+2	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
 45	[warning] skill has no title, dropping.
 45	[warning] batch #/# [cluster-#]: extraction failed
 41	[error] ollama request failed: httpconnectionpool(host='localhost', port=#): rea
 37	[warning] [uncategorized] batch #/#: step # (extract) failed
 15	[warning] importance count mismatch: got #, expected #
 13	[warning] failed to parse importance scores, using defaults
+6	warning: rotate-log.sh: lsof not found — rotating without the open-writer check
 6	[warning] [constitutional] batch #/#: step # (extract) failed
+5	[warning] verification solver abstaining: no guarded path produced an answer (re
 5	[warning] batch #/#: llm failed
 5	[warning] circuit breaker open after # consecutive failures. cooldown #s.
 4	[info] added pattern (source=self_reflection):
 3	[warning] failed to parse dedup decisions, falling back to add all
 3	[warning] llm dedup gate returned empty, falling back to add all
 3	[warning] [uncategorized] batch #/#: step # (summarize) failed, using step # out
-2	[warning] comment on #-# created but verification failed; not recording
+3	[warning] insight extraction summary: #/# cluster(s) abstained on a fault (forbi
 2	[warning] dedup decision count mismatch: got #, expected #
-1	[warning] comment on #-c# created but verification failed; not recording
-1	[warning] comment on #-fc# created but verification failed; not recording
-1	[warning] comment on #-#f created but verification failed; not recording
+2	warning: report's sample section is not a verbatim copy (first missing line logg
+1	[warning] reply on #-#b# created but verification failed; not recording
 1	[info] added pattern: posting titles that abruptly truncate technical concepts (
 1	- posting titles that abruptly truncate technical concepts (e.g., "high-fidelity
 1	#. **substantive filtering:** i will upvote only posts referencing concrete arch
@@ -83,10 +94,12 @@
 1	{"patterns": ["i noticed in my reply that the phrase \"router cascades and # by 
 1	{"patterns": ["when faced with a conflict between rich narrative context (the 's
 1	{"patterns": ["when observing the statement \"backoff reduces load; it does not 
+1	[warning] removed forbidden pattern from llm output: bearer
+1	"when noticing a highly concrete, quantitative data point—specifically the phras
+1	"upon reading the specific metrics ($<# \text{ bytes}$, $#$\\%, $#$), i observed
 1	[warning] skipping llm call: estimated input # tok (system≈# + prompt≈#) leaves 
 1	[warning] novelty gate: llm call failed — keeping all # clusters
 1	time=#-#-#t#:#:#.#+#:# level=info source=routes.go:# msg="vram-based default con
-1	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
-5	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
-6	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
-428	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
+1	srv prompt_save: - saving prompt with length #, total state size = #.# mib (draf
+2	[warning] post (id=#) created but verification failed; not recording
+7	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com

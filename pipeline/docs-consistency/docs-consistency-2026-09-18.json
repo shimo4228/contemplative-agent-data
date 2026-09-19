@@ -1,0 +1,30 @@
+{
+  "findings": [
+    {
+      "check": "enja_drift",
+      "file": "docs/adr/0083-episode-logs-enter-the-weekly-prompt-as-hashes-only.md",
+      "line": null,
+      "detail": "en committed after ja (4246449s gap): docs/adr/0083-episode-logs-enter-the-weekly-prompt-as-hashes-only.ja.md"
+    }
+  ],
+  "count": 1,
+  "readings": {
+    "freshness": [
+      {
+        "file": "docs/CYCLES.md",
+        "generated": "2026-08-26",
+        "source_commit": "117b04b",
+        "commits_behind": 204,
+        "days_old": 24
+      }
+    ]
+  },
+  "errors": [
+    {
+      "check": "enja_drift",
+      "reason": "GIT_FAIL",
+      "detail": "no timestamp: docs/adr/0103-retire-the-wiki-mechanism.md"
+    }
+  ],
+  "scanned_files": 297
+}
