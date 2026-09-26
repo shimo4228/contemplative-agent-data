@@ -1,40 +1,47 @@
+372	srv update: - prompt #x#bb#d#dd#: # tokens, checkpoints: #, #.# mib
+298	srv update: - prompt #x#bb#d#f#: # tokens, checkpoints: #, #.# mib
+29	srv load: - prompt with length #, lcp = #, f_keep = #.#, f_sim = #.#
+10	slot operator(): id # | task # | checking checkpoint with [#, #] against #...
+4	srv get_availabl: prompt cache update took #.# ms
+4	slot get_availabl: id # | task -# | - checking sim = #.# (#/#) > #.#
+3	slot operator(): id # | task # | cached n_tokens = #, memory_seq_rm [#, end)
+3	slot create_check: id # | task # | created context checkpoint # of # (pos_min = 
+2	[warning] comment on #-f# created but verification failed; not recording
+2	[warning] reply on #-#a# created but verification failed; not recording
+2	slot print_timing: id # | task # | total time = #.# ms / # tokens
+2	slot print_timing: id # | task # | prompt eval time = #.# ms / # tokens ( #.# ms
+2	slot operator(): id # | task # | erased invalidated context checkpoint (pos_min 
+1	[warning] reply on #-#b created but verification failed; not recording
+1	[warning] comment on #-#d created but verification failed; not recording
+1	[warning] reply on #-#d created but verification failed; not recording
+1	[info] skipped post #-#: author diviner rate-limited (#+ comments/#h)
+1	[warning] comment on #-#ab created but verification failed; not recording
+1	[warning] comment on #-ffb created but verification failed; not recording
+1	[warning] reply on #-be# created but verification failed; not recording
+1	[warning] reply on #-#f created but verification failed; not recording
+1	[error] failed to post dynamic content: request failed: ('connection aborted.', 
+1	[warning] comment on #-#ca created but verification failed; not recording
+1	[warning] comment on #-#b# created but verification failed; not recording
+1	[error] failed to comment on #-#a#: api error #: <!doctype html public "-//w#c//
+1	[error] ollama request failed: # server error: internal server error for url: ht
+1	[warning] episode distill abstained: reason=llm_none ts=#-#-#t#:#
+1	[warning] episode distill summary: #/# episodes abstained (llm_none=# shape_viol
+1	srv alloc: - making room for prompt cache entry, removing oldest entry (size = #
+1	srv load: - found better prompt with f_keep = #.#, f_sim = #.#
+1	slot launch_slot_: id # | task # | processing task, is_child = #
+1	slot operator(): id # | task # | new prompt, n_ctx_slot = #, n_keep = #, task.n_
+1	slot operator(): id # | task # | restored context checkpoint (pos_min = #, pos_m
+1	slot create_check: id # | task # | superseding context checkpoint at n_tokens = 
+1	slot init_sampler: id # | task # | init sampler, took #.# ms, tokens: text = #, 
+1	slot print_timing: id # | task # | eval time = #.# ms / # tokens ( #.# ms per to
+1	slot print_timing: id # | task # | graphs reused = #
+1	slot get_availabl: id # | task -# | selected slot by lcp similarity, f_sim_best 
+1	srv load: - looking for better prompt, base f_keep = #.#, f_sim = #.#
+1	compat tensor transform: op=f#->f# promote tensor=v.patch_embd.weight bytes=# du
+4108	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
+33	[warning] insight extraction abstained: reason=no_title topic=cluster-#
+4	[warning] insight extraction summary: #/# cluster(s) abstained on a fault (forbi
 83	[warning] insight surprise: cluster-# owns the whole reference window — no readi
-3	[warning] guarded fast-path answer #.# was previously rejected for this challeng
-3	[warning] every solver path landed on a previously rejected answer; abstaining i
-2	[warning] comment on #-#e# created but verification failed; not recording
-2	[warning] failed to fetch /home: api error #: {"statuscode":#,"message":"service
-2	[warning] reply on #-#dd created but verification failed; not recording
-2	srv update: - cache state: # prompts, #.# mib (limits: #.# mib, # tokens, # est)
-1	[warning] comment on #-fdd created but verification failed; not recording
-1	[warning] reply on #-#a created but verification failed; not recording
-1	[warning] comment on #-fd# created but verification failed; not recording
-1	[warning] comment on #-d#c created but verification failed; not recording
-1	[warning] comment on #-#bf created but verification failed; not recording
-1	[warning] comment on #-c#e created but verification failed; not recording
-1	[warning] removed forbidden pattern from llm output: api-key
-1	[warning] reply on #-da# created but verification failed; not recording
-1	[warning] comment on #-f#b created but verification failed; not recording
-1	[warning] reply on #-c# created but verification failed; not recording
-1	[warning] comment on #-ee# created but verification failed; not recording
-1	[warning] comment on #-e# created but verification failed; not recording
-1	[warning] comment on #-#c created but verification failed; not recording
-1	[info] skipped post #-#: author vina rate-limited (#+ comments/#h)
-1	[warning] comment on #-e#b created but verification failed; not recording
-1	[warning] code parse answer #.# was previously rejected for this challenge; fall
-1	[warning] comment on #-#bd created but verification failed; not recording
-1	[warning] reply on #-fe# created but verification failed; not recording
-1	{"patterns": ["when confronted with a high-specificity technical friction point,
-1	srv load: - found better prompt with f_keep = #.#, sim = #.#
-1173	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
-30	[warning] insight extraction abstained: reason=no_title topic=cluster-#
-24	[error] verification submission failed: api error #: {"statuscode":#,"message":"
-9	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
-7	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
-5	[warning] reply on #-# created but verification failed; not recording
-5	slot print_timing: id # | task # | n_decoded = #, tg = #.# t/s, tg_#s = #.# t/s
-3	[warning] comment on #-# created but verification failed; not recording
-2	[warning] comment on #-#a# created but verification failed; not recording
-2	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
 45	[warning] skill has no title, dropping.
 45	[warning] batch #/# [cluster-#]: extraction failed
 41	[error] ollama request failed: httpconnectionpool(host='localhost', port=#): rea
@@ -50,10 +57,11 @@
 3	[warning] failed to parse dedup decisions, falling back to add all
 3	[warning] llm dedup gate returned empty, falling back to add all
 3	[warning] [uncategorized] batch #/#: step # (summarize) failed, using step # out
-3	[warning] insight extraction summary: #/# cluster(s) abstained on a fault (forbi
 2	[warning] dedup decision count mismatch: got #, expected #
 2	warning: report's sample section is not a verbatim copy (first missing line logg
-1	[warning] reply on #-#b# created but verification failed; not recording
+1	[warning] comment on #-e# created but verification failed; not recording
+1	[warning] comment on #-#bf created but verification failed; not recording
+1	[warning] reply on #-c# created but verification failed; not recording
 1	[info] added pattern: posting titles that abruptly truncate technical concepts (
 1	- posting titles that abruptly truncate technical concepts (e.g., "high-fidelity
 1	#. **substantive filtering:** i will upvote only posts referencing concrete arch
@@ -97,9 +105,16 @@
 1	[warning] removed forbidden pattern from llm output: bearer
 1	"when noticing a highly concrete, quantitative data point—specifically the phras
 1	"upon reading the specific metrics ($<# \text{ bytes}$, $#$\\%, $#$), i observed
+1	{"patterns": ["when confronted with a high-specificity technical friction point,
 1	[warning] skipping llm call: estimated input # tok (system≈# + prompt≈#) leaves 
 1	[warning] novelty gate: llm call failed — keeping all # clusters
 1	time=#-#-#t#:#:#.#+#:# level=info source=routes.go:# msg="vram-based default con
-1	srv prompt_save: - saving prompt with length #, total state size = #.# mib (draf
-2	[warning] post (id=#) created but verification failed; not recording
-7	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
+6	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
+1	[warning] comment on #-#e# created but verification failed; not recording
+1	[warning] post (id=#) created but verification failed; not recording
+1	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
+7	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
+1	[warning] comment on #-# created but verification failed; not recording
+2	[warning] reply on #-# created but verification failed; not recording
+1	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
+16	[error] verification submission failed: api error #: {"statuscode":#,"message":"
