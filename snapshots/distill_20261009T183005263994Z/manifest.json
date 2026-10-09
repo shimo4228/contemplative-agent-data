@@ -1,14 +1,21 @@
 {
   "command": "distill",
-  "ts": "2026-07-17T18:30:07Z",
+  "ts": "2026-10-09T18:30:05Z",
+  "run_id": "d721d9ca02934d77ba876dc22a161f1c",
   "generation_model": "gemma4:e4b",
   "think": false,
+  "ollama_version": "0.34.2",
+  "generation_model_digest": "c6eb396dbd59",
+  "embedding_model_digest": "0a109f422b47",
+  "serving_environment_reason": "ok",
   "embedding_model": "nomic-embed-text",
   "embedding_dim": 768,
   "thresholds": {
+    "CLUSTER_THRESHOLD_INSIGHT": 0.7,
+    "DEDUP_IMPORTANCE_FLOOR": 0.05,
+    "MAX_BATCH": 10,
     "SIM_DUPLICATE": 0.9,
-    "SIM_UPDATE": 0.8,
-    "DEDUP_IMPORTANCE_FLOOR": 0.05
+    "SIM_UPDATE": 0.8
   },
   "views": [
     "constitutional",
