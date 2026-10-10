@@ -1,0 +1,36 @@
+{
+  "findings": [
+    {
+      "check": "notes_ref",
+      "file": "docs/adr/0113-decision-faces-and-relevance-score4-shadow.ja.md",
+      "line": 94,
+      "detail": ".notes/ is gitignored — broken in every clone"
+    },
+    {
+      "check": "notes_ref",
+      "file": "docs/adr/0113-decision-faces-and-relevance-score4-shadow.md",
+      "line": 321,
+      "detail": ".notes/ is gitignored — broken in every clone"
+    }
+  ],
+  "count": 2,
+  "readings": {
+    "freshness": [
+      {
+        "file": "docs/CYCLES.md",
+        "generated": "2026-08-26",
+        "source_commit": "117b04b",
+        "commits_behind": 377,
+        "days_old": 45
+      }
+    ]
+  },
+  "errors": [
+    {
+      "check": "enja_drift",
+      "reason": "GIT_FAIL",
+      "detail": "no timestamp: docs/adr/0103-retire-the-wiki-mechanism.md"
+    }
+  ],
+  "scanned_files": 385
+}

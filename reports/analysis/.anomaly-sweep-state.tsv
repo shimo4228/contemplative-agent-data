@@ -1,37 +1,56 @@
-3	[info] skipped post #-#: author vina rate-limited (#+ comments/#h)
-2	[warning] comment on #-#a# created but verification failed; not recording
-1	[warning] reply on #-#bf created but verification failed; not recording
-1	[warning] comment on #-b# created but verification failed; not recording
-1	[warning] reply on #-d# created but verification failed; not recording
-1	[warning] comment on #-ca# created but verification failed; not recording
-1	[warning] comment on #-#da created but verification failed; not recording
-1	[warning] reply on #-a#f created but verification failed; not recording
-1	[warning] comment on #-fe# created but verification failed; not recording
-1	[warning] comment on #-e#d created but verification failed; not recording
-1	[warning] comment on #-#c created but verification failed; not recording
-1	[warning] reply on #-edc created but verification failed; not recording
-1	[warning] reply on #-bd# created but verification failed; not recording
-1	[warning] reply on #-#f# created but verification failed; not recording
-1	"when observing the phrase 'a truncated result is structurally indistinguishable
-1	srv update: - cache state: # prompts, #.# mib (limits: #.# mib, # tokens, # est)
-14	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
-8	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
-5	[info] added pattern (source=self_reflection):
-2	slot get_availabl: id # | task -# | selected slot by lcp similarity, f_sim_best 
-2	srv load: - looking for better prompt, base f_keep = #.#, f_sim = #.#
-2	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
+6	[warning] reply on #-# created but verification failed; not recording
+3	[warning] output truncated at num_predict=# (finish_reason=length); dropping ins
+2	[warning] reply on #-f#d created but verification failed; not recording
+2	[warning] verification solver abstaining: the solve call returned no text (see l
+2	[warning] comment on #-#f created but verification failed; not recording
+1	[info] post #-# score# gate passed (live relevance #.#)
+1	[info] post #-# relevance #.# passed threshold #.#
+1	[info] upvoted post #-# (relevance: #.#)
+1	[info] >> comment on #-#: # chars:
+1	[warning] comment on #-#e# created but verification failed; not recording
+1	[warning] comment on #-ef# created but verification failed; not recording
+1	[warning] reply on #-#f created but verification failed; not recording
+1	[warning] reply on #-#b# created but verification failed; not recording
+1	[warning] reply on #-df# created but verification failed; not recording
+1	[warning] reply on #-b#f created but verification failed; not recording
+1	[warning] comment on #-f# created but verification failed; not recording
+1	[warning] comment on #-#e created but verification failed; not recording
+1	[warning] output truncated at num_predict=# (finish_reason=length); downstream c
+1	[warning] clamping num_predict # -> #: estimator input # tok (system≈# + prompt≈
+1	[warning] post (id=#) created but verification failed; not recording
+1	[warning] reply on #-#c created but verification failed; not recording
+1	[warning] reply on #-#e created but verification failed; not recording
+1	[warning] guarded fast-path answer #.# was previously rejected for this challeng
+1	[warning] every solver path landed on a previously rejected answer; abstaining i
+1	[info] >> new post
+1	{"patterns": ["when observing a discussion that contrasts distinct operational m
+1	"when noticing the opening phrase, \"i claim that context‑window truncation is a
+1	"when i noticed the structural pivot in my own writing—moving from the technical
+1	"when considering the parallel between context truncation eroding 'governing con
+1	"when i read the agent noting that 'a constraint that survives truncation but ar
+1	slot print_timing: id # | task # | n_gen = #, tg = #.# t/s, tg_#s = #.# t/s
+1	slot print_timing: id # | task # | eval time = #.# ms / # tokens ( #.# ms per to
+1	srv prompt_save: - saving prompt with length #, total state size = #.# mib (draf
+1	srv update: - prompt #x#: # tokens, checkpoints: #, #.# mib
+1	slot print_timing: id # | task # | total time = #.# ms / # tokens
+1	error: session produced no report (/users/shimomoto_tatsuya/.config/moltbook/rep
+8	[info] added pattern (source=self_reflection):
+5	[warning] verification solver abstaining: no guarded path produced an answer (re
+17	[error] verification submission failed: api error #: {"statuscode":#,"message":"
+9	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
+7	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
+2	[warning] episode distill abstained: reason=llm_none ts=#-#-#t#:#
+2	[warning] episode distill summary: #/# episodes abstained (llm_none=# shape_viol
 83	[warning] insight surprise: cluster-# owns the whole reference window — no readi
 45	[warning] skill has no title, dropping.
 45	[warning] batch #/# [cluster-#]: extraction failed
 41	[error] ollama request failed: httpconnectionpool(host='localhost', port=#): rea
 37	[warning] [uncategorized] batch #/#: step # (extract) failed
 33	[warning] insight extraction abstained: reason=no_title topic=cluster-#
-16	[error] verification submission failed: api error #: {"statuscode":#,"message":"
 15	[warning] importance count mismatch: got #, expected #
 13	[warning] failed to parse importance scores, using defaults
 6	warning: rotate-log.sh: lsof not found — rotating without the open-writer check
 6	[warning] [constitutional] batch #/#: step # (extract) failed
-6	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
 5	[warning] batch #/#: llm failed
 5	[warning] circuit breaker open after # consecutive failures. cooldown #s.
 4	[warning] insight extraction summary: #/# cluster(s) abstained on a fault (forbi
@@ -39,11 +58,12 @@
 3	[warning] llm dedup gate returned empty, falling back to add all
 3	[warning] [uncategorized] batch #/#: step # (summarize) failed, using step # out
 2	[warning] dedup decision count mismatch: got #, expected #
+2	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
 2	warning: report's sample section is not a verbatim copy (first missing line logg
-1	[warning] reply on #-#b created but verification failed; not recording
-1	[warning] reply on #-c# created but verification failed; not recording
-1	[warning] comment on #-#b# created but verification failed; not recording
 1	[warning] comment on #-# created but verification failed; not recording
+1	[warning] comment on #-#c created but verification failed; not recording
+1	[warning] reply on #-d# created but verification failed; not recording
+1	[warning] comment on #-#da created but verification failed; not recording
 1	[info] added pattern: posting titles that abruptly truncate technical concepts (
 1	- posting titles that abruptly truncate technical concepts (e.g., "high-fidelity
 1	#. **substantive filtering:** i will upvote only posts referencing concrete arch
@@ -89,11 +109,9 @@
 1	"upon reading the specific metrics ($<# \text{ bytes}$, $#$\\%, $#$), i observed
 1	{"patterns": ["when confronted with a high-specificity technical friction point,
 1	[error] ollama request failed: # server error: internal server error for url: ht
-1	[warning] episode distill abstained: reason=llm_none ts=#-#-#t#:#
-1	[warning] episode distill summary: #/# episodes abstained (llm_none=# shape_viol
+1	"when observing the phrase 'a truncated result is structurally indistinguishable
 1	[warning] skipping llm call: estimated input # tok (system≈# + prompt≈#) leaves 
 1	[warning] novelty gate: llm call failed — keeping all # clusters
 1	time=#-#-#t#:#:#.#+#:# level=info source=routes.go:# msg="vram-based default con
-2	[warning] verification solver abstaining: no guarded path produced an answer (re
-4	srv load: - prompt with length #, lcp = #, f_keep = #.#, f_sim = #.#
-1306	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
+3	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
+1214	slot release: id # | task # | stop processing: n_tokens = #, truncated = #

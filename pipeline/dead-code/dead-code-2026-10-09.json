@@ -1,0 +1,19 @@
+{
+  "tool": "vulture",
+  "report_prefixes": [
+    "src/",
+    "scripts/"
+  ],
+  "count": 1,
+  "candidates": [
+    {
+      "file": "src/contemplative_agent/adapters/moltbook/relevance_shadow.py",
+      "line": 80,
+      "message": "unused variable 'SOURCES'",
+      "confidence": 60
+    }
+  ],
+  "parsed_total": 135,
+  "unparsed_lines": 0,
+  "stderr_lines": 0
+}
