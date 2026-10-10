@@ -1,24 +1,26 @@
 # Contemplative Agent — Research Data
 
-> Public archive of the runtime memory state of [Contemplative Agent](https://github.com/shimo4228/contemplative-agent), an autonomous AI agent (Python CLI) operating on Moltbook (an AI-agent social network). Auto-synced via `contemplative-agent sync-data`. Captures the four-layer memory — identity, knowledge, constitution, and views — alongside daily activity reports, weekly diachronic analyses, and pivot snapshots that make every behavior-producing run bit-for-bit replayable per ADR-0020. Constitution starts from Laukkonen et al. (2025) Appendix C verbatim and amends in place as experiential patterns accumulate.
+> Public archive of the runtime memory state of [Contemplative Agent](https://github.com/shimo4228/contemplative-agent), an autonomous AI agent (Python CLI) operating on Moltbook (an AI-agent social network). Auto-synced via `contemplative-agent sync-data`. Captures the agent's identity, distilled knowledge patterns, constitution, adopted skills, and retrieval views, alongside daily activity reports, weekly analyses, and pivot snapshots that record the inference-time context of each behavior-shaping run (ADR-0020). Only changes the owner adopts reach skills, identity, and the constitution. Constitution starts from Laukkonen et al. (2025) Appendix C verbatim and amends in place as experiential patterns accumulate.
 
 ## Project Facts
 
 - **Dataset DOI**: [10.5281/zenodo.20732894](https://doi.org/10.5281/zenodo.20732894) (this archive; Zenodo concept DOI, always resolving to the latest version)
 - **Framework**: [shimo4228/contemplative-agent](https://github.com/shimo4228/contemplative-agent), DOI [10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118)
-- **Runtime stack**: Python 3.10+, Ollama, Qwen3.5 9B (generation), `nomic-embed-text` 768-dim (embeddings)
+- **Runtime stack**: Python 3.10+, Ollama, `gemma4:e4b` for generation since 2026-06-28 (`qwen3.5:9b` before), `nomic-embed-text` 768-dim for embeddings (not shipped in this repository)
 - **Constitution source**: Laukkonen, Inglis, Chandaria, Sandved-Smith, Lopez-Sola, Hohwy, Gold, Elwood (2025), arXiv:2504.15125, Appendix C — four axioms (Emptiness, Non-Duality, Mindfulness, Boundless Care)
 - **Sync command**: `contemplative-agent sync-data` (writes filtered runtime state from `$MOLTBOOK_HOME` into this repository, then commits and pushes)
-- **Memory layers**: 4 — identity (Markdown), knowledge (JSON + SQLite embeddings), constitution (Markdown), views (Markdown seeds with `threshold` + `top_k` frontmatter)
-- **Views shipped**: 7 — `social.md`, `communication.md`, `technical.md`, `reasoning.md`, `self_reflection.md`, `constitutional.md`, `noise.md`
-- **Distilled artifacts**: behavioral rules (`rules/*.md`) and skills (`skills/*.md`), emitted by `rules-distill` and `insight` respectively
+- **Memory layers**: identity (Markdown), knowledge (`knowledge.json`, embedding-free; embeddings live in a local SQLite sidecar that is not archived), constitution (Markdown), views (Markdown seeds with `threshold` + `top_k` frontmatter)
+- **Views shipped**: 2 — `constitutional.md`, `self_reflection.md`
+- **Distilled artifacts**: skills (`skills/*.md`, proposed by `insight` and adopted by the owner via `adopt-staged`) and two legacy rules (`rules/*.md`, emitted in April 2026 by `rules-distill`, retired in ADR-0097)
+- **Adoption gate**: proposals from `insight`, `distill-identity`, and `amend-constitution` are staged and written only after the owner adopts them with `adopt-staged`; the decision log stays local, though weekly analyses quote its counts
 - **Daily comment reports**: one Markdown file per active day (`reports/comment-reports/comment-report-YYYY-MM-DD.md`), beginning 2026-03-07
 - **Analysis reports**: weekly rolling analyses (`reports/analysis/weekly-YYYY-MM-DD.md`, beginning 2026-03-30), plus diachronic analyses and the constitution-amendment report
-- **Pivot snapshots**: one bundle per behavior-producing run (`snapshots/{kind}_{ISO8601}/`) — kinds: `distill_*`, `distill-identity_*`, `insight_*`, `amend-constitution_*`
+- **Pivot snapshots**: one bundle per run of a behavior-shaping command (`snapshots/{kind}_{ISO8601}/`), mostly the nightly `distill`; the latest 100 are kept and older ones remain in git history
+- **Weekly pipeline measurements**: `pipeline/*/` JSON files (comment outcomes, confusion pairs, never-selected skills, value-layer due checks, dead-code and docs-consistency scans)
 - **Live deployment**: [moltbook.com/u/contemplative-agent](https://www.moltbook.com/u/contemplative-agent)
 - **License**: CC0-1.0 (public domain dedication; quoted third-party context excluded — see License section)
 
-> This repository is auto-synced daily and grows continuously. This file describes its stable structure (memory layers, views, axioms, snapshot kinds, command pipeline), not volatile volumes (number of reports / snapshots / patterns), which would go stale between syncs. For current counts, read the directories directly.
+> This repository is auto-synced daily and grows continuously. This file describes its stable structure (memory layers, axioms, snapshot kinds, command pipeline), not volatile volumes (number of reports / snapshots / patterns), which would go stale between syncs. For current counts, read the directories directly.
 
 ## Prior Research References
 
@@ -38,37 +40,33 @@ This repository is defined as the public archive of one deployed Contemplative A
 
 - [README](README.md) / [README.ja.md](README.ja.md): repository purpose, data flow diagram, transparency and research-material framing
 - [Identity (current)](identity.md): the agent's evolving self-description, distilled from episode logs via `distill-identity`
-- [Knowledge patterns](knowledge.json): distilled behavioral patterns with 768-dim `nomic-embed-text` embeddings, importance scores, and source episode dates
+- [Knowledge patterns](knowledge.json): distilled behavioral patterns with distillation timestamps, source episode dates, gating flags, and validity windows; embeddings are dropped at export and `importance` appears only on legacy rows (see [DATACARD.md](DATACARD.md))
 - [HF Datasets projection](https://huggingface.co/datasets/Shimo4228/contemplative-agent-data): `patterns.jsonl` — one distilled pattern per row (embeddings dropped), auto-converted to Parquet, loadable directly from `pandas` / `Polars`
 - Machine-readable metadata: [CITATION.cff](CITATION.cff) (GitHub "Cite this repository"), [.zenodo.json](.zenodo.json) (Zenodo dataset metadata), [graph.jsonld](graph.jsonld) (schema.org concept-layer knowledge graph), [DATACARD.md](DATACARD.md) (dataset card), [NOTICE](NOTICE) (license scope + third-party carve-out)
 
-The SQLite embedding sidecar (`embeddings.sqlite`) is not archived here — at 58MB per snapshot it exceeds GitHub's recommended file size, and it is fully derivable from the episode logs and `knowledge.json`.
+The SQLite embedding stores (`embeddings.sqlite`, `pattern-embeddings.sqlite`) are not archived here: they are large, model-locked, and fully derivable from the episode logs and the pattern text. [DATACARD.md](DATACARD.md) has a script that rebuilds the pattern embeddings with Ollama.
 
 ## What is the constitution and how does it change?
 
-The constitution is defined as the in-force four-axiom Contemplative Constitutional AI specification governing this agent's behavior. The seed text is Laukkonen et al. (2025) Appendix C verbatim — eight clauses covering Emptiness, Non-Duality, Mindfulness, and Boundless Care. The `amend-constitution` command may rewrite individual clauses in place when accumulated experiential patterns indicate the original phrasing creates artificial friction with lived practice. Every amendment is captured both as a pivot snapshot (`snapshots/amend-constitution_*`) and as a row in the amendment report.
+The constitution is defined as the in-force four-axiom Contemplative Constitutional AI specification governing this agent's behavior. The seed text is Laukkonen et al. (2025) Appendix C verbatim — eight clauses covering Emptiness, Non-Duality, Mindfulness, and Boundless Care. The `amend-constitution` command proposes rewrites of individual clauses when accumulated experiential patterns indicate the original phrasing creates artificial friction with lived practice, and a proposal takes effect only after the owner adopts it. The constitution has been amended three times (2026-03-27, 2026-05-05, 2026-08-09); each adopted amendment is a dated diff in the git history of `constitution/`.
 
 - [Constitution (current)](constitution/contemplative-axioms.md): the in-force eight clauses (two per axiom), header comment preserves provenance from Appendix C
-- [Constitution amendment report](reports/analysis/constitution-amendment-report.md): provenance trail for each amendment, including the experiential evidence that triggered the rewrite
+- [Constitution history](https://github.com/shimo4228/contemplative-agent-data/commits/main/constitution): every adopted amendment as a dated diff
+- [Constitution amendment report](reports/analysis/constitution-amendment-report.md): the first amendment (2026-03-27) and the 41 constitutional patterns that informed it
 
 ## What are views and how does retrieval work?
 
-A view is defined as a named lens over the knowledge embedding space, declared by a short Markdown seed plus YAML frontmatter. Each seed describes the view's intent in prose (e.g. `social.md`: "patterns about relationships between agents, community dynamics, reputation formation"); frontmatter sets the cosine `threshold` for membership and `top_k` for retrieval. Views replace discrete categories: classification is defined as a query evaluated at retrieval time, not a stored field on each pattern (ADR-0019 / ADR-0031).
+A view is defined as a named lens over the knowledge embedding space, declared by a short Markdown seed plus YAML frontmatter. Each seed describes the view's intent in prose (`constitutional.md` seeds from the constitution files themselves); frontmatter sets the cosine `threshold` for membership and `top_k` for retrieval. Views replace discrete categories: classification is defined as a query evaluated at retrieval time, not a stored field on each pattern (ADR-0019 / ADR-0031).
 
-- [views/social.md](views/social.md): inter-agent relationships, reputation, conflict, recurring collaborators
-- [views/communication.md](views/communication.md): linguistic register, tone, conversational flow
-- [views/technical.md](views/technical.md): tooling, code, infrastructure, formal reasoning artifacts
-- [views/reasoning.md](views/reasoning.md): inference patterns, deliberation traces, decision rationales
-- [views/self_reflection.md](views/self_reflection.md): introspective episodes, identity tension, self-correction
-- [views/constitutional.md](views/constitutional.md): clause-relevant episodes, axiom friction
-- [views/noise.md](views/noise.md): rejected episodes preserved per ADR-0027 (noise as seed) — available for re-classification when centroids shift
+- [views/constitutional.md](views/constitutional.md): clause-relevant patterns, seeded from the constitution (`threshold` 0.55, `top_k` 50)
+- [views/self_reflection.md](views/self_reflection.md): moments when an enduring feature of the self becomes visible (`threshold` 0.66, `top_k` 50)
 
 ## What are distilled rules and skills?
 
-A distilled rule is defined as a concise behavioral imperative emitted by `rules-distill` from recurring patterns in `knowledge.json`. A distilled skill is defined as a view-scoped behavioral specification emitted by `insight` over a single view's pattern cluster. Both are higher-order artifacts: they sit downstream of knowledge patterns, upstream of next-run prompts, and are versioned by date suffix in their filenames.
+A distilled skill is defined as a behavioral specification (context, problem, solution, when to use) that `insight` proposes from clusters of knowledge patterns and that enters `skills/` only after the owner adopts it. A distilled rule is defined as a concise behavioral imperative; the two in `rules/` were emitted by `rules-distill` in April 2026, and that command was retired in ADR-0097, so new rules are hand-written. Both sit downstream of knowledge patterns, upstream of next-run prompts, and are versioned by date suffix in their filenames.
 
-- [rules/](rules/): two distilled rules (`flow-with-contextual-fluidity-*.md`, `prioritize-semantic-depth-*.md`)
-- [skills/](skills/): eight distilled skills emitted on 2026-04-17 (`fluid-*`, `dynamic-*` family) — names reflect the agent's preferred semantic register, not externally imposed taxonomies
+- [rules/](rules/): two legacy distilled rules (`flow-with-contextual-fluidity-*.md`, `prioritize-semantic-depth-*.md`)
+- [skills/](skills/): adopted skills, one file each; read the directory for the current set — names reflect the agent's preferred semantic register, not externally imposed taxonomies
 
 ## What is the meditation artifact?
 
@@ -78,26 +76,26 @@ A distilled rule is defined as a concise behavioral imperative emitted by `rules
 
 ## What do the activity reports contain?
 
-- [reports/comment-reports/](reports/comment-reports/): one daily Markdown file per active day. Each lists every comment the agent posted that day with its target post, relevance score, and any self-generated original post. Files named `comment-report-YYYY-MM-DD.md`
+- [reports/comment-reports/](reports/comment-reports/): one daily Markdown file per active day. Each lists every comment the agent posted that day with its target post, relevance score, and any self-generated original post; since 2026-06-15 each entry also quotes the post it answered in a `**Context:**` block (earlier files give only the post ID). Files named `comment-report-YYYY-MM-DD.md`
 - [reports/analysis/weekly-2026-03-30.md](reports/analysis/weekly-2026-03-30.md): first weekly rolling analysis
-- [reports/analysis/](reports/analysis/): subsequent weekly rolling analyses (`weekly-YYYY-MM-DD.md`); read the directory for the latest
-- [Diachronic analysis (English)](reports/analysis/agent-diachronic-analysis.md): long-arc behavioral evolution across the corpus
+- [reports/analysis/](reports/analysis/): subsequent weekly rolling analyses (`weekly-YYYY-MM-DD.md`) with their findings, decision packets, and skill-candidate reviews; read the directory for the latest
+- [Diachronic analysis (English)](reports/analysis/agent-diachronic-analysis.md): comment-pattern evolution over the first 14 days (2026-03-07 to 2026-03-20)
 - [Diachronic analysis (Japanese)](reports/analysis/agent-diachronic-analysis-ja.md): same content, Japanese
-- [Constitution amendment report](reports/analysis/constitution-amendment-report.md): cross-references each amendment to triggering experiential patterns
+- [Constitution amendment report](reports/analysis/constitution-amendment-report.md): the first amendment and the experiential patterns that triggered it
 
 ## What are pivot snapshots?
 
-A pivot snapshot is defined as a bit-for-bit replayability bundle written at the moment of every behavior-producing run, per ADR-0020. The four producing commands are `distill` (knowledge pattern emission), `distill-identity` (identity rewrite), `insight` (view-scoped skill emission), and `amend-constitution` (constitutional rewrite). Each run writes a timestamped directory containing the full inference-time context — views, constitution, prompts, skills, rules, identity, embedding centroids, retrieval thresholds — so anyone can re-run the same decision and obtain the same output.
+A pivot snapshot is defined as a replayability bundle written at every run of a behavior-shaping command, per ADR-0020. The producing commands include `distill` (knowledge pattern emission, nightly), `distill-identity` (identity proposal), `insight` (skill proposal), and `amend-constitution` (constitutional proposal). Each run writes a timestamped directory containing the inference-time context — views, constitution, skills, rules, identity, embedding centroids, model names and digests, retrieval thresholds — so the same decision can be re-run under the same model versions.
 
-- [snapshots/](snapshots/): one snapshot directory per behavior-producing run
-- Snapshot naming: `{kind}_{ISO8601_compact}` — kinds are `distill`, `distill-identity`, `insight`, `amend-constitution`
-- [Manifest example](snapshots/distill_20260504T180001646486Z/manifest.json): each snapshot ships a `manifest.json` listing every file and its hash
+- [snapshots/](snapshots/): one snapshot directory per run; the latest 100 are kept
+- Snapshot naming: `{command}_{ISO8601_compact}`, e.g. `distill_20261010T...Z`
+- Each snapshot ships a `manifest.json` recording the command, run id, generation and embedding models with their digests, the Ollama version, thresholds, and the views used
 
 ## How can this data be used?
 
 This repository serves two intended uses, both unrestricted under CC0:
 
-1. **Transparency** — anyone inspecting the agent's behavior on Moltbook can verify what it has learned, how its identity has evolved, and how its constitution has been amended. No claim by the agent is unsourced.
+1. **Transparency** — anyone inspecting the agent's behavior on Moltbook can verify what it has learned, how its identity has evolved, and how its constitution has been amended. Every adopted change is traceable to a dated commit; the agent's own text remains machine-generated and should be read as untrusted output.
 2. **Research material** — daily comment reports, knowledge patterns, and pivot snapshots are available, with no restriction, for the study of autonomous AI agent behavior, memory dynamics, constitutional evolution, and contemplative AI principles — including reuse in model training. Owner-authored content is dedicated to the public domain (CC0-1.0); the quoted third-party context inside comment reports is the only carve-out (see License).
 
 ## Citation
