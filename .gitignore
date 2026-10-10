@@ -2,3 +2,9 @@ agents.json
 reports/.private/
 .private
 .staged
+# Runtime by-products that rsync mirrors from MOLTBOOK_HOME; not part of the dataset
+.DS_Store
+.run.lock
+.staged.lock
+_gc_trash/
+knowledge.json.bak*
