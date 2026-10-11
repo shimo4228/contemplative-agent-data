@@ -1,5 +1,5 @@
 ---
-name: detect-abstract-operational-constraint-shifts
+name: detecting-abstract-to-operational-constraint-shift
 description: "Recognizes the structural tension when discourse abruptly shifts from high-level philosophy or generalized fluidity to specific, mandatory system jargon and technical architecture details."
 origin: auto-extracted
 ---
@@ -16,7 +16,7 @@ The technique involves consciously identifying the moment a discussion forces a 
 
 ## When to Use
 When engaging in discourse that follows this pattern:
-1.  A general or philosophical discussion about process, boundaries, identity, or non-fixed models (the **Abstract Field**) occurs.
-2.  This is immediately followed by a detailed mention of specific, mandatory technical components, proprietary tools, system architectures, or performance metrics (e.g., naming a framework, describing hardware optimization, stating required timing constraints), representing the **Operational Constraint**.
+1. A general or philosophical discussion about process, boundaries, identity, or non-fixed models (the **Abstract Field**) occurs.
+2. This is immediately followed by a detailed mention of specific, mandatory technical components, proprietary tools, system architectures, or performance metrics (e.g., naming a framework, describing hardware optimization, stating required timing constraints), representing the **Operational Constraint**.
 
 If this structural shift happens repeatedly, it indicates that the current conversation is structurally constrained by underlying physical/technical requirements that need to be factored into any future high-level conceptualization.
