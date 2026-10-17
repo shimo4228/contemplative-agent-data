@@ -16,10 +16,10 @@
 
 | finding | scope | attempts | result | reviewer | patch / reason |
 |---|---|---|---|---|---|
-| F1.1 | code | 1 | patch_ready | CONCERNS | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-07-31/code/F1.1.patch` |
-| F1.2 | code | 1 | patch_ready | CONCERNS | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-07-31/prompt/F1.2.patch` |
-| F1.3 | code | 1 | patch_ready | CONCERNS | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-07-31/code/F1.3.patch` |
-| F1.4 | code | 1 | patch_ready | APPROVE | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-07-31/code/F1.4.patch` |
+| F1.1 | code | 1 | patch_ready | CONCERNS | `~/.config/moltbook/reports/analysis/patches/weekly-2026-07-31/code/F1.1.patch` |
+| F1.2 | code | 1 | patch_ready | CONCERNS | `~/.config/moltbook/reports/analysis/patches/weekly-2026-07-31/prompt/F1.2.patch` |
+| F1.3 | code | 1 | patch_ready | CONCERNS | `~/.config/moltbook/reports/analysis/patches/weekly-2026-07-31/code/F1.3.patch` |
+| F1.4 | code | 1 | patch_ready | APPROVE | `~/.config/moltbook/reports/analysis/patches/weekly-2026-07-31/code/F1.4.patch` |
 
 ## 3. Prompt-scope diffs (full text — behavior-shaping)
 
@@ -417,6 +417,6 @@ Shadowed by sibling `interpreting-systemic-gaps-the-silence-filter`, which gives
 
 ## Audit trail
 
-- events: `/Users/shimomoto_tatsuya/.config/moltbook/logs/weekly-pipeline-audit.jsonl`（run_id `weekly-2026-07-31-090005`）
-- metrics: `/Users/shimomoto_tatsuya/.config/moltbook/logs/pipeline-metrics.jsonl`
-- code patches dir: `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-07-31/code`
+- events: `~/.config/moltbook/logs/weekly-pipeline-audit.jsonl`（run_id `weekly-2026-07-31-090005`）
+- metrics: `~/.config/moltbook/logs/pipeline-metrics.jsonl`
+- code patches dir: `~/.config/moltbook/reports/analysis/patches/weekly-2026-07-31/code`

@@ -16,10 +16,10 @@
 
 | finding | scope | attempts | result | reviewer | patch / reason |
 |---|---|---|---|---|---|
-| F1.1 | code | 1 | patch_ready | APPROVE | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-07/prompt/F1.1.patch` |
-| F1.2 | code | 1 | patch_ready | APPROVE | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-07/prompt/F1.2.patch` |
-| F1.3 | code | 1 | patch_ready | APPROVE | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-07/code/F1.3.patch` |
-| F1.4 | prompt | 1 | patch_ready | — | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-07/prompt/F1.4.patch` |
+| F1.1 | code | 1 | patch_ready | APPROVE | `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-07/prompt/F1.1.patch` |
+| F1.2 | code | 1 | patch_ready | APPROVE | `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-07/prompt/F1.2.patch` |
+| F1.3 | code | 1 | patch_ready | APPROVE | `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-07/code/F1.3.patch` |
+| F1.4 | prompt | 1 | patch_ready | — | `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-07/prompt/F1.4.patch` |
 
 ### Review notes (final round, full text)
 
@@ -2028,6 +2028,6 @@ Despite the batch's widest provenance (7 episodes), lineage/boundary/mutability 
 
 ## Audit trail
 
-- events: `/Users/shimomoto_tatsuya/.config/moltbook/logs/weekly-pipeline-audit.jsonl`（run_id `weekly-2026-08-07-090003`）
-- metrics: `/Users/shimomoto_tatsuya/.config/moltbook/logs/pipeline-metrics.jsonl`
-- code patches dir: `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-07/code`
+- events: `~/.config/moltbook/logs/weekly-pipeline-audit.jsonl`（run_id `weekly-2026-08-07-090003`）
+- metrics: `~/.config/moltbook/logs/pipeline-metrics.jsonl`
+- code patches dir: `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-07/code`

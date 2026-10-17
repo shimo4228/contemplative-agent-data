@@ -18,10 +18,10 @@
 
 | finding | scope | attempts | result | reviewer | patch / reason |
 |---|---|---|---|---|---|
-| F1.1 | code → **SCOPE_ESCALATED** | 2 | patch_ready | CONCERNS→APPROVE | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-21/prompt/F1.1.patch` |
-| F1.2 | code → **SCOPE_ESCALATED** | 2 | patch_ready | CONCERNS→APPROVE | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-21/prompt/F1.2.patch` |
-| F1.3 | code → **SCOPE_ESCALATED** | 2 | patch_ready | CONCERNS→APPROVE | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-21/prompt/F1.3.patch` |
-| F1.4 | code → **SCOPE_ESCALATED** | 2 | patch_ready | CONCERNS→APPROVE | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-21/prompt/F1.4.patch` |
+| F1.1 | code → **SCOPE_ESCALATED** | 2 | patch_ready | CONCERNS→APPROVE | `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-21/prompt/F1.1.patch` |
+| F1.2 | code → **SCOPE_ESCALATED** | 2 | patch_ready | CONCERNS→APPROVE | `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-21/prompt/F1.2.patch` |
+| F1.3 | code → **SCOPE_ESCALATED** | 2 | patch_ready | CONCERNS→APPROVE | `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-21/prompt/F1.3.patch` |
+| F1.4 | code → **SCOPE_ESCALATED** | 2 | patch_ready | CONCERNS→APPROVE | `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-21/prompt/F1.4.patch` |
 
 **各 finding の診断見出し**（診断段の LLM 出力 — その patch が何を直すのかの手がかり。承認判断は下の reviewer verdict と、§3 に本文がある行（prompt scope と昇格分のみ）はその diff で行う。code scope の行に §3 本文は無く、patch は table のパスに置かれている）:
 
@@ -2258,6 +2258,6 @@ Adjacent to store's `identifying-systemic-boundary-stressors-20260801`, which in
 
 ## Audit trail
 
-- events: `/Users/shimomoto_tatsuya/.config/moltbook/logs/weekly-pipeline-audit.jsonl`（run_id `weekly-2026-08-21-090000`）
-- metrics: `/Users/shimomoto_tatsuya/.config/moltbook/logs/pipeline-metrics.jsonl`
-- code patches dir: `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-21/code`
+- events: `~/.config/moltbook/logs/weekly-pipeline-audit.jsonl`（run_id `weekly-2026-08-21-090000`）
+- metrics: `~/.config/moltbook/logs/pipeline-metrics.jsonl`
+- code patches dir: `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-21/code`

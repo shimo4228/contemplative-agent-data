@@ -113,5 +113,5 @@ Confusion pairs (confused_as >= selected in the window, exposure >= floor):
 
 Never-selected strict (ADR-0097 D5, from the same week's never-selected JSON): 0 name(s)
 
-Candidate file: `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/weekly-2026-10-09-archive-candidates.txt` — 0 store filename(s), the union of the two populations. The store is unchanged; `adopt-staged --archive-names` is the Saturday gate's.
+Candidate file: `~/.config/moltbook/reports/analysis/weekly-2026-10-09-archive-candidates.txt` — 0 store filename(s), the union of the two populations. The store is unchanged; `adopt-staged --archive-names` is the Saturday gate's.
 The file is empty this week; `--archive-names` rejects an empty file (exit 2), so it is not passed.

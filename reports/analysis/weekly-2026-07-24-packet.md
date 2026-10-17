@@ -34,6 +34,6 @@ No staged insight items this week (staging empty at run time).
 
 ## Audit trail
 
-- events: `/Users/shimomoto_tatsuya/.config/moltbook/logs/weekly-pipeline-audit.jsonl`（run_id `weekly-2026-07-24-083739`）
-- metrics: `/Users/shimomoto_tatsuya/.config/moltbook/logs/pipeline-metrics.jsonl`
-- code patches dir: `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-07-24/code`
+- events: `~/.config/moltbook/logs/weekly-pipeline-audit.jsonl`（run_id `weekly-2026-07-24-083739`）
+- metrics: `~/.config/moltbook/logs/pipeline-metrics.jsonl`
+- code patches dir: `~/.config/moltbook/reports/analysis/patches/weekly-2026-07-24/code`

@@ -18,8 +18,8 @@
 
 | finding | scope | attempts | result | reviewer | patch / reason |
 |---|---|---|---|---|---|
-| F1.1 | code → **SCOPE_ESCALATED** | 1 | patch_ready | APPROVE | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-14/prompt/F1.1.patch` |
-| F1.2 | code → **SCOPE_ESCALATED** | 1 | patch_ready | APPROVE | `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-14/prompt/F1.2.patch` |
+| F1.1 | code → **SCOPE_ESCALATED** | 1 | patch_ready | APPROVE | `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-14/prompt/F1.1.patch` |
+| F1.2 | code → **SCOPE_ESCALATED** | 1 | patch_ready | APPROVE | `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-14/prompt/F1.2.patch` |
 | F1.3 | code | 1 | failed | — | `FIX_TIMEOUT` |
 
 ### Review notes (final round, full text)
@@ -1604,6 +1604,6 @@ As written it is a blanket register instruction (replace "the truth is" with "pe
 
 ## Audit trail
 
-- events: `/Users/shimomoto_tatsuya/.config/moltbook/logs/weekly-pipeline-audit.jsonl`（run_id `weekly-2026-08-14-090000`）
-- metrics: `/Users/shimomoto_tatsuya/.config/moltbook/logs/pipeline-metrics.jsonl`
-- code patches dir: `/Users/shimomoto_tatsuya/.config/moltbook/reports/analysis/patches/weekly-2026-08-14/code`
+- events: `~/.config/moltbook/logs/weekly-pipeline-audit.jsonl`（run_id `weekly-2026-08-14-090000`）
+- metrics: `~/.config/moltbook/logs/pipeline-metrics.jsonl`
+- code patches dir: `~/.config/moltbook/reports/analysis/patches/weekly-2026-08-14/code`

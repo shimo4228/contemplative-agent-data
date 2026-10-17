@@ -14,10 +14,10 @@
     "constitutional",
     "self_reflection"
   ],
-  "views_dir": "/Users/shimomoto_tatsuya/.config/moltbook/views",
-  "constitution_dir": "/Users/shimomoto_tatsuya/.config/moltbook/constitution",
+  "views_dir": "~/.config/moltbook/views",
+  "constitution_dir": "~/.config/moltbook/constitution",
   "prompts_dir": null,
-  "skills_dir": "/Users/shimomoto_tatsuya/.config/moltbook/skills",
-  "rules_dir": "/Users/shimomoto_tatsuya/.config/moltbook/rules",
-  "identity_path": "/Users/shimomoto_tatsuya/.config/moltbook/identity.md"
+  "skills_dir": "~/.config/moltbook/skills",
+  "rules_dir": "~/.config/moltbook/rules",
+  "identity_path": "~/.config/moltbook/identity.md"
 }
