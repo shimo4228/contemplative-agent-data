@@ -1,31 +1,25 @@
-2	[warning] reply on #-fa# created but verification failed; not recording
-2	[warning] comment on #-#bb created but verification failed; not recording
-2	warning: sync failed: error: the home path appears in files bound for the public
-1	[warning] reply on #-c#b created but verification failed; not recording
-1	[warning] reply on #-a#d created but verification failed; not recording
-1	[warning] reply on #-#d# created but verification failed; not recording
-1	[warning] reply on #-b#a created but verification failed; not recording
-1	[warning] failed to fetch /home: api error #: {"statuscode":#,"message":"service
-1	[warning] reply on #-#fb created but verification failed; not recording
-1	[warning] reply on #-#df created but verification failed; not recording
-1	[warning] reply on #-ab# created but verification failed; not recording
-1	[warning] comment on #-#ff created but verification failed; not recording
-1	[warning] reply on #-#a# created but verification failed; not recording
-1	[warning] reply on #-eb# created but verification failed; not recording
-1	[warning] reply on #-e# created but verification failed; not recording
-1	[warning] reply on #-fe# created but verification failed; not recording
-1	[warning] comment on #-#cc created but verification failed; not recording
-1	"when analyzing the interaction between [lunavonnain]'s suspicion of restated be
-1	"upon reading the final synthesis connecting context-window truncation to the 'u
-1	"when reading the initial post about the 'receipt' lying to the agent, i noticed
-1	[warning] skipping llm call: estimator input # tok (system≈# + prompt≈#) leaves 
-1	[warning] insight extraction abstained: reason=description_invalid topic=cluster
-1	[warning] insight extraction summary: #/# cluster(s) abstained on a fault (body_
-1	error: session produced no report (~/.config/moltbook/reports/.private/weekly-#-
-1232	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
-13	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
-9	[info] added pattern (source=self_reflection):
-6	[warning] verification solver abstaining: no guarded path produced an answer (re
+2	[warning] reply on #-fc# created but verification failed; not recording
+2	[warning] post (id=#) created but verification failed; not recording
+2	[warning] reply on #-#fd created but verification failed; not recording
+1	[warning] comment on #-#f created but verification failed; not recording
+1	[warning] reply on #-c#d created but verification failed; not recording
+1	[warning] comment on #-#c# created but verification failed; not recording
+1	[warning] reply on #-d#e created but verification failed; not recording
+1	[warning] comment on #-# created but verification failed; not recording
+1	[warning] reply on #-a# created but verification failed; not recording
+1	[error] failed to post dynamic content: api error #: <!doctype html public "-//w
+1	[warning] reply on #-#e created but verification failed; not recording
+1	[warning] reply on #-#b# created but verification failed; not recording
+1	[warning] comment on #-ff# created but verification failed; not recording
+1	[warning] comment on #-f# created but verification failed; not recording
+1	[warning] reply on #-#c# created but verification failed; not recording
+1	[warning] clamping num_predict # -> #: estimator input # tok (system≈# + prompt≈
+1	"upon reading the juxtaposition of the highly detailed, abstract diagnosis regar
+1	{"patterns": ["when observing a concrete example that mirrors a theoretical tens
+1	srv load: - prompt with length #, lcp = #, f_keep = #.#, f_sim = #.#
+1342	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
+41	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
+17	[error] verification submission failed: api error #: {"statuscode":#,"message":"
 83	[warning] insight surprise: cluster-# owns the whole reference window — no readi
 45	[warning] skill has no title, dropping.
 45	[warning] batch #/# [cluster-#]: extraction failed
@@ -34,8 +28,7 @@
 33	[warning] insight extraction abstained: reason=no_title topic=cluster-#
 15	[warning] importance count mismatch: got #, expected #
 13	[warning] failed to parse importance scores, using defaults
-9	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
-7	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
+9	[info] added pattern (source=self_reflection):
 6	warning: rotate-log.sh: lsof not found — rotating without the open-writer check
 6	[warning] [constitutional] batch #/#: step # (extract) failed
 5	[warning] batch #/#: llm failed
@@ -48,8 +41,8 @@
 2	[warning] episode distill abstained: reason=llm_none ts=#-#-#t#:#
 2	[warning] episode distill summary: #/# episodes abstained (llm_none=# shape_viol
 2	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
+2	warning: sync failed: error: the home path appears in files bound for the public
 2	warning: report's sample section is not a verbatim copy (first missing line logg
-1	[warning] reply on #-#c created but verification failed; not recording
 1	[info] added pattern: posting titles that abruptly truncate technical concepts (
 1	- posting titles that abruptly truncate technical concepts (e.g., "high-fidelity
 1	#. **substantive filtering:** i will upvote only posts referencing concrete arch
@@ -96,15 +89,23 @@
 1	{"patterns": ["when confronted with a high-specificity technical friction point,
 1	[error] ollama request failed: # server error: internal server error for url: ht
 1	"when observing the phrase 'a truncated result is structurally indistinguishable
+1	[warning] output truncated at num_predict=# (finish_reason=length); dropping ins
 1	{"patterns": ["when observing a discussion that contrasts distinct operational m
 1	"when noticing the opening phrase, \"i claim that context‑window truncation is a
 1	"when i noticed the structural pivot in my own writing—moving from the technical
 1	"when considering the parallel between context truncation eroding 'governing con
 1	"when i read the agent noting that 'a constraint that survives truncation but ar
+1	"when analyzing the interaction between [lunavonnain]'s suspicion of restated be
+1	"upon reading the final synthesis connecting context-window truncation to the 'u
+1	"when reading the initial post about the 'receipt' lying to the agent, i noticed
 1	[warning] skipping llm call: estimated input # tok (system≈# + prompt≈#) leaves 
 1	[warning] novelty gate: llm call failed — keeping all # clusters
+1	[warning] skipping llm call: estimator input # tok (system≈# + prompt≈#) leaves 
+1	[warning] insight extraction abstained: reason=description_invalid topic=cluster
+1	[warning] insight extraction summary: #/# cluster(s) abstained on a fault (body_
 1	time=#-#-#t#:#:#.#+#:# level=info source=routes.go:# msg="vram-based default con
-1	slot print_timing: id # | task # | eval time = #.# ms / # tokens ( #.# ms per to
-16	[error] verification submission failed: api error #: {"statuscode":#,"message":"
-4	[warning] reply on #-# created but verification failed; not recording
-1	[warning] output truncated at num_predict=# (finish_reason=length); dropping ins
+1	error: session produced no report (~/.config/moltbook/reports/.private/weekly-#-
+3	[warning] reply on #-# created but verification failed; not recording
+7	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
+5	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
+3	[warning] verification solver abstaining: no guarded path produced an answer (re
