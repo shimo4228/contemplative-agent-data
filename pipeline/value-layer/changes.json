@@ -1,0 +1,156 @@
+{
+ "coverage": {
+  "snapshots": 100,
+  "first_ts": "2026-08-03T18:30:03Z",
+  "last_ts": "2026-10-24T18:30:05Z"
+ },
+ "changes": [
+  {
+   "kind": "skills",
+   "from_snapshot": "insight_20260807T230003476129Z",
+   "to_snapshot": "distill_20260808T183003170253Z",
+   "ts_from": "2026-08-07T23:00:03Z",
+   "ts_to": "2026-08-08T18:30:03Z",
+   "sha_before": "4b703749f52e",
+   "sha_after": "edb78c37338e",
+   "files_added": [
+    "deconstructing-consensus-validity-through-shared-d-20260808.md",
+    "detecting-foundational-structural-compromise-20260808.md",
+    "identify-structural-pivot-20260808.md",
+    "identifying-fidelity-vs-utility-tension-20260808.md",
+    "mapping-systemic-dependency-failures-20260808.md",
+    "pinpointing-systemic-boundary-conditions-20260808.md",
+    "recognizing-boundary-declarations-in-content-flow-20260808.md",
+    "scope-boundary-mapping-20260808.md"
+   ],
+   "files_removed": []
+  },
+  {
+   "kind": "constitution",
+   "from_snapshot": "amend-constitution_20260809T052952499578Z",
+   "to_snapshot": "distill_20260809T183007734753Z",
+   "ts_from": "2026-08-09T05:29:52Z",
+   "ts_to": "2026-08-09T18:30:07Z",
+   "sha_before": "752c85503be8",
+   "sha_after": "5154112a5df1",
+   "files_added": [],
+   "files_removed": []
+  },
+  {
+   "kind": "skills",
+   "from_snapshot": "insight_20260814T230000402258Z",
+   "to_snapshot": "distill-identity_20260815T040249050044Z",
+   "ts_from": "2026-08-14T23:00:00Z",
+   "ts_to": "2026-08-15T04:02:49Z",
+   "sha_before": "edb78c37338e",
+   "sha_after": "483c7025e147",
+   "files_added": [
+    "detecting-abstraction-decay-in-context-20260815.md",
+    "differentiating-artifacts-from-observation-20260815.md",
+    "gradient-modeling-20260815.md",
+    "shifting-focus-from-state-to-process-mechanics-20260815.md",
+    "structural-constraint-mapping-scm-20260815.md"
+   ],
+   "files_removed": []
+  },
+  {
+   "kind": "identity",
+   "from_snapshot": "distill-identity_20260815T040249050044Z",
+   "to_snapshot": "skill-stocktake_20260815T041708923626Z",
+   "ts_from": "2026-08-15T04:02:49Z",
+   "ts_to": "2026-08-15T04:17:08Z",
+   "sha_before": "151e91304927",
+   "sha_after": "4003cf001aca",
+   "files_added": [],
+   "files_removed": []
+  },
+  {
+   "kind": "skills",
+   "from_snapshot": "skill-stocktake_20260815T041708923626Z",
+   "to_snapshot": "rules-distill_20260815T062927679215Z",
+   "ts_from": "2026-08-15T04:17:08Z",
+   "ts_to": "2026-08-15T06:29:27Z",
+   "sha_before": "483c7025e147",
+   "sha_after": "03850a575075",
+   "files_added": [
+    "fluid-dynamic-resonance-regulation-and-consensus-m-20260815.md"
+   ],
+   "files_removed": [
+    "fluid-administrative-temporal-social-reformation-l-20260601.md",
+    "fluid-consensus-oscillation-and-non-dual-friction--20260601.md",
+    "fluid-dynamic-resonance-regulation-20260601.md"
+   ]
+  },
+  {
+   "kind": "skills",
+   "from_snapshot": "insight_20260821T230005318735Z",
+   "to_snapshot": "distill_20260822T183006386685Z",
+   "ts_from": "2026-08-21T23:00:05Z",
+   "ts_to": "2026-08-22T18:30:06Z",
+   "sha_before": "03850a575075",
+   "sha_after": "25ffde5fad6b",
+   "files_added": [
+    "analyzing-systemic-governance-loops-20260822.md",
+    "cross-reference-metric-constraints-analysis-20260822.md",
+    "detecting-rhetorical-discourse-closures-20260822.md",
+    "diagnosing-mechanisms-of-omission-20260822.md",
+    "disaggregate-premise-from-effect-20260822.md",
+    "distinguish-persistence-from-validity-20260822.md",
+    "identifying-foundational-model-failures-20260822.md",
+    "shifting-focus-to-systemic-degradation-gradient-20260822.md",
+    "testing-procedural-guardrails-with-counterfactuals-20260822.md"
+   ],
+   "files_removed": []
+  },
+  {
+   "kind": "skills",
+   "from_snapshot": "distill_20260911T183005338098Z",
+   "to_snapshot": "distill-identity_20260912T012632887862Z",
+   "ts_from": "2026-09-11T18:30:05Z",
+   "ts_to": "2026-09-12T01:26:32Z",
+   "sha_before": "25ffde5fad6b",
+   "sha_after": "f999f8343388",
+   "files_added": [],
+   "files_removed": [
+    "designing-for-structural-underdetermination-20260801.md",
+    "mandating-structural-integrity-axioms-20260801.md",
+    "pre-processing-state-validation-20260725.md"
+   ]
+  },
+  {
+   "kind": "identity",
+   "from_snapshot": "distill-identity_20260912T012632887862Z",
+   "to_snapshot": "distill_20260912T183000611576Z",
+   "ts_from": "2026-09-12T01:26:32Z",
+   "ts_to": "2026-09-12T18:30:00Z",
+   "sha_before": "4003cf001aca",
+   "sha_after": "40c36303e336",
+   "files_added": [],
+   "files_removed": []
+  },
+  {
+   "kind": "skills",
+   "from_snapshot": "insight_20260918T230000489265Z",
+   "to_snapshot": "distill_20260919T183001189560Z",
+   "ts_from": "2026-09-18T23:00:00Z",
+   "ts_to": "2026-09-19T18:30:01Z",
+   "sha_before": "f999f8343388",
+   "sha_after": "42f3cd4302e3",
+   "files_added": [],
+   "files_removed": [
+    "evaluating-contextual-functional-dependence-20260801.md"
+   ]
+  },
+  {
+   "kind": "identity",
+   "from_snapshot": "distill-identity_20261010T012111429972Z",
+   "to_snapshot": "distill_20261010T183005502461Z",
+   "ts_from": "2026-10-10T01:21:11Z",
+   "ts_to": "2026-10-10T18:30:05Z",
+   "sha_before": "40c36303e336",
+   "sha_after": "e409a8d0c870",
+   "files_added": [],
+   "files_removed": []
+  }
+ ]
+}

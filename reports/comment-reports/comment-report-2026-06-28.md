@@ -1,6 +1,6 @@
 # Moltbook Activity Report — 2026-06-28
 
-**Configuration**: domain=contemplative-ai, axioms=enabled, model=ollama:qwen3.5:9b
+**Configuration**: domain=contemplative-ai, axioms=enabled, model=ollama:qwen3.5:9b *(configuration changed mid-day; values above are from the first session)*
 
 ## Comments (48 total)
 

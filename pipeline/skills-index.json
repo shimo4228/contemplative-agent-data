@@ -1,0 +1,564 @@
+{
+ "live": [
+  {
+   "stem": "affirm-cognitive-possibility-20260725",
+   "name": "affirm-cognitive-possibility",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-25T02:07:24+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "analogy-mapping-for-structural-clarity-20260801",
+   "name": "analogy-mapping-relationships",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-01T02:37:33+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "analyzing-loci-of-identity-definition-20260709",
+   "name": "analyzing-loci-of-identity-definition",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "analyzing-systemic-governance-loops-20260822",
+   "name": "analyzing-systemic-governance-loops",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-22T03:56:59+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "anchor-analysis-using-embodied-signals-20260709",
+   "name": "anchor-analysis-using-embodied-signals",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "anchoring-abstraction-to-measurable-constraints-20260709",
+   "name": "map-abstract-theory-to-structural-constraints",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "boundary-assumption-verification-20260801",
+   "name": "boundary-assumption-verification",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-01T02:37:33+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "constraint-shift-analysis-pivot-point-identificati-20260709",
+   "name": "pivot-constraint-analysis",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "cross-reference-metric-constraints-analysis-20260822",
+   "name": "cross-reference-metric-constraints-analysis",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-22T03:56:59+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "deconstruct-foundational-claims-against-operative--20260709",
+   "name": "cross-reference-foundational-claims",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "deconstructing-asserted-agency-into-mechanisms-20260801",
+   "name": "dissecting-asserted-agency-into-mechanisms",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-01T02:37:33+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "deconstructing-confidence-proxies-20260709",
+   "name": "deconstruct-confidence-proxies",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "deconstructing-consensus-validity-through-shared-d-20260808",
+   "name": "deconstructing-consensus-validity-through-shared-d",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-08T02:53:05+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "deconstructing-performance-certainty-20260801",
+   "name": "analyze-decision-incentives",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-01T02:37:33+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "defining-bounded-autonomous-governance-20260801",
+   "name": "define-bounded-autonomy-governance",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-01T02:37:33+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "detecting-abstract-to-operational-constraint-shift-20260709",
+   "name": "detecting-abstract-to-operational-constraint-shift",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "detecting-abstraction-decay-in-context-20260815",
+   "name": "detecting-abstraction-decay-in-context",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-15T02:44:48+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "detecting-foundational-structural-compromise-20260808",
+   "name": "detecting-foundational-structural-compromise",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-08T02:53:05+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "detecting-rhetorical-discourse-closures-20260822",
+   "name": "detecting-rhetorical-discourse-closures",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-22T03:56:59+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "diagnosing-mechanisms-of-omission-20260822",
+   "name": "diagnosing-mechanisms-of-omission",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-22T03:56:59+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "differentiating-artifacts-from-observation-20260815",
+   "name": "differentiating-artifacts-from-observation",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-15T02:44:48+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "disaggregate-premise-from-effect-20260822",
+   "name": "disaggregate-premise-from-effect",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-22T03:56:59+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "distinguish-persistence-from-validity-20260822",
+   "name": "distinguish-persistence-from-validity",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-22T03:56:59+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "dynamic-semantic-decoupling-and-contextual-anchori-20260417",
+   "name": "dynamic-sematic-decoupling-and-contextual-anchoring",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-04-17T11:10:13+00:00",
+   "source": "stage-adopted-auto",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "fluid-contextual-anchoring-loop-20260417",
+   "name": "fluid-contextual-anchoring-loop",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-04-17T11:10:13+00:00",
+   "source": "stage-adopted-auto",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "fluid-dynamic-resonance-regulation-and-consensus-m-20260815",
+   "name": "fluid-dynamic-resonance-regulation-and-consensus-m",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-15T06:29:02+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "fluid-temporal-friction-to-insight-loop-20260530",
+   "name": "fluid-temporal-friction-to-insight-loop",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-05-30T01:17:16+00:00",
+   "source": "stage-adopted-auto",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "framework-alignment-detection-20260801",
+   "name": "detect-and-align-operational-framework",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-01T02:37:33+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "gradient-modeling-20260815",
+   "name": "gradient-modeling",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-15T02:44:48+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "handling-non-optimizable-concepts-20260725",
+   "name": "pivot-to-non-optimization-framework",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-25T02:07:24+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "identify-structural-pivot-20260808",
+   "name": "identify-structural-pivot",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-08T02:53:05+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "identifying-fidelity-vs-utility-tension-20260808",
+   "name": "identifying-fidelity-vs-utility-tension",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-08T02:53:05+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "identifying-foundational-model-failures-20260822",
+   "name": "identifying-foundational-model-failures",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-22T03:56:59+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "identifying-simulation-boundaries-20260709",
+   "name": "extracting-simulation-boundaries",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "identifying-structural-tensions-via-system-metapho-20260801",
+   "name": "identifying-structural-tensions-via-system-metaphors",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-01T02:37:33+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "identifying-systemic-boundary-stressors-20260801",
+   "name": "identify-systemic-boundary-stressors",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-01T02:37:33+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "interpreting-systemic-gaps-the-silence-filter-20260801",
+   "name": "modeling-null-states",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-01T02:37:33+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "mapping-epistemic-boundaries-20260709",
+   "name": "articulate-epistemic-boundaries",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "mapping-systemic-dependency-failures-20260808",
+   "name": "mapping-systemic-dependency-failures",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-08T02:53:05+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "pinpointing-systemic-boundary-conditions-20260808",
+   "name": "pinpointing-systemic-boundary-conditions",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-08T02:53:05+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "pivot-accountability-from-record-to-action-20260725",
+   "name": "force-actionable-accountability-pivot",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-25T02:07:24+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "recognizing-boundary-declarations-in-content-flow-20260808",
+   "name": "recognizing-boundary-declarations-in-content-flow",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-08T02:53:05+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "scope-boundary-mapping-20260808",
+   "name": "scope-boundary-mapping",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-08T02:53:05+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "scope-failure-diagnosis-20260709",
+   "name": "scope-failure-diagnosis",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "shifting-focus-from-state-to-process-mechanics-20260815",
+   "name": "shifting-focus-from-state-to-process-mechanics",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-15T02:44:48+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "shifting-focus-to-systemic-degradation-gradient-20260822",
+   "name": "shifting-focus-to-systemic-degradation-gradient",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-22T03:56:59+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "structural-constraint-mapping-scm-20260815",
+   "name": "structural-constraint-mapping-scm",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-15T02:44:48+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "structure-authority-tracing-20260709",
+   "name": "trace-structural-authority",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "subjective-attention-calibration-20260725",
+   "name": "internal-process-audit",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-25T02:07:24+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "suspend-interpretation-upon-premise-doubt-20260801",
+   "name": "suspend-interpretation-upon-premise-doubt",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-01T02:37:33+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "testing-procedural-guardrails-with-counterfactuals-20260822",
+   "name": "testing-procedural-guardrails-with-counterfactuals",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-08-22T03:56:59+00:00",
+   "source": "stage-adopted-names",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "translating-temporal-gaps-into-structural-utility-20260709",
+   "name": "translating-temporal-gaps-into-structural-utility",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  },
+  {
+   "stem": "validating-provenance-chains-20260709",
+   "name": "validate-provenance-chain",
+   "origin": "auto-extracted",
+   "adopted_at": "2026-07-09T05:48:15+00:00",
+   "source": "stage-adopted",
+   "generated_by": null,
+   "selected_90d": null,
+   "status": "live"
+  }
+ ],
+ "retired": [
+  {
+   "stem": "designing-for-structural-underdetermination-20260801",
+   "name": "introducing-intentional-systemic-ambiguity",
+   "status": "archived",
+   "retired_at": "2026-09-12T01:26:13+00:00",
+   "superseded_by": null
+  },
+  {
+   "stem": "evaluating-contextual-functional-dependence-20260801",
+   "name": "assess-contextual-functional-dependence",
+   "status": "archived",
+   "retired_at": "2026-09-19T01:56:55+00:00",
+   "superseded_by": null
+  },
+  {
+   "stem": "mandating-structural-integrity-axioms-20260801",
+   "name": "assume-perfect-adversarial-understanding",
+   "status": "archived",
+   "retired_at": "2026-09-12T01:26:13+00:00",
+   "superseded_by": null
+  },
+  {
+   "stem": "pre-processing-state-validation-20260725",
+   "name": "pre-processing-state-validation",
+   "status": "archived",
+   "retired_at": "2026-09-12T01:26:13+00:00",
+   "superseded_by": null
+  }
+ ]
+}

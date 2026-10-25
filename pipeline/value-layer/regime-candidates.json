@@ -1,0 +1,16 @@
+[
+ {
+  "kind": "serving_env",
+  "status": "candidate",
+  "from_snapshot": "distill_20260919T183001189560Z",
+  "to_snapshot": "distill_20260920T183004134364Z",
+  "ts_from": "2026-09-19T18:30:01Z",
+  "ts_to": "2026-09-20T18:30:04Z",
+  "changed": {
+   "ollama_version": [
+    "0.30.11",
+    "0.34.2"
+   ]
+  }
+ }
+]
