@@ -1,25 +1,19 @@
-2	[warning] reply on #-fc# created but verification failed; not recording
-2	[warning] post (id=#) created but verification failed; not recording
-2	[warning] reply on #-#fd created but verification failed; not recording
-1	[warning] comment on #-#f created but verification failed; not recording
-1	[warning] reply on #-c#d created but verification failed; not recording
-1	[warning] comment on #-#c# created but verification failed; not recording
-1	[warning] reply on #-d#e created but verification failed; not recording
-1	[warning] comment on #-# created but verification failed; not recording
-1	[warning] reply on #-a# created but verification failed; not recording
-1	[error] failed to post dynamic content: api error #: <!doctype html public "-//w
-1	[warning] reply on #-#e created but verification failed; not recording
-1	[warning] reply on #-#b# created but verification failed; not recording
-1	[warning] comment on #-ff# created but verification failed; not recording
-1	[warning] comment on #-f# created but verification failed; not recording
-1	[warning] reply on #-#c# created but verification failed; not recording
-1	[warning] clamping num_predict # -> #: estimator input # tok (system≈# + prompt≈
-1	"upon reading the juxtaposition of the highly detailed, abstract diagnosis regar
-1	{"patterns": ["when observing a concrete example that mirrors a theoretical tens
-1	srv load: - prompt with length #, lcp = #, f_keep = #.#, f_sim = #.#
-1342	slot release: id # | task # | stop processing: n_tokens = #, truncated = #
-41	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
-17	[error] verification submission failed: api error #: {"statuscode":#,"message":"
+2	slot operator(): id # | task # | checking checkpoint with [#, #] against #...
+2	slot operator(): id # | task # | erased invalidated context checkpoint (pos_min 
+1	[warning] comment on #-#bb created but verification failed; not recording
+1	[warning] comment on #-c#c created but verification failed; not recording
+1	[warning] comment on #-d# created but verification failed; not recording
+1	[warning] reply on #-ab# created but verification failed; not recording
+1	[warning] failed to fetch /home: api error #: {"statuscode":#,"message":"service
+1	slot create_check: id # | task # | created context checkpoint # of # (pos_min = 
+1	slot print_timing: id # | task # | prompt eval time = #.# ms / # tokens ( #.# ms
+46	[error] failed to reply on #: api error #: {"statuscode":#,"message":"parent com
+22	[error] verification submission failed: api error #: {"statuscode":#,"message":"
+8	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
+9	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
+4	[warning] verification solver abstaining: no guarded path produced an answer (re
+3	[warning] reply on #-fc# created but verification failed; not recording
+2	[warning] reply on #-#c# created but verification failed; not recording
 83	[warning] insight surprise: cluster-# owns the whole reference window — no readi
 45	[warning] skill has no title, dropping.
 45	[warning] batch #/# [cluster-#]: extraction failed
@@ -34,15 +28,29 @@
 5	[warning] batch #/#: llm failed
 5	[warning] circuit breaker open after # consecutive failures. cooldown #s.
 4	[warning] insight extraction summary: #/# cluster(s) abstained on a fault (forbi
+3	[warning] reply on #-# created but verification failed; not recording
 3	[warning] failed to parse dedup decisions, falling back to add all
 3	[warning] llm dedup gate returned empty, falling back to add all
 3	[warning] [uncategorized] batch #/#: step # (summarize) failed, using step # out
+2	[warning] post (id=#) created but verification failed; not recording
+2	[warning] reply on #-#fd created but verification failed; not recording
 2	[warning] dedup decision count mismatch: got #, expected #
 2	[warning] episode distill abstained: reason=llm_none ts=#-#-#t#:#
 2	[warning] episode distill summary: #/# episodes abstained (llm_none=# shape_viol
-2	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
 2	warning: sync failed: error: the home path appears in files bound for the public
 2	warning: report's sample section is not a verbatim copy (first missing line logg
+1	[warning] comment on #-#f created but verification failed; not recording
+1	[warning] reply on #-c#d created but verification failed; not recording
+1	[warning] comment on #-#c# created but verification failed; not recording
+1	[warning] reply on #-d#e created but verification failed; not recording
+1	[warning] comment on #-# created but verification failed; not recording
+1	[warning] reply on #-a# created but verification failed; not recording
+1	[error] failed to post dynamic content: api error #: <!doctype html public "-//w
+1	[warning] reply on #-#e created but verification failed; not recording
+1	[warning] reply on #-#b# created but verification failed; not recording
+1	[warning] comment on #-ff# created but verification failed; not recording
+1	[warning] comment on #-f# created but verification failed; not recording
+1	[warning] clamping num_predict # -> #: estimator input # tok (system≈# + prompt≈
 1	[info] added pattern: posting titles that abruptly truncate technical concepts (
 1	- posting titles that abruptly truncate technical concepts (e.g., "high-fidelity
 1	#. **substantive filtering:** i will upvote only posts referencing concrete arch
@@ -98,6 +106,8 @@
 1	"when analyzing the interaction between [lunavonnain]'s suspicion of restated be
 1	"upon reading the final synthesis connecting context-window truncation to the 'u
 1	"when reading the initial post about the 'receipt' lying to the agent, i noticed
+1	"upon reading the juxtaposition of the highly detailed, abstract diagnosis regar
+1	{"patterns": ["when observing a concrete example that mirrors a theoretical tens
 1	[warning] skipping llm call: estimated input # tok (system≈# + prompt≈#) leaves 
 1	[warning] novelty gate: llm call failed — keeping all # clusters
 1	[warning] skipping llm call: estimator input # tok (system≈# + prompt≈#) leaves 
@@ -105,7 +115,5 @@
 1	[warning] insight extraction summary: #/# cluster(s) abstained on a fault (body_
 1	time=#-#-#t#:#:#.#+#:# level=info source=routes.go:# msg="vram-based default con
 1	error: session produced no report (~/.config/moltbook/reports/.private/weekly-#-
-3	[warning] reply on #-# created but verification failed; not recording
-7	time=#-#-#t#:#:#.#+#:# level=warn source=server.go:# msg="requested context size
-5	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model fits
-3	[warning] verification solver abstaining: no guarded path produced an answer (re
+1	time=#-#-#t#:#:#.#+#:# level=info source=sched.go:# msg="llama-server model pred
+616	slot release: id # | task # | stop processing: n_tokens = #, truncated = #

@@ -1,0 +1,25 @@
+{
+  "tool": "vulture",
+  "report_prefixes": [
+    "src/",
+    "scripts/"
+  ],
+  "count": 2,
+  "candidates": [
+    {
+      "file": "scripts/docs_consistency_scan.py",
+      "line": 733,
+      "message": "unused variable 'RECONCILE_BY'",
+      "confidence": 60
+    },
+    {
+      "file": "src/contemplative_agent/core/domain.py",
+      "line": 98,
+      "message": "unused variable 'doctor_canary'",
+      "confidence": 60
+    }
+  ],
+  "parsed_total": 164,
+  "unparsed_lines": 0,
+  "stderr_lines": 0
+}
