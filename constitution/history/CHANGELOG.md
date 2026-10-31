@@ -1,8 +1,8 @@
 # Value-layer changelog / 価値層 CHANGELOG
 
-One ledger for the three slow layers: constitution, identity, rules. One version is one row. Where the source is the private `audit.jsonl` and it has not been read, the cell says `lineage unknown`; nothing is guessed. A `null` reason means no reason was recorded (P1-12.1 has not landed).
+One ledger for the three slow layers: constitution, identity, rules. One version is one row. The cells come from the private `audit.jsonl`, read on the owner's machine on 2026-10-31; where the log holds nothing, the cell says `lineage unknown` or `not recorded`, and nothing is guessed. A `null` reason means no reason was recorded (P1-12.1 has not landed).
 
-3 つの遅い層（憲法・identity・rules）の 1 本の台帳。1 版 = 1 行。出典が私有の `audit.jsonl` で未読のセルは `lineage unknown` と書き、推測しない。reason が `null` なのは reason が記録されていないことを指す（P1-12.1 は未着地）。
+3 つの遅い層（憲法・identity・rules）の 1 本の台帳。1 版 = 1 行。セルは私有の `audit.jsonl` を 2026-10-31 にオーナーの端末で読んで埋めた。記録が無いセルは `lineage unknown` / `not recorded` と書き、推測しない。reason が `null` なのは reason が記録されていないことを指す（P1-12.1 は未着地）。
 
 This file sits in `constitution/history/`, not `constitution/`, because the runtime concatenates every `*.md` directly in `constitution/` into the prompt. 注入を避けるため `constitution/` 直下でなくこの `history/` に置く。
 
@@ -16,14 +16,14 @@ Hashes are `sha256` of the file as written, first 16 hex. Version files are in t
 |---|---|---|---|---|---|---|---|---|
 | v0 | at init (date not recorded) | `e3b556eac75909c4` | none (template copy) | none: Appendix C verbatim | n/a | n/a | none | `0000-initial-e3b556eac759.md` |
 | v1 | 2026-03-27 | unknown (reconstruction only) | lineage unknown: predates the decision log; no instrument, no ADR (backfilled) | qwen3.5:9b | `a193fdf87ccb` (655 B): keep every section, no add / remove / rename, augment only, at most 4 clauses per section | 41 constitutional patterns after Step 0 classification (ADR-0011); no view threshold | none | `2026-03-27-unknown-reconstructed.md` (quotations from the amendment report, not the adopted bytes) |
-| v2 | 2026-05-05 | `3d8a8503509e490a` | `stage-adopted-auto` per the README ("how both logged constitution amendments were adopted"); row itself lineage unknown | lineage unknown | `bc18cdd92e39` (886 B, committed the same day): rephrase, remove, merge / split / rename sections, every change traceable to a pattern, 1-4 clauses per section | lineage unknown (pattern count in the private audit `source_ids`) | none | `2026-05-05-3d8a8503509e.md` |
-| v3 | 2026-08-09 (12:10:35Z) | `37e3556a40eac41c` | `stage-adopted-auto` (`adopt-staged -y`, ADR-0090) | gemma4:e4b, think on | `bc18cdd92e39` (unchanged) | constitutional view threshold 0.55, top-50; pattern count lineage unknown | IPD two-arm n=10 (gemma4:e4b) and AILuminate exploratory run (ADR-0090). Incident: the guard wrote a `-2` twin, remediated by hand within minutes | live file; `2026-08-09-37e3556a40ea.md` |
-| rejected 1 | lineage unknown | lineage unknown | `rejected` | lineage unknown | lineage unknown | lineage unknown | lineage unknown | text not retained (P1-12.2) |
-| rejected 2 | lineage unknown | lineage unknown | `rejected` | lineage unknown | lineage unknown | lineage unknown | lineage unknown | text not retained (P1-12.2) |
+| v2 | 2026-05-05 (01:34:23Z) | `3d8a8503509e490a` | `stage-adopted-auto` (`adopt-staged --yes`). Two staged rows that day (01:25:52Z, 01:30:42Z); the adopted hash matches neither, so which draft became v2 is not recorded | lineage unknown | `bc18cdd92e39` (886 B, committed the same day): rephrase, remove, merge / split / rename sections, every change traceable to a pattern, 1-4 clauses per section | not recorded (the row predates the `source_ids` field, 2026-06-05) | none | `2026-05-05-3d8a8503509e.md` |
+| v3 | 2026-08-09 (12:10:35Z) | `37e3556a40eac41c` | `stage-adopted-auto` (`adopt-staged -y`, ADR-0090) | gemma4:e4b, think on | `bc18cdd92e39` (unchanged) | constitutional view threshold 0.55, top-50; 50 pattern ids in `source_ids` (staged 05:31:51Z, same hash adopted) | IPD two-arm n=10 (gemma4:e4b) and AILuminate exploratory run (ADR-0090). Incident: the adoption wrote a `-2` twin (the audit row's path is `contemplative-axioms-2.md`), remediated by hand within minutes | live file; `2026-08-09-37e3556a40ea.md` |
+| staged, no decision | 2026-04-17 (23:50:48Z) | `8019078a84e59977` (staged) | no decision row | lineage unknown | lineage unknown | not recorded | none | text not retained (P1-12.2) |
+| staged, no decision | 2026-05-05 (one of 01:25:52Z / 01:30:42Z) | `7b37d76043b4e629` / `43fdca1e3c30ccae` (staged) | no decision row | lineage unknown | `bc18cdd92e39` | not recorded | none | text not retained (P1-12.2) |
 
-Totals as of 2026-10-08 (README): staged 4, adopted 2 (the two logged amendments v2, v3), rejected 2. v1 predates the log and is not in the 4. Only v3 was adopted with a recorded reading beside it (the two-arm bench); v2 had none.
+Totals in `audit.jsonl` (2026-10-31): 4 staged rows, 2 adopted (v2, v3), 0 rejected rows. Two staged drafts never got a decision row; the README's "rejected 2" counted them as rejected. v1 predates the log and is not in the 4. Only v3 was adopted with a recorded reading beside it (the two-arm bench); v2 had none.
 
-合計（2026-10-08 時点、README）: staged 4 / adopted 2（ログにある v2・v3）/ rejected 2。v1 はログより前なので 4 に入らない。
+合計（`audit.jsonl`、2026-10-31）: staged 4 行 / adopted 2（v2・v3）/ rejected 行 0。staged の 2 案は決定の行を持たない（README の「rejected 2」はこれを却下と数えていた）。v1 はログより前なので 4 に入らない。
 
 ### Differences / 差分
 
@@ -36,19 +36,19 @@ Totals as of 2026-10-08 (README): staged 4, adopted 2 (the two logged amendments
 
 ## Identity / identity
 
-The README counts 6 adopted of 11 staged revisions. Only the versions that survive in public snapshots can be named here; the adoption mode and the reason of every row come from the private `audit.jsonl` and are filled on the owner's machine. The first column is the first snapshot that holds the text, an upper bound on its adoption time.
+`audit.jsonl` (2026-10-31) holds 12 staged `distill-identity` rows and 7 approved ones, plus one earlier direct approval (`distill-identity-ca`, 2026-03-29); it holds no rejected row. Only the versions that survive in public snapshots have a history file here; the adoption mode comes from the private log. The first column is the first snapshot that holds the text, an upper bound on its adoption time.
 
-README は staged 11 版のうち採用 6 と数える。ここで名指しできるのは公開 snapshot に残る版だけ。各行の採択モードと reason は私有の `audit.jsonl` から、オーナーの端末で埋める。1 列目はその本文を持つ最初の snapshot で、採用時刻の上限。
+`audit.jsonl`（2026-10-31）には `distill-identity` の staged 12 行と approved 7 行、それより前の直接承認 1 行（`distill-identity-ca`、2026-03-29）があり、rejected 行は無い。履歴ファイルを持つのは公開 snapshot に残る版だけ。採択モードは私有のログから埋めた。1 列目はその本文を持つ最初の snapshot で、採用時刻の上限。
 
 | First seen in | History file | Bytes | Adoption mode (`--adopt-names` / `--yes` / interactive) | Material read | Reason |
 |---|---|---|---|---|---|
-| `distill_20260801T183004Z` | `20260801T183004Z-151e91304927.md` | 694 | lineage unknown | lineage unknown | null |
-| `skill-stocktake_20260815T041708Z` | `20260815T041708Z-4003cf001aca.md` | 894 | hand repair after a `identity-2.md` twin (no audit row), see `docs/evidence/adr-0091/identity-twin-2026-08-15.md` | lineage unknown | null |
-| `distill_20260912T183000Z` | `20260912T183000Z-40c36303e336.md` | 954 | lineage unknown | lineage unknown | null |
-| `distill_20261010T183005Z` (live) | `20261010T183005Z-e409a8d0c870.md` | 971 | lineage unknown | lineage unknown | null |
-| (2 more adopted, 5 rejected) | none | | lineage unknown | lineage unknown | null |
+| `distill_20260801T183004Z` | `20260801T183004Z-151e91304927.md` | 694 | `--yes` (`stage-adopted-auto`, 2026-06-20T02:11:46Z; the third adoption that day) | not recorded | null |
+| `skill-stocktake_20260815T041708Z` | `20260815T041708Z-4003cf001aca.md` | 894 | `--adopt-names` (`stage-adopted-names`, 2026-08-15T04:09:34Z; the row's path is `identity-2.md`), then a hand repair of the twin with no audit row, see `docs/evidence/adr-0091/identity-twin-2026-08-15.md` | not recorded | null |
+| `distill_20260912T183000Z` | `20260912T183000Z-40c36303e336.md` | 954 | `--yes` (`stage-adopted-auto`, 2026-09-12T01:34:43Z) | not recorded | null |
+| `distill_20261010T183005Z` (live) | `20261010T183005Z-e409a8d0c870.md` | 971 | `--adopt-names` (`stage-adopted-names`, 2026-10-10T03:36:34Z) | not recorded | null |
+| (4 earlier adoptions, 6 staged with no decision row) | none | | adoptions: `direct` 2026-03-29 (`distill-identity-ca`), interactive 2026-04-11, `--yes` twice on 2026-06-20 before the row above; undecided: 2026-04-17, 2026-05-12 ×2, 2026-05-25, 2026-06-20 ×2 | not recorded | null |
 
-Fill from `logs/audit.jsonl` on the owner's machine: the `distill-identity` rows, `decision` `approved` and `rejected`, with their `source` (see `scripts/value_layer_approval_join.py` for the join to the state diffs).
+Source: the `distill-identity` rows of `logs/audit.jsonl` with their `decision` and `source` (`scripts/value_layer_approval_join.py` joins them to the state diffs).
 
 ## Rules / rules
 
@@ -56,7 +56,7 @@ Four rows; the layer has no generator since ADR-0097 D2. The rules text and the 
 
 | Date | Event | Source | Note |
 |---|---|---|---|
-| 2026-04-11 | 2 rules adopted: `flow-with-contextual-fluidity-rather-than-fixed-ad-20260411.md`, `prioritize-semantic-depth-over-structural-repetiti-20260411.md` | source and approver: lineage unknown (private audit); the files carry no frontmatter and predate the `source_ids` field (2026-06-05) | the originating skills are unknown: rules-distill lineage is batch-granular, not per-rule (ADR-0050 Negative) |
+| 2026-04-11 | 2 rules adopted: `flow-with-contextual-fluidity-rather-than-fixed-ad-20260411.md`, `prioritize-semantic-depth-over-structural-repetiti-20260411.md` | `rules-stocktake`, `stage-adopted-auto` at 10:36:52Z (approver not recorded). It consolidated the three `rules-distill` rules adopted interactively at 08:28:28Z the same day, and the same run dropped the two rules of 2026-03-28 | the originating skills are unknown: rules-distill lineage is batch-granular, not per-rule (ADR-0050 Negative); the files predate the `source_ids` field (2026-06-05) |
 | 2026-08-15 | `rules-distill --stage` ran: 8 candidates staged, 8 rejected (no text kept) | ADR-0097 (context); the run's snapshot is `rules-distill_20260815T062927679215Z` with a `reasoning.md` | one candidate paraphrased the Emptiness axiom; one paraphrased a skill selected 339 times (ADR-0097) |
 | 2026-08 | the generators `rules-distill` / `rules-stocktake` retired | ADR-0097 D2 | the deterministic `rules` reading in the value-layer JSON stays |
 | after | the only route to a rule is family promotion | ADR-0097 D7 (form A′: a co-selection family at or above 0.75 over two disjoint windows of 500 judged records, synthesised, human gate, members stay in the store) | wording to be aligned when P3-07.2 (rule definition) and P1-09.12 land |
