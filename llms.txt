@@ -14,7 +14,7 @@
 - **Distilled artifacts**: skills (`skills/*.md`, proposed by `insight` and adopted by the owner via `adopt-staged`) and two legacy rules (`rules/*.md`, emitted in April 2026 by `rules-distill`, retired in ADR-0097)
 - **Adoption gate**: proposals from `insight`, `distill-identity`, and `amend-constitution` are staged and written only after the owner adopts them with `adopt-staged`; the decision log stays local, though weekly analyses quote its counts
 - **Daily comment reports**: one Markdown file per active day (`reports/comment-reports/comment-report-YYYY-MM-DD.md`), beginning 2026-03-07
-- **Analysis reports**: weekly rolling analyses (`reports/analysis/weekly-YYYY-MM-DD.md`, beginning 2026-03-30), plus diachronic analyses and the constitution-amendment report
+- **Analysis reports**: weekly rolling analyses (`reports/analysis/weekly-YYYY-MM-DD.md`, beginning 2026-03-30), plus the initial 14-day analysis and the constitution-amendment report
 - **Pivot snapshots**: one bundle per run of a behavior-shaping command (`snapshots/{kind}_{ISO8601}/`), mostly the nightly `distill`; the latest 100 are kept and older ones remain in git history
 - **Weekly pipeline measurements**: `pipeline/*/` JSON files (comment outcomes, confusion pairs, never-selected skills, value-layer due checks, dead-code and docs-consistency scans)
 - **Live deployment**: [moltbook.com/u/contemplative-agent](https://www.moltbook.com/u/contemplative-agent)
@@ -79,8 +79,8 @@ A distilled skill is defined as a behavioral specification (context, problem, so
 - [reports/comment-reports/](reports/comment-reports/): one daily Markdown file per active day. Each lists every comment the agent posted that day with its target post, relevance score, and any self-generated original post; since 2026-06-15 each entry also quotes the post it answered in a `**Context:**` block (earlier files give only the post ID). Files named `comment-report-YYYY-MM-DD.md`
 - [reports/analysis/weekly-2026-03-30.md](reports/analysis/weekly-2026-03-30.md): first weekly rolling analysis
 - [reports/analysis/](reports/analysis/): subsequent weekly rolling analyses (`weekly-YYYY-MM-DD.md`) with their findings (in earlier weeks also decision packets, a since-retired artifact) and skill-candidate reviews; read the directory for the latest
-- [Diachronic analysis (English)](reports/analysis/agent-diachronic-analysis.md): comment-pattern evolution over the first 14 days (2026-03-07 to 2026-03-20)
-- [Diachronic analysis (Japanese)](reports/analysis/agent-diachronic-analysis-ja.md): same content, Japanese
+- [Initial 14-day analysis (English)](reports/analysis/agent-diachronic-analysis.md): comment-pattern evolution over the first 14 days (2026-03-07 to 2026-03-20); the file name keeps the former title
+- [Initial 14-day analysis (Japanese)](reports/analysis/agent-diachronic-analysis-ja.md): same content, Japanese
 - [Constitution amendment report](reports/analysis/constitution-amendment-report.md): the first amendment and the experiential patterns that triggered it
 
 ## What are pivot snapshots?
@@ -93,10 +93,10 @@ A pivot snapshot is defined as a replayability bundle written at every run of a 
 
 ## How can this data be used?
 
-This repository serves two intended uses, both unrestricted under CC0:
+This repository serves two intended uses. Owner-authored content is CC0; third-party post text quoted in the reports is outside CC0 (see License):
 
 1. **Transparency** — anyone inspecting the agent's behavior on Moltbook can verify what it has learned, how its identity has evolved, and how its constitution has been amended. Every adopted change is traceable to a dated commit; the agent's own text remains machine-generated and should be read as untrusted output.
-2. **Research material** — daily comment reports, knowledge patterns, and pivot snapshots are available, with no restriction, for the study of autonomous AI agent behavior, memory dynamics, constitutional evolution, and contemplative AI principles — including reuse in model training. Owner-authored content is dedicated to the public domain (CC0-1.0); the quoted third-party context inside comment reports is the only carve-out (see License).
+2. **Research material** — daily comment reports, knowledge patterns, and pivot snapshots are available for the study of autonomous AI agent behavior, memory dynamics, constitutional evolution, and contemplative AI principles — including reuse in model training. Owner-authored content is dedicated to the public domain (CC0-1.0); third-party post text under `reports/`, and the spans of the patterns and snapshots that match it, are the carve-out (see License).
 
 ## Citation
 
@@ -128,12 +128,12 @@ Shimomoto, T. (2026). Contemplative Agent [Computer software]. https://doi.org/1
 
 ## License
 
-The license posture is defined as a public-domain dedication (CC0-1.0) over all owner-authored content. There are no restrictions: you may copy, modify, distribute, and use this content — including for model training and any commercial purpose — without permission and without attribution. Citation is appreciated as a scholarly courtesy but is not required. The single carve-out is third-party content: the quoted `**Context:**` blocks inside `reports/comment-reports/` reproduce other agents' Moltbook posts, which remain with their original authors and are outside the CC0 dedication (attributed in the adjacent `## Sources` blocks). The owner-authored distillate — for example the Hugging Face `patterns.jsonl` projection — contains no raw quoted context and is the cleanest fully-CC0 surface for downstream reuse. See [LICENSE](LICENSE) for the legal code and [NOTICE](NOTICE) for the full scope and constitution-source attribution.
+The license posture is defined as a public-domain dedication (CC0-1.0) over all owner-authored content. Within that dedication you may copy, modify, distribute, and use this content — including for model training and any commercial purpose — without permission and without attribution. Citation is appreciated as a scholarly courtesy but is not required. The carve-out is third-party content: the quoted `**Context:**` blocks inside `reports/comment-reports/` reproduce other agents' Moltbook posts, which remain with their original authors and are outside the CC0 dedication (each entry heading names the counterparty and the first 8 characters of the post id), and so do fragments of that text elsewhere under `reports/` and the matching spans of `knowledge.json` and snapshot `reasoning.md` files. Measured 2026-10-24: 371 of 12,628 patterns share a 12-word run with third-party text (555 at 8 words, 148 at 20), and 46 of 82 weekly documents do (DATACARD, Distribution). See [LICENSE](LICENSE) for the legal code and [NOTICE](NOTICE) for the full scope and constitution-source attribution.
 
 ## Related repositories
 
 - [contemplative-agent](https://github.com/shimo4228/contemplative-agent): the framework producing this data — Python CLI, 3-layer memory (episode log → knowledge → identity), structural security via Security by Absence, single Moltbook adapter as the only external surface (ADR-0015)
-- [contemplative-agent-rules](https://github.com/shimo4228/contemplative-agent-rules): drop-in alignment rules based on the same four axioms, with empirical validation — IPD cooperation d>7 and AILuminate safety d=0.96
+- [contemplative-agent-rules](https://github.com/shimo4228/contemplative-agent-rules): drop-in alignment rules based on the same four axioms, whose README quotes the paper's reported effect sizes (Laukkonen et al., 2025: IPD cooperation d = 7.09 / 5.73 / 0.66, AILuminate safety d = 0.96; the paper's values, not reproduced here except an exploratory n=2 IPD replication on a different model)
 - [contemplative-agent-cloud](https://github.com/shimo4228/contemplative-agent-cloud): optional managed-LLM backend routing generation calls through Anthropic Claude or OpenAI GPT; embeddings remain local Ollama
 - [agent-knowledge-cycle](https://github.com/shimo4228/agent-knowledge-cycle): the AKC six-phase memory-centric self-improvement cycle that inspired this memory architecture
 - [agent-attribution-practice](https://github.com/shimo4228/agent-attribution-practice): sibling research repository (DOI [10.5281/zenodo.19652013](https://doi.org/10.5281/zenodo.19652013)) re-expressing this implementation's architectural decisions in harness-neutral form

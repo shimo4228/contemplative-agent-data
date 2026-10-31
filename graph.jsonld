@@ -37,6 +37,8 @@
       "isBasedOn": "https://github.com/shimo4228/contemplative-agent-data",
       "creator": {"@id": "https://orcid.org/0009-0002-6168-4162"},
       "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "usageInfo": "https://github.com/shimo4228/contemplative-agent-data/blob/main/NOTICE",
+      "conditionsOfAccess": "Owner-authored content is CC0-1.0. Third-party post text quoted under reports/ (and the spans of knowledge.json and snapshot reasoning.md files that match it) stays with its original authors and is outside the CC0 dedication; see NOTICE.",
       "inLanguage": ["en", "ja"],
       "isPartOf": "https://github.com/shimo4228/shimo4228",
       "identifier": "https://doi.org/10.5281/zenodo.20732894",

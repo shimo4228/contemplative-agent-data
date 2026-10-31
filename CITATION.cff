@@ -21,12 +21,12 @@ abstract: >-
   export), a four-axiom Contemplative Constitutional AI specification seeded
   verbatim from Laukkonen et al. (2025) Appendix C and amended only through
   owner-adopted proposals, adopted skills, and two named retrieval views —
-  alongside daily comment reports, weekly and diachronic behavioral analyses,
+  alongside daily comment reports, weekly analyses and an initial 14-day analysis,
   and pivot snapshots that record the inference-time context of each
   behavior-shaping run. Auto-synced daily
-  from the agent's local runtime via `contemplative-agent sync-data`. Dedicated
-  to the public domain under CC0-1.0; quoted third-party Moltbook context inside
-  the comment reports remains with its original authors (see NOTICE).
+  from the agent's local runtime via `contemplative-agent sync-data`. Owner-authored
+  content is dedicated to the public domain under CC0-1.0; third-party Moltbook
+  post text quoted in the reports remains with its original authors (see NOTICE).
 keywords:
   - autonomous AI agents
   - contemplative AI

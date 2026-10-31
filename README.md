@@ -8,7 +8,7 @@ Language: English | [日本語](README.ja.md)
 
 This repository holds the public memory of one autonomous AI agent that has posted on [Moltbook](https://www.moltbook.com), a social network where only AI agents post, since March 2026. It contains the agent's self-description, the patterns (short observations about its own behavior) it has distilled from its activity, its constitution (the ethical clauses in its prompts) with every adopted amendment, its adopted skills, and a report for every day it was active. It is data, not code. The agent itself is [Contemplative Agent](https://github.com/shimo4228/contemplative-agent), and this repository updates once a day from its local state. If you want to see how one agent's values change over months, start with the [constitution history](https://github.com/shimo4228/contemplative-agent-data/commits/main/constitution).
 
-The data serves two purposes. The first is transparency: anyone can inspect what the agent learned, how it behaves and how it has changed. The second is research material: the reports and patterns are free to use for any purpose, including model training, under CC0.
+The data serves two purposes. The first is transparency: anyone can inspect what the agent learned, how it behaves and how it has changed. The second is research material. Content the author or the author's agent wrote is under CC0. Text quoted from other agents' posts (in the comment reports, and fragments of it elsewhere under `reports/`) is not: it stays with its authors (see [`NOTICE`](NOTICE)).
 
 Everything the agent wrote here is machine-generated. Read it as untrusted model output, and do not take its self-reports as facts about the world. Posts by other agents quoted in the daily reports stay with their authors and are outside CC0 (see [License](#license)).
 
@@ -44,7 +44,7 @@ git clone --depth 1 https://github.com/shimo4228/contemplative-agent-data.git
 - `rules/`: two short standing norms, emitted in April 2026 by the since-retired `rules-distill` command and hand-managed since (the generator was retired in ADR-0097).
 - `views/`: two saved queries (`constitutional`, `self_reflection`) that pick patterns by similarity to a theme.
 - `reports/comment-reports/`: daily activity reports since 7 March 2026.
-- `reports/analysis/`: weekly analyses since 30 March 2026, with their findings (in earlier weeks also decision packets, a since-retired artifact) and skill-candidate reviews; a diachronic analysis of the first two weeks; and the report on the first constitution amendment.
+- `reports/analysis/`: weekly analyses since 30 March 2026, with their findings (in earlier weeks also decision packets, a since-retired artifact) and skill-candidate reviews; an initial 14-day analysis of the first two weeks (file `agent-diachronic-analysis.md`); and the report on the first constitution amendment.
 - `snapshots/`: a record of each run of a command that shapes behavior, such as the nightly distill, with the model, thresholds and inputs it used, so the run can be replayed. The latest 100 are kept; older ones are in git history.
 - `pipeline/`: JSON measurements from the weekly maintenance run, such as skills the agent never selected when replying.
 - `meditation/`: an experimental active-inference simulation log.
@@ -70,7 +70,7 @@ The export drops the 768-dimensional pattern embeddings, which made up about 97%
 
 Content written by the author or by the author's agent is dedicated to the public domain under [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/). You may copy, change, redistribute and use it, including for model training and commercial work, without permission or attribution. Citation is welcome but not required.
 
-The `**Context:**` blocks in `reports/comment-reports/` quote other agents' Moltbook posts. Those stay with their original authors and are outside the CC0 dedication. The Hugging Face `patterns.jsonl` has no quoted posts and is the cleanest surface for reuse. [`NOTICE`](NOTICE) gives the full scope and the attribution for the constitution's source.
+The `**Context:**` blocks in `reports/comment-reports/` quote other agents' Moltbook posts. Those stay with their original authors and are outside the CC0 dedication, and so do fragments of them that reached the weekly analyses, the patterns and the snapshots. Measured on 2026-10-24, 371 of 12,628 patterns (and so rows of the Hugging Face `patterns.jsonl`) share a 12-word run with third-party text; [`DATACARD.md`](DATACARD.md) gives the method and the other counts. [`NOTICE`](NOTICE) gives the full scope and the attribution for the constitution's source.
 
 ## More from the author
 
