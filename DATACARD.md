@@ -544,8 +544,9 @@ Also to be checked by the owner and recorded in the Maintenance revision: whethe
   is the deposit and no separate copy is built. Before tagging, the maintainer
   checks that no `**Context:**` text survives in `reports/comment-reports/`.
 - **Which DOI is which.** `10.5281/zenodo.20732894` is the **concept** DOI (it
-  resolves to the latest version). Each version has its own version DOI; the first
-  deposited version is v1.0.0 (2026-06-17). `CITATION.cff` carries the concept DOI
+  resolves to the latest version). Each version has its own version DOI: v1.0.0
+  (2026-06-17) is `10.5281/zenodo.20732895`, v1.1.0 (2026-10-31, with framework
+  v2.14.0) is `10.5281/zenodo.23837886`. `CITATION.cff` carries the concept DOI
   in `doi:` and, once a new version exists, its version and `date-released`. The list
   of versions is on the Zenodo record linked above.
 
