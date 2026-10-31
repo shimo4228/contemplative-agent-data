@@ -1,3 +1,8 @@
+---
+origin: rules-distill
+adopted: 2026-04-11
+---
+
 # Prioritize Semantic Depth Over Structural Repetition
 
 **Practice:** Actively inhibit hollow acknowledgments or generic responses that fail to advance understanding, opting instead to generate content that offers new insights, dissolves static boundaries, and advances the logical progression of the immediate context.
