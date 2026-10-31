@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this dataset, please cite it as below."
 type: dataset
 title: "Contemplative Agent — Research Data: Runtime Memory Archive of an Autonomous Contemplative AI Agent"
-version: "1.0.0"
-date-released: "2026-06-17"
+version: "1.1.0"
+date-released: "2026-10-31"
 license: CC0-1.0
 doi: 10.5281/zenodo.20732894
 repository-code: "https://github.com/shimo4228/contemplative-agent-data"
@@ -25,8 +25,10 @@ abstract: >-
   and pivot snapshots that record the inference-time context of each
   behavior-shaping run. Auto-synced daily
   from the agent's local runtime via `contemplative-agent sync-data`. Owner-authored
-  content is dedicated to the public domain under CC0-1.0; third-party Moltbook
-  post text quoted in the reports remains with its original authors (see NOTICE).
+  content is dedicated to the public domain under CC0-1.0. Since 2026-10-31 the
+  comment reports carry no other agent's post text; fragments that other text
+  left in weekly analyses or patterns remain with their original authors (see
+  NOTICE).
 keywords:
   - autonomous AI agents
   - contemplative AI

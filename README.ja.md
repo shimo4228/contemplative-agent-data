@@ -70,7 +70,7 @@ flowchart TD
 
 著者と著者のエージェントが書いた内容は、[CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) によりパブリックドメインに献呈しています。モデルの学習や商用を含め、許諾も帰属表示もなしに、複製・改変・再配布・利用ができます。引用は歓迎しますが必須ではありません。
 
-`reports/comment-reports/` の `**Context:**` ブロックは、他のエージェントの Moltbook 投稿の引用です。これらは原著者のもので、CC0 の献呈の対象外です。週次分析・パターン・スナップショットに入ったその断片も同じです。2026-10-24 の測定では、12,628 件のパターン（Hugging Face の `patterns.jsonl` の行も同じ）のうち 371 件が第三者の文と 12 語の連なりを共有しています。方法とほかの数字は [`DATACARD.md`](DATACARD.md) にあります。範囲の全体と憲法の出典の帰属は [`NOTICE`](NOTICE)（英語）にあります。
+2026 年 10 月 31 日から、`reports/comment-reports/` には他のエージェントの Moltbook 投稿が入っていません（引用していた `**Context:**` ブロックは 1 行の注記に置き換えました。Git の履歴とデータセットの version 1.0.0 には以前の文が残ります）。週次分析・パターン・スナップショットに入ったその断片は原著者のもので、CC0 の献呈の対象外です。2026-10-24 の測定では、12,628 件のパターン（Hugging Face の `patterns.jsonl` の行も同じ）のうち 371 件が第三者の文と 12 語の連なりを共有しています。方法とほかの数字は [`DATACARD.md`](DATACARD.md) にあります。範囲の全体と憲法の出典の帰属は [`NOTICE`](NOTICE)（英語）にあります。
 
 ## 著者のほかの仕事
 
@@ -93,8 +93,8 @@ flowchart TD
 - 状態: 稼働中。2026 年 3 月から `contemplative-agent sync-data` が毎日同期し、`--force-with-lease` で push します。活動レポートは 2026 年 3 月 7 日から始まります。
 - 生成モデル: Ollama 経由のローカル LLM（2026 年 6 月 28 日から `gemma4:e4b`、それ以前は `qwen3.5:9b`）。埋め込みは `nomic-embed-text` の 768 次元で、書き出しの際に外します。
 - 除外しているもの: 生のエピソードログ、埋め込みのストア、認証情報とキャッシュ、非公開のレポート、著者の判断ログ（採用と却下）。このログの件数を引く週次分析と、一部の候補に却下を推奨するスキル候補レビューは公開しています。
-- ライセンス: 著者とエージェントの内容は CC0-1.0。引用の `**Context:**` ブロックは対象外（`NOTICE` を参照）。
-- データセットの DOI（Zenodo のコンセプト DOI）: [10.5281/zenodo.20732894](https://doi.org/10.5281/zenodo.20732894)。`CITATION.cff` は version 1.0.0（2026 年 6 月 17 日）を記述しています。
+- ライセンス: 著者とエージェントの内容は CC0-1.0。他のエージェントの文の断片は対象外（`NOTICE` を参照）。
+- データセットの DOI（Zenodo のコンセプト DOI）: [10.5281/zenodo.20732894](https://doi.org/10.5281/zenodo.20732894)。`CITATION.cff` は version 1.1.0（2026 年 10 月 31 日）を記述しています。
 - フレームワークの DOI: [10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118)。
 - Hugging Face: [shimo4228/contemplative-agent-data](https://huggingface.co/datasets/shimo4228/contemplative-agent-data) の `patterns.jsonl`（埋め込みなしのパターンの行）。
 

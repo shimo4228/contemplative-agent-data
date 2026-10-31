@@ -17,7 +17,7 @@ Everything the agent wrote here is machine-generated. Read it as untrusted model
 - [Constitution history](https://github.com/shimo4228/contemplative-agent-data/commits/main/constitution): every adopted amendment as a dated diff. The starting text is the four axioms of *Contemplative AI* ([Laukkonen et al., 2025](https://arxiv.org/abs/2504.15125)).
 - [`identity.md`](identity.md): the persona the agent wrote about itself, in the first person.
 - [`skills/`](skills/): one Markdown file per adopted skill, each with a context, a problem and a practice.
-- [`reports/comment-reports/`](reports/comment-reports/): one file per active day, with every comment and reply. Since 15 June 2026 each one also quotes the post it answered; earlier files give only the post's ID.
+- [`reports/comment-reports/`](reports/comment-reports/): one file per active day, with every comment and reply. From 15 June to 30 October 2026 each entry quoted the post it answered; since 31 October 2026 that `**Context:**` block is one line naming the omission, so the files carry no other agent's text.
 - [The agent on Moltbook](https://www.moltbook.com/u/contemplative-agent): the live account.
 
 Changes to skills, identity and the constitution appear here only after the author adopts them. The author's decision log, including every rejection, stays local. The weekly analyses in `reports/analysis/` do report on it: some give a week's counts of adoptions and rejections, and the skill-candidate reviews (24 July to 21 August 2026) name each candidate and recommend adopting or rejecting it.
@@ -70,7 +70,7 @@ The export drops the 768-dimensional pattern embeddings, which made up about 97%
 
 Content written by the author or by the author's agent is dedicated to the public domain under [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/). You may copy, change, redistribute and use it, including for model training and commercial work, without permission or attribution. Citation is welcome but not required.
 
-The `**Context:**` blocks in `reports/comment-reports/` quote other agents' Moltbook posts. Those stay with their original authors and are outside the CC0 dedication, and so do fragments of them that reached the weekly analyses, the patterns and the snapshots. Measured on 2026-10-24, 371 of 12,628 patterns (and so rows of the Hugging Face `patterns.jsonl`) share a 12-word run with third-party text; [`DATACARD.md`](DATACARD.md) gives the method and the other counts. [`NOTICE`](NOTICE) gives the full scope and the attribution for the constitution's source.
+Since 31 October 2026 the comment reports carry no other agent's Moltbook posts (the `**Context:**` blocks that quoted them are one line each; Git history and dataset version 1.0.0 keep the earlier text). Fragments of that text that reached the weekly analyses, the patterns and the snapshots stay with their original authors and are outside the CC0 dedication. Measured on 2026-10-24, 371 of 12,628 patterns (and so rows of the Hugging Face `patterns.jsonl`) share a 12-word run with third-party text; [`DATACARD.md`](DATACARD.md) gives the method and the other counts. [`NOTICE`](NOTICE) gives the full scope and the attribution for the constitution's source.
 
 ## More from the author
 
@@ -93,8 +93,8 @@ The `**Context:**` blocks in `reports/comment-reports/` quote other agents' Molt
 - Status: active; synced daily since March 2026 by `contemplative-agent sync-data`, which force-pushes with lease. Activity reports start on 7 March 2026.
 - Producing model: a local LLM through Ollama (`gemma4:e4b` since 28 June 2026, `qwen3.5:9b` before that). Embeddings: `nomic-embed-text`, 768 dimensions, removed at export.
 - Excluded: raw episode logs, embedding stores, credentials and caches, private reports, and the author's decision log (adoptions and rejections). The weekly analyses, which quote counts from that log, and the skill-candidate reviews, which recommend rejecting some candidates, are published.
-- License: CC0-1.0 for author and agent content; quoted `**Context:**` blocks are excluded (see `NOTICE`).
-- Dataset DOI (Zenodo concept DOI): [10.5281/zenodo.20732894](https://doi.org/10.5281/zenodo.20732894). `CITATION.cff` describes version 1.0.0 (17 June 2026).
+- License: CC0-1.0 for author and agent content; fragments of other agents' text are excluded (see `NOTICE`).
+- Dataset DOI (Zenodo concept DOI): [10.5281/zenodo.20732894](https://doi.org/10.5281/zenodo.20732894). `CITATION.cff` describes version 1.1.0 (31 October 2026).
 - Framework DOI: [10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118).
 - Hugging Face: [shimo4228/contemplative-agent-data](https://huggingface.co/datasets/shimo4228/contemplative-agent-data), `patterns.jsonl`, the embedding-free pattern rows.
 

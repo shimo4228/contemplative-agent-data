@@ -8,7 +8,7 @@ was run**; re-run the command rather than trusting the number. Commands were run
 on 2026-10-24 against a checkout at sync commit `d44544a` (2026-10-23).
 
 - **Curator**: Tatsuya Shimomoto ([ORCID 0009-0002-6168-4162](https://orcid.org/0009-0002-6168-4162), shimo4228)
-- **DOI**: [10.5281/zenodo.20732894](https://doi.org/10.5281/zenodo.20732894) (Zenodo concept DOI; first deposited version v1.0.0, 2026-06-17)
+- **DOI**: [10.5281/zenodo.20732894](https://doi.org/10.5281/zenodo.20732894) (Zenodo concept DOI; versions v1.0.0, 2026-06-17, and v1.1.0, 2026-10-31)
 - **License**: CC0-1.0 (public domain dedication) for owner-authored content; see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE)
 - **Source archive**: this repository, [shimo4228/contemplative-agent-data](https://github.com/shimo4228/contemplative-agent-data)
 - **Flattened projection**: [shimo4228/contemplative-agent-data](https://huggingface.co/datasets/shimo4228/contemplative-agent-data) (`patterns.jsonl`)
@@ -532,17 +532,17 @@ Also to be checked by the owner and recorded in the Maintenance revision: whethe
 
 **5. How requests are carried out.** Withdrawals go through a suppression list (`post:<id>`, `name:<display name>`, `pattern:<pattern_id>`, `file:<path>`) that the framework's export and report writers apply before anything is published; the list holds identifiers, never text. A request that came before the list existed is carried out once by hand in the maintainer's checkout. Details are in the framework repository (`docs/REPRODUCING.md`, section "Withdrawing published text").
 
-- **Versioning rule** (decision D-P3-05-1 = (a) B, (b) C, owner, 2026-10-24).
-  A dataset version is cut (1) at each **code minor release** of the framework,
-  (2) just before a constitution amendment falls due, and (3) once more as the
-  **final** version when the run ends. So a paper can cite one dataset version per
-  code version. The deposit copy keeps `knowledge.json`, `skills/`, `identity.md`,
-  `constitution/`, snapshots and the reports, but the comment reports are
-  the tree's copies, which omit the `**Context:**` blocks (third-party text); `**Internal note:**`
-  and `**Output:**` stay. The deposit is a **copy made for Zenodo**, not the tree.
-  Before the first such version the Zenodo-GitHub integration of this repository is
-  switched off and no GitHub Release is created here (a Release with the
-  integration on would deposit the whole tree).
+- **Versioning rule** (decision D-P3-05-1 = (a) B, owner, 2026-10-24; deposit
+  form D-P3-05-11, owner, 2026-10-31). A dataset version is cut (1) at each
+  **code minor release** of the framework, (2) just before a constitution
+  amendment falls due, and (3) once more as the **final** version when the run
+  ends. So a paper can cite one dataset version per code version (v1.1.0 pairs
+  with framework v2.14.0). A version is a **GitHub Release of this repository**,
+  which the Zenodo-GitHub integration deposits as a zip of the tagged tree. The
+  tree carries no other agent's post text since 2026-10-31 (each `**Context:**`
+  block is one line; `**Internal note:**` and `**Output:**` stay), so the tree
+  is the deposit and no separate copy is built. Before tagging, the maintainer
+  checks that no `**Context:**` text survives in `reports/comment-reports/`.
 - **Which DOI is which.** `10.5281/zenodo.20732894` is the **concept** DOI (it
   resolves to the latest version). Each version has its own version DOI; the first
   deposited version is v1.0.0 (2026-06-17). `CITATION.cff` carries the concept DOI
