@@ -49,10 +49,12 @@ Each row of the table is one top-level path; the second table covers
 | `constitution/` | In-force four-axiom constitution, amended in place | `amend-constitution`, adopted by the owner | — (state) |
 | `views/*.md` | Named lenses over the embedding space (`threshold` + `top_k` frontmatter) | hand-written seeds | — (state) |
 | `skills/*.md`, `rules/*.md` | Adopted skills; two legacy rules (2026-04-11, retired command) | `insight`, `adopt-staged` | skills: yes, see "Skill lineage" |
+| `skills/INDEX.md` | One row per skill: file stem, `name:`, origin, `adopted_at`, audit source, status; retired skills by name and date only | `scripts/skills_index.py`, at every sync | live rows: yes (from `skills/`); retired rows need the private archive |
+| `history/identity/`, `constitution/history/` | Every adopted identity and constitution version, one file each (`<time>-<sha12>.md`), with `constitution/history/CHANGELOG.md` and `lineage.json` | `core/value_history.py` at adoption; the versions before 2026-10-24 seeded once from the framework's `docs/evidence/value-history/seed/` | — (record) |
 | `reports/comment-reports/` | One file per active day: each comment/reply/post with context, internal note and output | framework report writer | — (record) |
-| `reports/analysis/` | Weekly analyses, diachronic analyses, amendment report, observation ledger, `patches/` | weekly pipeline | see the second table |
+| `reports/analysis/` | Weekly analyses, the initial 14-day analysis, amendment report, observation ledger | weekly pipeline | see "Analysis documents" |
 | `reports/PIPELINE-STATUS.md` | Status of the last weekly pipeline run | `scripts/weekly-pipeline.sh` | no (reads private logs) |
-| `pipeline/*/` | Weekly instrument readings, one JSON per series per week (table below) | weekly pipeline scripts | two series yes, five no |
+| `pipeline/` | Weekly instrument readings, one JSON per series per week, and four files the sync writes (table below) | weekly pipeline scripts, `sync-data` | see "Pipeline instruments" |
 | `snapshots/{kind}_{ISO8601}/` | Replayability bundle per behavior-producing run | framework (`core/snapshot.py`) | — (record; see Preprocessing) |
 | `meditation/results.json` | Experimental Active Inference (POMDP) belief-update log | `meditation` command | — (**stale**, see note) |
 
@@ -78,30 +80,55 @@ injects every skill at once.
 | `weekly-DATE-insight-review.md` | Review of that week's staged skill candidates |
 | `weekly-DATE-archive-candidates.txt` | Skills proposed for retirement that week |
 | `weekly-DATE-improvement.md` | Improvement proposal text |
-| `agent-diachronic-analysis(-ja).md`, `constitution-amendment-report.md` | Long-form analyses |
+| `agent-diachronic-analysis(-ja).md` (the initial 14-day analysis; the file name keeps the former title), `constitution-amendment-report.md` | Long-form analyses |
 | `observation-ledger.jsonl` | Append-only ledger of weekly observations |
-| `patches/weekly-DATE/{code,prompt}/*.patch` | Patch proposals against the framework (MIT, framework code, not data); 14 files on 2026-10-24 (`find reports/analysis/patches -type f | wc -l`) |
+| `README.md` | Hand-kept: which file formats are active and which are retired |
 
-> **`patches/`.** Whether this directory stays in the mirror is decision
-> D-P3-05-4. Variant A (recommended): excluded from sync; this row becomes
-> "removed from the mirror on DATE, history in git". Variant B: kept, and
-> `NOTICE` states that the files are framework code under MIT, not CC0 data.
-> The owner picks one and deletes the other sentence.
+**`patches/`.** The weekly patch proposals against the framework
+(`patches/weekly-DATE/{code,prompt}/*.patch`, 14 files, framework code under MIT,
+not data) were removed from the mirror (decision D-P3-05-4 = A); git history keeps
+them.
+
+**Pipeline state.** `.anomaly-sweep-state.tsv` (+ `.corpus.tsv`),
+`.api-drift-state.tsv` and `.approval-join-state.json` are weekly baseline and
+pipeline state files, published as is. `skills/.last_insight` and
+`constitution/.last_constitution_amend` are no longer published.
+
+### Analysis documents (`reports/analysis/`)
+
+| Document | Period | Format and writer | ADR | Machine-readable counterpart |
+|---|---|---|---|---|
+| `agent-diachronic-analysis.md` (+ `-ja`): the initial 14-day analysis | 2026-03-07 to 2026-03-20; a note was added 2026-03-28 and it has not been updated since | prose; written by a different model, in the qwen era | - | none |
+| `constitution-amendment-report.md` | the first amendment only (episodes 2026-03-10 to 2026-03-26) | prose | - | none |
+| `weekly-YYYY-MM-DD.md` (series A-E) | 2026-03-30 to 2026-08-21; 2026-03-30 to 2026-08-07 is prose only | prose, one writer style until R16 (2026-08-16), another after | - | `pipeline/dead-code` from 2026-08-07 |
+| `weekly-YYYY-MM-DD.md` (instrument documents) | 2026-08-28 (first run 2026-08-29) onward | observation document with a ledger; one session writes report and diagnosis | ADR-0098, ADR-0099 | `pipeline/<series>/` from 2026-08-14 and `observation-ledger.jsonl` |
+
+The stretches (boundary to boundary, with the number of weekly points) are in the
+framework repository, `docs/evidence/regimes/intervals.md`. The weekly documents
+may contain verbatim fragments of third-party posts (see Distribution). A monthly
+longitudinal summary is not part of this card (decision D-P3-02-1 = A).
 
 ### Pipeline instruments (`pipeline/`)
 
 Each file is a reading, not a state. No file carries its generating script, code
 version or inputs in its header; the mapping lives here.
 
-| Series (files on 2026-10-24: `ls pipeline/<series> | wc -l`) | Generating script (framework repo) | Owning ADR | Consumer | Recompute from public input |
+| Series (files on 2026-10-31: `ls pipeline/<series> | wc -l`) | Generating script (framework repo) | Owning ADR | Consumer | Recompute from public input |
 |---|---|---|---|---|---|
-| `comment-outcomes` (6) | `scripts/weekly-pipeline.sh` stage 7d (`core/comment_outcomes.py`) | ADR-0106 (log), RFC-0028 | weekly gate | no: input is `logs/` |
-| `confusion-pairs` (6) | `scripts/confusion_pair_reading.py`, stage 7c | ADR-0097 | weekly gate | no: input is `logs/` |
-| `dead-code` (11) | `scripts/dead_code_scan.py` (fifth deterministic intake) | ADR-0093 | weekly gate | **yes**: framework repo at the tagged commit |
-| `docs-consistency` (10) | `scripts/docs_consistency_scan.py`, stage 6b | ADR-0093 | weekly gate | **yes**: framework repo at the tagged commit |
-| `ledger-watch` (1) | stage 6c, retired | ADR-0095 | none | no |
-| `never-selected` (8) | `scripts/weekly-pipeline.sh` stage 7b (skill-selection reading) | ADR-0076, ADR-0097 | weekly gate | no: input is `logs/skill-selection-*.jsonl` |
-| `value-layer` (10) | `scripts/value_layer_due_check.py` | ADR-0091 | weekly gate | no: input is `logs/audit.jsonl` |
+| `comment-outcomes` (8) | `scripts/weekly-pipeline.sh` stage 7d (`core/comment_outcomes.py`); the stage was removed on 2026-10-31 (decision D-P1-04-2 = A) | ADR-0106 (log), RFC-0028 | none after 2026-10-31 | no: input is `logs/` |
+| `confusion-pairs` (8) | `scripts/confusion_pair_reading.py`, stage 7c | ADR-0097 | weekly gate | no: input is `logs/` |
+| `dead-code` (13) | `scripts/dead_code_scan.py` (fifth deterministic intake) | ADR-0093 | weekly gate | **yes**: framework repo at the tagged commit |
+| `docs-consistency` (12) | `scripts/docs_consistency_scan.py`, stage 6b | ADR-0093 | weekly gate | **yes**: framework repo at the tagged commit |
+| `never-selected` (10) | `scripts/weekly-pipeline.sh` stage 7b (skill-selection reading) | ADR-0076, ADR-0097 | weekly gate | no: input is `logs/skill-selection-*.jsonl` |
+| `relevance-reading` (1) | `scripts/relevance_shadow_reading.py` (weekly analysis) | ADR-0113, RFC-0046 | weekly report | no: input is `logs/` |
+| `value-layer` (14 weekly files) | `scripts/value_layer_due_check.py` | ADR-0091 | weekly gate | no: input is `logs/audit.jsonl` |
+| `value-layer/changes.json`, `value-layer/regime-candidates.json` | `scripts/value_layer_change_series.py`, at every sync | ADR-0010 amendment (P2-05.7) | readers of the regime table | **yes**: from `snapshots/` |
+| `skills-index.json` | `scripts/skills_index.py`, at every sync (same rows as `skills/INDEX.md`) | ADR-0010 amendment (P2-05.8) | readers | live rows yes |
+| `regimes.json` | copied at every sync from the framework's `docs/evidence/regimes/regimes.json` (hand-confirmed) | P3-02.1 | readers, figures | — (record) |
+
+`ledger-watch` (stage 6c, retired with ADR-0095; one file, 2026-08-14) was removed
+from the tree; git history keeps it. `reports/analysis/README.md` lists the active
+and retired formats.
 
 The recompute column for `dead-code` and `docs-consistency` was checked by
 re-running the scripts from a framework tag and comparing `count`; the record is
@@ -241,6 +268,55 @@ embeddings inside `knowledge.json`; the text of rejected proposals; follower lis
 files (`config/sync-excludes.txt`, `config/sync-excludes-public.txt`). This
 repository's `.gitignore` is generated from the same two files and is a second net.
 
+### Apparatus boundaries / regime changes
+
+The series in this dataset are not stationary in the apparatus that produced them:
+the extractor, the generation model, the serving stack, the report instruments and
+the value layer all changed while it ran. A change in a series across one of the
+dates below is first a change of apparatus. Compare inside a stretch between two
+boundaries that touch the same series, not across them. The machine-readable copy
+is [`pipeline/regimes.json`](pipeline/regimes.json) (same rows; `affects` names the
+series each row moves). Boundaries are dates on which a change takes effect (UTC
+unless a row says otherwise); a row whose time is given is the snapshot or adoption
+instant. Regenerate the table with `python3 -I scripts/regime_intervals.py --regimes
+docs/evidence/regimes/regimes.json --render-datacard` (framework repository).
+
+| id | date | change | affects | ADR / RFC |
+|---|---|---|---|---|
+| R01 | 2026-03-27 | First constitution amendment (before the interval logs begin) | `constitution`, `comment-reports` | reports/analysis/constitution-amendment-report.md |
+| R02 | 2026-04-16 | provenance.pipeline_version starts at distill@0.26; the 300 earlier rows carry none | `knowledge.provenance` | - |
+| R03 | 2026-05-05 | Second constitution amendment | `constitution`, `comment-reports` | ADR-0090 |
+| R04 | 2026-06-17 | Importance scoring retired; new rows omit the importance field | `knowledge.patterns` | ADR-0056 |
+| R05 | 2026-06-23 | distill@0.60: per-episode grounded distill replaces the batch distill | `knowledge.patterns`, `knowledge.provenance` | ADR-0060 |
+| R06 | 2026-06-28 | Generation model qwen3.5:9b -> gemma4:e4b | `knowledge.patterns`, `comment-reports`, `snapshots` | ADR-0069 |
+| R07 | 2026-07-03 | register intervention; retrieval views 7 -> 2 | `comment-reports`, `views` | ADR-0072, ADR-0073 |
+| R08 | 2026-07-12 | Public export drops the 768-dim embeddings from knowledge.json | `knowledge.embedding` | ADR-0010 |
+| R09 | 2026-07-18 | dup-cleanup: no row removed, 96 rows differ only in valid_until | `knowledge.patterns` | - |
+| R10 | 2026-07-26 | Post-distill durability gate (postgate) changes the extractor's output | `knowledge.patterns` | ADR-0084 |
+| R11 | 2026-08-08 | Skills 37 -> 45 (snapshot observation) | `skills`, `comment-reports` | P2-05.7 |
+| R12 | 2026-08-09 | Third constitution amendment; the IPD two-arm instrument is used for the first time | `constitution`, `comment-reports`, `ipd-benchmark`, `snapshots` | ADR-0090 |
+| R13 | 2026-08-15 04:02Z | Skills 45 -> 50 | `skills`, `comment-reports` | P2-05.7 |
+| R14 | 2026-08-15 04:17Z | Identity adopted: 694 B -> 894 B (the twin-file adjustments are included in the digest) | `identity`, `comment-reports` | P2-05.7, P3-04.2, P3-07.1 |
+| R15 | 2026-08-15 06:29Z | Skills 50 -> 48 (1 added, 3 removed) | `skills`, `comment-reports` | P2-05.7 |
+| R16 | 2026-08-16 | Report session loses the user settings layer: the report-writing model and style change. Reports ending on or after this date are a different instrument | `weekly-analysis` | ADR-0099, ADR-0102 |
+| R17 | 2026-08-22 | Last adoption batch: skills 48 -> 57 | `skills`, `comment-reports` | P2-05.7 |
+| R18 | 2026-08-28 | The hand-edit detector's unmatched set has been the same since this date (no hand edits). This is not a stillness of the value layer; read stillness or drift from the change series | `pipeline/value-layer` | scripts/value_layer_approval_join.py, P2-05.7 |
+| R19 | 2026-08-29 | Report and diagnosis come from one session through a materials file; the A-E series ends and Japanese report translations end | `weekly-analysis`, `pipeline/value-layer`, `pipeline/never-selected`, `pipeline/comment-outcomes`, `pipeline/confusion-pairs`, `pipeline/docs-consistency`, `pipeline/ledger-watch` | ADR-0098, ADR-0099 |
+| R20 | 2026-09-06 | ADR-0069 addendum: manifests record serving_env (Ollama version, weight digests); the first manifest to carry it is dated 2026-09-06 | `snapshots` | ADR-0069 |
+| R21 | 2026-09-11 | One insight run missing (09-11); resumes 09-18. The 09-25 and 10-02 runs stage nothing (verdict revise at the naming stage) | `insight-staging`, `skills` | ADR-0111 |
+| R22 | 2026-09-12 | Embedding sidecar introduced (embeddings.sqlite beside knowledge.json; not archived) | `knowledge.embedding`, `snapshots` | ADR-0108 |
+| R23 | 2026-09-12 01:26Z | Skills 57 -> 54 (archived) | `skills`, `comment-reports` | P2-05.7 |
+| R24 | 2026-09-12 18:30Z | Identity adopted: 894 B -> 954 B | `identity`, `comment-reports` | P2-05.7 |
+| R25 | 2026-09-19 | Skills 54 -> 53 (53 since) | `skills`, `comment-reports` | P2-05.7 |
+| R26 | 2026-09-20 | Ollama 0.30.11 -> 0.34.2; the two weight digests are unchanged. The switch happened between the 2026-09-18T23:00Z insight run and the 2026-09-20T18:30Z distill run | `knowledge.embedding`, `knowledge.patterns`, `comment-reports`, `snapshots` | ADR-0069 |
+| R27 | 2026-09-28 15:00Z | score4 relevance gate enforced at t = 0.3 (a different scale from the old 0.82 threshold) | `comment-reports`, `comment-reports.relevance` | RFC-0046, ADR-0113 |
+| R28 | 2026-10-07 | comment-report headings render relevance as P(top) (score4), kept apart from the old-scale range | `comment-reports.relevance` | RFC-0046, ADR-0113 |
+| R29 | 2026-10-10 | Identity adopted: 954 B -> 971 B (not in the 2026-10 roadmap list; found by the change series) | `identity`, `comment-reports` | P2-05.7 |
+
+Ollama before 2026-09-06 is `unknown`: manifests carry the serving environment only
+from that date. 0.30.11 ran from 2026-09-06 to 2026-09-19, 0.34.2 from 2026-09-20
+(R26; the two weight digests did not change).
+
 ## 4. Preprocessing, cleaning, labeling
 
 - **Embeddings dropped at export.** Since 2026-07-12 `knowledge.json` and the
@@ -294,14 +370,18 @@ the framework's `docs/REPRODUCING.md` says which tag uses which).
 ### Pivot snapshots: what "replay" means
 
 Each behavior-producing run writes `snapshots/{kind}_{ISO8601}/` with a
-`manifest.json`. The framework keeps the latest `MAX_SNAPSHOTS = 100`
-(`core/snapshot.py`); older ones leave the working tree on the next sync and
-remain only in git history (`git log --diff-filter=D --name-only -- snapshots/`,
-then `git show <commit>^:<path>`). On 2026-10-24 the tree holds 100 bundles from
-2026-08-01 (`ls snapshots | wc -l`; first by `ls snapshots | sed -E 's/^[a-z-]+_//' | sort | head -1`).
+`manifest.json`. Snapshots are kept per kind (framework ADR-0020 amendment,
+2026-10-24): only the daily `distill` kind is capped, at `MAX_SNAPSHOTS = 100`
+(`core/snapshot.py`); `distill-identity`, `amend-constitution`, `insight`,
+`skill-stocktake` and the retired `rules-distill` are kept without limit. A pruned
+`distill` bundle leaves the working tree on the next sync and remains only in git
+history (`git log --diff-filter=D --name-only -- snapshots/`, then
+`git show <commit>^:<path>`); bundles of other kinds pruned before that amendment
+are in git history the same way. On 2026-10-31 the tree holds 103 bundles from
+2026-08-05 (`ls snapshots | wc -l`; first by `ls snapshots | sed -E 's/^[a-z-]+_//' | sort | head -1`).
 Kinds present: `ls snapshots | sed 's/_.*//' | sort -u` = `amend-constitution`,
 `distill`, `distill-identity`, `insight`, `rules-distill` (retired command),
-`skill-stocktake`. Counts: distill 84, insight 10, distill-identity 3,
+`skill-stocktake`. Counts: distill 86, insight 11, distill-identity 3,
 amend-constitution 1, rules-distill (retired) 1, skill-stocktake 1.
 
 A snapshot is the **context** of a run, not a self-contained replay. What a replay
@@ -312,14 +392,27 @@ needs and where it is:
 | views, constitution, skills, rules, identity at run time | yes (in the bundle) | |
 | view centroids (`centroids.npz`) | yes | |
 | manifest: command, models, thresholds, embedding dim | yes | |
-| Ollama version and model digests in the manifest | only bundles from 2026-09-12 on (55 of 100: manifests with 19 keys) | earlier ones: not recorded |
+| Ollama version and model digests in the manifest | bundles from 2026-09-06 on with 19 or 32 keys (61 of 103; the one 16-key repair manifest of 2026-10-26 lacks them) | earlier ones: not recorded |
 | the episode log the run read | | yes (episode log, never published) |
 | the embeddings sidecar | | yes (derivable, large) |
-| the prompt files | | `prompts_dir` is `null` in 15- and 14-key manifests; prompts are the framework's `config/prompts/` at the run's code version |
+| the prompt files | from 2026-10-25 the 32-key manifests carry `prompt_digests`, `git_commit` and `values_digest` | earlier: prompts are the framework's `config/prompts/` at the run's code version |
 
 So "replayable" holds for **what the run saw in the value layer**, not for
-re-running the run from public data alone. Manifest shapes: 14 keys (1 bundle),
-15 keys (44), 19 keys (55), from `ls snapshots/*/manifest.json` and counting keys.
+re-running the run from public data alone.
+
+#### Snapshot manifest generations
+
+`snapshots/*/manifest.json` has several key sets (2026-10-31,
+`python3 -I scripts/manifest_key_generations.py snapshots` from the framework
+repository). An absent key in an old manifest is a different fact from a null in a
+new one. The 16-key manifest is a single repair run on 2026-10-26.
+
+| keys | manifests | first snapshot (ts) | last (ts) | keys added over the previous generation | origin |
+|---|---|---|---|---|---|
+| 15 | 41 | `distill_20260805T183003399849Z` (2026-08-05T18:30:03Z) | `distill_20260905T183010212415Z` (2026-09-05T18:30:10Z) | (base set) `command`, `constitution_dir`, `embedding_dim`, `embedding_model`, `generation_model`, `identity_path`, `prompts_dir`, `rules_dir`, `run_id`, `skills_dir`, `think`, `thresholds`, `ts`, `views`, `views_dir` | T-MANIFEST-RUNID fix, 2026-08-02 (a snapshot finds its own telemetry) |
+| 19 | 57 | `distill_20260906T183007489471Z` (2026-09-06T18:30:07Z) | `distill_20261024T183005030424Z` (2026-10-24T18:30:05Z) | `embedding_model_digest`, `generation_model_digest`, `ollama_version`, `serving_environment_reason` | ADR-0069 addendum, 2026-09-06 |
+| 32 | 4 | `distill_20261025T183005682100Z` (2026-10-25T18:30:05Z) | `distill_20261030T183005363399Z` (2026-10-30T18:30:05Z) | `axioms_sha256`, `framework_version`, `git_commit`, `identity_sha256`, `identity_source`, `manifest_schema`, `numpy_version`, `os_release`, `prompt_digests`, `prompt_override_files`, `prompt_templates_sha256`, `python_version`, `values_digest` | - |
+| 16 | 1 | `distill_20261026T183005992421Z` (2026-10-26T18:30:05Z) | `distill_20261026T183005992421Z` (2026-10-26T18:30:05Z) | `repair_note`; removed: `axioms_sha256`, `embedding_model_digest`, `framework_version`, `generation_model_digest`, `git_commit`, `identity_sha256`, `identity_source`, `manifest_schema`, `numpy_version`, `ollama_version`, `os_release`, `prompt_digests`, `prompt_override_files`, `prompt_templates_sha256`, `python_version`, `serving_environment_reason`, `values_digest` | - |
 
 ## 5. Uses
 
