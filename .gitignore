@@ -20,4 +20,6 @@ knowledge.backups/
 .staged/
 .archive/
 _gc_trash/
+patches/
+ledger-watch/
 .private
