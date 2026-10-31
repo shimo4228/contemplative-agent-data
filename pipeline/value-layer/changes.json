@@ -1,8 +1,8 @@
 {
  "coverage": {
-  "snapshots": 103,
+  "snapshots": 104,
   "first_ts": "2026-08-05T18:30:03Z",
-  "last_ts": "2026-10-30T18:30:05Z"
+  "last_ts": "2026-10-30T23:00:00Z"
  },
  "changes": [
   {

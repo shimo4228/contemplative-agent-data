@@ -1,0 +1,19 @@
+{
+  "findings": [],
+  "count": 0,
+  "readings": {
+    "freshness": [
+      {
+        "file": "docs/CYCLES.md",
+        "generated": "2026-10-24",
+        "source_commit": "68f76c0",
+        "commits_behind": 402,
+        "days_old": 7
+      }
+    ]
+  },
+  "errors": [],
+  "readings_count": 1,
+  "abstain_count": 0,
+  "scanned_files": 480
+}
