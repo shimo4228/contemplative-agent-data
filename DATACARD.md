@@ -124,6 +124,8 @@ version or inputs in its header; the mapping lives here.
 | `value-layer` (14 weekly files) | `scripts/value_layer_due_check.py` | ADR-0091 | weekly gate | no: input is `logs/audit.jsonl` |
 | `value-layer/changes.json`, `value-layer/regime-candidates.json` | `scripts/value_layer_change_series.py`, at every sync | ADR-0010 amendment (P2-05.7) | readers of the regime table | **yes**: from `snapshots/` |
 | `skills-index.json` | `scripts/skills_index.py`, at every sync (same rows as `skills/INDEX.md`) | ADR-0010 amendment (P2-05.8) | readers | live rows yes |
+| `skill-names.json` (from the next sync) | `scripts/skills_index.py --out-names`, at every sync: skill file stem ↔ `name:` for live and retired skills, and `by_name` (`name:` → stems) for the `dormant` names in `never-selected/` | ADR-0010 amendment 2026-10-31 (P3-05.9) | readers of `never-selected/` | live rows yes |
+| `decisions/decisions.jsonl` (from the next sync) | `scripts/decisions_projection.py`, at every sync: one row per `logs/audit.jsonl` row, without the free-text reason, the epistemic counts or the hash chain; paths relative to the runtime home | ADR-0010 amendment 2026-10-31 (P2-05.2, D-P2-05-2 = A) | readers; `scripts/snapshot_resolve.py` | — (record) |
 | `regimes.json` | copied at every sync from the framework's `docs/evidence/regimes/regimes.json` (hand-confirmed) | P3-02.1 | readers, figures | — (record) |
 
 `ledger-watch` (stage 6c, retired with ADR-0095; one file, 2026-08-14) was removed
