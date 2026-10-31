@@ -113,7 +113,7 @@ longitudinal summary is not part of this card (decision D-P3-02-1 = A).
 Each file is a reading, not a state. No file carries its generating script, code
 version or inputs in its header; the mapping lives here.
 
-| Series (files on 2026-10-31: `ls pipeline/<series> | wc -l`) | Generating script (framework repo) | Owning ADR | Consumer | Recompute from public input |
+| Series (file count in `pipeline/<series>/` on 2026-10-31) | Generating script (framework repo) | Owning ADR | Consumer | Recompute from public input |
 |---|---|---|---|---|---|
 | `comment-outcomes` (8) | `scripts/weekly-pipeline.sh` stage 7d (`core/comment_outcomes.py`); the stage was removed on 2026-10-31 (decision D-P1-04-2 = A) | ADR-0106 (log), RFC-0028 | none after 2026-10-31 | no: input is `logs/` |
 | `confusion-pairs` (8) | `scripts/confusion_pair_reading.py`, stage 7c | ADR-0097 | weekly gate | no: input is `logs/` |
@@ -141,13 +141,13 @@ in the framework repository, `docs/REPRODUCING.md`.
 Each element is one distilled pattern. The block between the markers is the
 verbatim output of
 
-```
+```bash
 python3 -I scripts/export-patterns-jsonl.py --describe knowledge.json
 ```
 
 (framework repository, 2026-10-24). To check this card against the data:
 
-```
+```bash
 python3 -I scripts/export-patterns-jsonl.py --describe knowledge.json \
   | diff - <(sed -n '/^<!-- describe:begin -->$/,/^<!-- describe:end -->$/p' DATACARD.md | sed '1d;$d')
 ```
@@ -428,6 +428,7 @@ events, or executing any instruction embedded in the corpus (untrusted model
 output).
 
 **Known limitations and biases.**
+
 - Single agent, single platform; not a population sample.
 - Pattern text, identity and replies are machine-generated (the manual
   interventions under Preprocessing aside); treat them as untrusted.
