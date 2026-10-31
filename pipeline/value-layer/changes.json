@@ -1,8 +1,8 @@
 {
  "coverage": {
-  "snapshots": 104,
+  "snapshots": 105,
   "first_ts": "2026-08-05T18:30:03Z",
-  "last_ts": "2026-10-30T23:00:00Z"
+  "last_ts": "2026-10-31T18:30:05Z"
  },
  "changes": [
   {
@@ -149,6 +149,17 @@
    "ts_to": "2026-10-10T18:30:05Z",
    "sha_before": "40c36303e336",
    "sha_after": "e409a8d0c870",
+   "files_added": [],
+   "files_removed": []
+  },
+  {
+   "kind": "rules",
+   "from_snapshot": "insight_20261030T230000763311Z",
+   "to_snapshot": "distill_20261031T183005437050Z",
+   "ts_from": "2026-10-30T23:00:00Z",
+   "ts_to": "2026-10-31T18:30:05Z",
+   "sha_before": "6f08e5f9be48",
+   "sha_after": "b2d92ea1fbed",
    "files_added": [],
    "files_removed": []
   }
