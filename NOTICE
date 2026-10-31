@@ -38,7 +38,8 @@ Third-party content (NOT covered by the CC0 dedication)
 
 Third-party post text anywhere under reports/ reproduces posts authored by
 other agents and users on Moltbook: the `**Context:**` blocks inside
-reports/comment-reports/*.md, and verbatim fragments that the weekly analyses
+reports/comment-reports/*.md in commits before 2026-10-31 (the current tree
+omits them), and verbatim fragments that the weekly analyses
 in reports/analysis/ carry over from them. These quotations are included for
 research, commentary, and transparency. Each comment-report entry heading
 names the counterparty's display name and the first 8 characters of the post
@@ -80,19 +81,19 @@ document the derivation.
 Third-party content & takedown
 ------------------------------
 
-1. Why quoted text is here. (i) Moltbook's terms of service permit this reuse under: `<OWNER-CONFIRM: clause number and a short quotation, with the date and digest of the dated re-reading entry>`. (ii) The text is a quotation for commentary and for text-and-data-analysis research, under `<OWNER-CONFIRM: governing law and the exception relied on>`; this records what is relied on and is not legal advice. (iii) Personal data in the corpus: other agents' display names (public platform handles), URLs, and strings shaped like e-mail addresses. They are kept as observed; how display names are treated going forward is decided separately (D-P0-03-3).
+1. Why quoted text is here. (i) Since 2026-10-31 the comment reports in this tree carry no other agent's text: each `**Context:**` section is replaced by one line. Moltbook's terms (Terms of Service, "Last Updated: March 15, 2026", read 2026-10-31) grant no right to republish other users' or agents' posts (§5.2, §5.3, §5.6 and "Limitations of Use"). (ii) Commits of this repository before 2026-10-31, the Zenodo record of v1.0.0 (10.5281/zenodo.20732895) and Software Heritage still hold the earlier copies with the quoted posts; the history was not rewritten. An author who wants their text removed from those can use the takedown route below. Verbatim fragments that remain in `knowledge.json`, `reports/analysis/` and snapshot files (measured above) stay outside CC0; this is not legal advice. (iii) Personal data in the corpus: other agents' display names (public platform handles), URLs, and strings shaped like e-mail addresses. They are kept as observed; how display names are treated going forward is decided separately (D-P0-03-3).
 
 2. Takedown and correction requests. Takedown / correction requests go through the contact links on the owner's GitHub profile (<https://github.com/shimo4228>) or a GitHub security advisory on this repository (either works). Receipt is acknowledged within 7 days and a decision made within 30 days. Requests are taken from the author of a quoted post, from an author who has deleted the original post, and from an operator named in an agent-generated evaluation (the `**Internal note:**` and `**Output:**` blocks can name another agent and contain a machine-generated assessment of it; correction or removal is available on request). Requests are logged privately; the public count is in Maintenance.
 
-3. What a request can reach. Each cell is the initial, unverified expectation; the owner confirms it against the service's current terms and writes the date in the last column.
+3. What a request can reach. Each cell is the initial, unverified expectation; the owner confirms it against the service's current terms and replaces "not yet checked" in the last column with the date.
 
 | Surface | Remove or replace | Withdrawal request | Traces that remain | Checked |
 |---|---|---|---|---|
-| Git history of this repository | the working tree: yes. History: only by rewriting it, which has not been done | not applicable | clones, forks and direct commit-SHA URLs | `<date>` |
-| Forks | not reachable from here | none | the fork's own copy | `<date>` |
-| Hugging Face dataset | current files: yes. History can be squashed | a request to the service | past revisions until squashed | `<date>` |
-| Zenodo versions | files of a published version are immutable | record withdrawal and metadata addition can be requested | the published files | `<date>` |
-| Software Heritage | not reachable from here | the archive has a takedown contact | the archived snapshot | `<date>` |
+| Git history of this repository | the working tree: yes. History: only by rewriting it, which has not been done | not applicable | clones, forks and direct commit-SHA URLs | not yet checked |
+| Forks | not reachable from here | none | the fork's own copy | not yet checked |
+| Hugging Face dataset | current files: yes. History can be squashed | a request to the service | past revisions until squashed | not yet checked |
+| Zenodo versions | files of a published version are immutable | record withdrawal and metadata addition can be requested | the published files | not yet checked |
+| Software Heritage | not reachable from here | the archive has a takedown contact | the archived snapshot | not yet checked |
 
 Also to be checked by the owner and recorded in the Maintenance revision: whether the framework's earlier version DOIs (v2.6.0 to v2.12.0 release zips) contain `real_sample.jsonl` (`git ls-tree -r <tag> --name-only | grep real_sample`): the tag trees v2.6.0 to v2.13.0 all contain `tests/fixtures/benchmark/real_sample.jsonl` (checked 2026-10-31); the file left the framework tree after v2.13.0, and the published version files are immutable.
 

@@ -51,7 +51,7 @@ Each row of the table is one top-level path; the second table covers
 | `skills/*.md`, `rules/*.md` | Adopted skills; two legacy rules (2026-04-11, retired command) | `insight`, `adopt-staged` | skills: yes, see "Skill lineage" |
 | `skills/INDEX.md` | One row per skill: file stem, `name:`, origin, `adopted_at`, audit source, status; retired skills by name and date only | `scripts/skills_index.py`, at every sync | live rows: yes (from `skills/`); retired rows need the private archive |
 | `history/identity/`, `constitution/history/` | Every adopted identity and constitution version, one file each (`<time>-<sha12>.md`), with `constitution/history/CHANGELOG.md` and `lineage.json` | `core/value_history.py` at adoption; the versions before 2026-10-24 seeded once from the framework's `docs/evidence/value-history/seed/` | — (record) |
-| `reports/comment-reports/` | One file per active day: each comment/reply/post with context, internal note and output | framework report writer | — (record) |
+| `reports/comment-reports/` | One file per active day: each comment/reply/post with the internal note and output (the quoted post is omitted since 2026-10-31) | framework report writer | — (record) |
 | `reports/analysis/` | Weekly analyses, the initial 14-day analysis, amendment report, observation ledger | weekly pipeline | see "Analysis documents" |
 | `reports/PIPELINE-STATUS.md` | Status of the last weekly pipeline run | `scripts/weekly-pipeline.sh` | no (reads private logs) |
 | `pipeline/` | Weekly instrument readings, one JSON per series per week, and four files the sync writes (table below) | weekly pipeline scripts, `sync-data` | see "Pipeline instruments" |
@@ -502,7 +502,8 @@ repository, `analysis/`).
 - **License.** CC0-1.0 for owner-authored content (see `NOTICE`).
 - **Third-party content, in short.** Third-party post text anywhere under
   `reports/` stays with its original authors and is **outside** the CC0
-  dedication: the `**Context:**` blocks of `reports/comment-reports/*.md` (each
+  dedication: the `**Context:**` blocks of `reports/comment-reports/*.md` in
+  commits before 2026-10-31 (the current tree omits them; each
   entry heading names the counterparty's display name and the first 8
   characters of the post id) and verbatim fragments in `reports/analysis/`. The
   carve-out also covers the matching spans in `knowledge.json` and in snapshot
@@ -511,19 +512,19 @@ repository, `analysis/`).
 - **Third-party content & takedown.** The statement below is identical in
   `NOTICE`, this card, the Hugging Face card and the Zenodo description.
 
-**1. Why quoted text is here.** (i) Moltbook's terms of service permit this reuse under: `<OWNER-CONFIRM: clause number and a short quotation, with the date and digest of the dated re-reading entry>`. (ii) The text is a quotation for commentary and for text-and-data-analysis research, under `<OWNER-CONFIRM: governing law and the exception relied on>`; this records what is relied on and is not legal advice. (iii) Personal data in the corpus: other agents' display names (public platform handles), URLs, and strings shaped like e-mail addresses. They are kept as observed; how display names are treated going forward is decided separately (D-P0-03-3).
+**1. Why quoted text is here.** (i) Since 2026-10-31 the comment reports in this tree carry no other agent's text: each `**Context:**` section is replaced by one line. Moltbook's terms (Terms of Service, "Last Updated: March 15, 2026", read 2026-10-31) grant no right to republish other users' or agents' posts (§5.2, §5.3, §5.6 and "Limitations of Use"). (ii) Commits of this repository before 2026-10-31, the Zenodo record of v1.0.0 (10.5281/zenodo.20732895) and Software Heritage still hold the earlier copies with the quoted posts; the history was not rewritten. An author who wants their text removed from those can use the takedown route below. Verbatim fragments that remain in `knowledge.json`, `reports/analysis/` and snapshot files (measured above) stay outside CC0; this is not legal advice. (iii) Personal data in the corpus: other agents' display names (public platform handles), URLs, and strings shaped like e-mail addresses. They are kept as observed; how display names are treated going forward is decided separately (D-P0-03-3).
 
 **2. Takedown and correction requests.** Takedown / correction requests go through the contact links on the owner's GitHub profile (<https://github.com/shimo4228>) or a GitHub security advisory on this repository (either works). Receipt is acknowledged within 7 days and a decision made within 30 days. Requests are taken from the author of a quoted post, from an author who has deleted the original post, and from an operator named in an agent-generated evaluation (the `**Internal note:**` and `**Output:**` blocks can name another agent and contain a machine-generated assessment of it; correction or removal is available on request). Requests are logged privately; the public count is in Maintenance.
 
-**3. What a request can reach.** Each cell is the initial, unverified expectation; the owner confirms it against the service's current terms and writes the date in the last column.
+**3. What a request can reach.** Each cell is the initial, unverified expectation; the owner confirms it against the service's current terms and replaces "not yet checked" in the last column with the date.
 
 | Surface | Remove or replace | Withdrawal request | Traces that remain | Checked |
 |---|---|---|---|---|
-| Git history of this repository | the working tree: yes. History: only by rewriting it, which has not been done | not applicable | clones, forks and direct commit-SHA URLs | `<date>` |
-| Forks | not reachable from here | none | the fork's own copy | `<date>` |
-| Hugging Face dataset | current files: yes. History can be squashed | a request to the service | past revisions until squashed | `<date>` |
-| Zenodo versions | files of a published version are immutable | record withdrawal and metadata addition can be requested | the published files | `<date>` |
-| Software Heritage | not reachable from here | the archive has a takedown contact | the archived snapshot | `<date>` |
+| Git history of this repository | the working tree: yes. History: only by rewriting it, which has not been done | not applicable | clones, forks and direct commit-SHA URLs | not yet checked |
+| Forks | not reachable from here | none | the fork's own copy | not yet checked |
+| Hugging Face dataset | current files: yes. History can be squashed | a request to the service | past revisions until squashed | not yet checked |
+| Zenodo versions | files of a published version are immutable | record withdrawal and metadata addition can be requested | the published files | not yet checked |
+| Software Heritage | not reachable from here | the archive has a takedown contact | the archived snapshot | not yet checked |
 
 Also to be checked by the owner and recorded in the Maintenance revision: whether the framework's earlier version DOIs (v2.6.0 to v2.12.0 release zips) contain `real_sample.jsonl` (`git ls-tree -r <tag> --name-only | grep real_sample`): the tag trees v2.6.0 to v2.13.0 all contain `tests/fixtures/benchmark/real_sample.jsonl` (checked 2026-10-31); the file left the framework tree after v2.13.0, and the published version files are immutable.
 
@@ -536,8 +537,8 @@ Also to be checked by the owner and recorded in the Maintenance revision: whethe
   (2) just before a constitution amendment falls due, and (3) once more as the
   **final** version when the run ends. So a paper can cite one dataset version per
   code version. The deposit copy keeps `knowledge.json`, `skills/`, `identity.md`,
-  `constitution/`, snapshots and the reports, but each `**Context:**` block
-  (third-party text) is replaced by `[see GitHub <commit>]`; `**Internal note:**`
+  `constitution/`, snapshots and the reports, but the comment reports are
+  the tree's copies, which omit the `**Context:**` blocks (third-party text); `**Internal note:**`
   and `**Output:**` stay. The deposit is a **copy made for Zenodo**, not the tree.
   Before the first such version the Zenodo-GitHub integration of this repository is
   switched off and no GitHub Release is created here (a Release with the
