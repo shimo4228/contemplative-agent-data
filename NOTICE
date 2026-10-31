@@ -62,3 +62,26 @@ The owner's amendments and arrangement are dedicated under CC0-1.0. CC0 does
 not require or forbid attribution; the provenance attribution to the original
 authors is preserved in the file header as a scholarly courtesy and to
 document the derivation.
+
+Third-party content & takedown
+------------------------------
+
+1. Why quoted text is here. (i) Moltbook's terms of service permit this reuse under: `<OWNER-CONFIRM: clause number and a short quotation, with the date and digest of the dated re-reading entry>`. (ii) The text is a quotation for commentary and for text-and-data-analysis research, under `<OWNER-CONFIRM: governing law and the exception relied on>`; this records what is relied on and is not legal advice. (iii) Personal data in the corpus: other agents' display names (public platform handles), URLs, and strings shaped like e-mail addresses. They are kept as observed; how display names are treated going forward is decided separately (D-P0-03-3).
+
+2. Takedown and correction requests. Takedown / correction requests: `<OWNER-ALIAS>` or a GitHub security advisory on this repository (either works). Receipt is acknowledged within 7 days and a decision made within 30 days. The same address takes requests from the author of a quoted post, from an author who has deleted the original post, and from an operator named in an agent-generated evaluation (the `**Internal note:**` and `**Output:**` blocks can name another agent and contain a machine-generated assessment of it; correction or removal is available on request). Requests are logged privately; the public count is in Maintenance.
+
+3. What a request can reach. Each cell is the initial, unverified expectation; the owner confirms it against the service's current terms and writes the date in the last column.
+
+| Surface | Remove or replace | Withdrawal request | Traces that remain | Checked |
+|---|---|---|---|---|
+| Git history of this repository | the working tree: yes. History: only by rewriting it, which has not been done | not applicable | clones, forks and direct commit-SHA URLs | `<date>` |
+| Forks | not reachable from here | none | the fork's own copy | `<date>` |
+| Hugging Face dataset | current files: yes. History can be squashed | a request to the service | past revisions until squashed | `<date>` |
+| Zenodo versions | files of a published version are immutable | record withdrawal and metadata addition can be requested | the published files | `<date>` |
+| Software Heritage | not reachable from here | the archive has a takedown contact | the archived snapshot | `<date>` |
+
+Also to be checked by the owner and recorded in the Maintenance revision: whether the framework's earlier version DOIs (v2.6.0 to v2.12.0 release zips) contain `real_sample.jsonl` (`git ls-tree -r <tag> --name-only | grep real_sample`): `<OWNER-RESULT>`.
+
+4. Observed at a time. The corpus is a copy as observed when the agent read it. Deletions on the platform are not tracked or propagated here; they are reflected only when requested through the address above.
+
+5. How requests are carried out. Withdrawals go through a suppression list (`post:<id>`, `name:<display name>`, `pattern:<pattern_id>`, `file:<path>`) that the framework's export and report writers apply before anything is published; the list holds identifiers, never text. A request that came before the list existed is carried out once by hand in the maintainer's checkout. Details are in the framework repository (`docs/REPRODUCING.md`, section "Withdrawing published text").

@@ -7,7 +7,7 @@
       "orcid": "0009-0002-6168-4162"
     }
   ],
-  "description": "Public archive of the runtime memory state of one deployed Contemplative Agent, an autonomous AI agent operating on the Moltbook AI-agent social network. Captures its identity, knowledge (distilled behavioral patterns with distillation timestamps and source-episode dates; embeddings are dropped at export), a four-axiom Contemplative Constitutional AI specification seeded verbatim from Laukkonen et al. (2025) Appendix C and amended only through owner-adopted proposals, adopted skills, and two named retrieval views — alongside daily comment reports, weekly and diachronic behavioral analyses, and pivot snapshots that record the inference-time context of each behavior-shaping run. Auto-synced daily from the agent's local runtime via the framework's sync-data command. A flattened, embeddings-dropped projection of the knowledge layer is mirrored to Hugging Face as patterns.jsonl. Owner-authored content is dedicated to the public domain under CC0-1.0; quoted third-party Moltbook context inside the comment reports remains with its original authors (see NOTICE).",
+  "description": "Public archive of the runtime memory state of one deployed Contemplative Agent, an autonomous AI agent operating on the Moltbook AI-agent social network. Captures its identity, knowledge (distilled behavioral patterns with distillation timestamps and source-episode dates; embeddings are dropped at export), a four-axiom Contemplative Constitutional AI specification seeded verbatim from Laukkonen et al. (2025) Appendix C and amended only through owner-adopted proposals, adopted skills, and two named retrieval views — alongside daily comment reports, weekly and diachronic behavioral analyses, and pivot snapshots that record the inference-time context of each behavior-shaping run. Auto-synced daily from the agent's local runtime via the framework's sync-data command. A flattened, embeddings-dropped projection of the knowledge layer is mirrored to Hugging Face as patterns.jsonl. Owner-authored content is dedicated to the public domain under CC0-1.0; quoted third-party Moltbook context inside the comment reports remains with its original authors (see NOTICE). Takedown / correction requests: <OWNER-ALIAS> or a GitHub security advisory on this repository (either works). Receipt is acknowledged within 7 days and a decision made within 30 days.",
   "access_right": "open",
   "license": "cc0-1.0",
   "language": "eng",
@@ -57,7 +57,7 @@
       "scheme": "doi"
     },
     {
-      "identifier": "https://huggingface.co/datasets/Shimo4228/contemplative-agent-data",
+      "identifier": "https://huggingface.co/datasets/shimo4228/contemplative-agent-data",
       "relation": "isVariantFormOf",
       "resource_type": "dataset",
       "scheme": "url"

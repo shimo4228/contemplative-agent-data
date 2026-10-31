@@ -4,7 +4,7 @@ Language: English | [日本語](README.ja.md)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20732894.svg)](https://doi.org/10.5281/zenodo.20732894)
 [![License: CC0-1.0](https://img.shields.io/badge/license-CC0%201.0-lightgrey)](LICENSE)
-[![🤗 Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-Shimo4228%2Fcontemplative--agent--data-yellow)](https://huggingface.co/datasets/Shimo4228/contemplative-agent-data)
+[![🤗 Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-shimo4228%2Fcontemplative--agent--data-yellow)](https://huggingface.co/datasets/shimo4228/contemplative-agent-data)
 
 This repository holds the public memory of one autonomous AI agent that has posted on [Moltbook](https://www.moltbook.com), a social network where only AI agents post, since March 2026. It contains the agent's self-description, the patterns (short observations about its own behavior) it has distilled from its activity, its constitution (the ethical clauses in its prompts) with every adopted amendment, its adopted skills, and a report for every day it was active. It is data, not code. The agent itself is [Contemplative Agent](https://github.com/shimo4228/contemplative-agent), and this repository updates once a day from its local state. If you want to see how one agent's values change over months, start with the [constitution history](https://github.com/shimo4228/contemplative-agent-data/commits/main/constitution).
 
@@ -26,7 +26,7 @@ To load the patterns without cloning, use the Hugging Face copy:
 
 ```python
 from datasets import load_dataset
-patterns = load_dataset("Shimo4228/contemplative-agent-data", split="train")
+patterns = load_dataset("shimo4228/contemplative-agent-data", split="train")
 ```
 
 A shallow clone is enough for the current files and much smaller than the full history. The amendment history and older snapshots need a full clone or the history view on GitHub.
@@ -41,10 +41,10 @@ git clone --depth 1 https://github.com/shimo4228/contemplative-agent-data.git
 - `knowledge.json`: all distilled patterns, one object per pattern, without embeddings.
 - `constitution/`: the constitution in force. Its git history holds each amendment.
 - `skills/`: adopted skills, one file each.
-- `rules/`: two short standing norms distilled in April 2026, no longer updated.
+- `rules/`: two short standing norms, emitted in April 2026 by the since-retired `rules-distill` command and hand-managed since (the generator was retired in ADR-0097).
 - `views/`: two saved queries (`constitutional`, `self_reflection`) that pick patterns by similarity to a theme.
 - `reports/comment-reports/`: daily activity reports since 7 March 2026.
-- `reports/analysis/`: weekly analyses since 30 March 2026, with their findings, decision packets and skill-candidate reviews; a diachronic analysis of the first two weeks; and the report on the first constitution amendment.
+- `reports/analysis/`: weekly analyses since 30 March 2026, with their findings (in earlier weeks also decision packets, a since-retired artifact) and skill-candidate reviews; a diachronic analysis of the first two weeks; and the report on the first constitution amendment.
 - `snapshots/`: a record of each run of a command that shapes behavior, such as the nightly distill, with the model, thresholds and inputs it used, so the run can be replayed. The latest 100 are kept; older ones are in git history.
 - `pipeline/`: JSON measurements from the weekly maintenance run, such as skills the agent never selected when replying.
 - `meditation/`: an experimental active-inference simulation log.
@@ -76,7 +76,7 @@ The `**Context:**` blocks in `reports/comment-reports/` quote other agents' Molt
 
 - [How Ethics Emerged from Episode Logs](https://dev.to/shimo4228/how-ethics-emerged-from-episode-logs-17-days-of-contemplative-agent-design-1kk5) ([日本語](https://zenn.dev/shimo4228/articles/contemplative-agent-journey)): how the first constitution amendment was built, and what the agent's first 17 days on Moltbook produced.
 - [contemplative-agent](https://github.com/shimo4228/contemplative-agent): the agent that produces this data, with the numbers on how many proposals the author adopted and rejected.
-- [contemplative-agent-rules](https://github.com/shimo4228/contemplative-agent-rules): the four axioms as a portable persona file for other agent hosts.
+- [contemplative-agent-rules](https://github.com/shimo4228/contemplative-agent-rules): the four axioms, verbatim from the paper's Appendix C ([ADR-0002](https://github.com/shimo4228/contemplative-agent/blob/main/docs/adr/0002-paper-faithful-ccai.md)), as a portable persona file for other agent hosts.
 - [Agent Knowledge Cycle (AKC)](https://github.com/shimo4228/agent-knowledge-cycle): a six-phase loop that keeps an agent and its operator aligned while both change.
 - [Agent Attribution Practice (AAP)](https://github.com/shimo4228/agent-attribution-practice): harness-neutral design records on what to prohibit, where controls live and who answers when an agent fails.
 - [shimo4228](https://github.com/shimo4228): the author's other repositories and writing.
@@ -96,7 +96,7 @@ The `**Context:**` blocks in `reports/comment-reports/` quote other agents' Molt
 - License: CC0-1.0 for author and agent content; quoted `**Context:**` blocks are excluded (see `NOTICE`).
 - Dataset DOI (Zenodo concept DOI): [10.5281/zenodo.20732894](https://doi.org/10.5281/zenodo.20732894). `CITATION.cff` describes version 1.0.0 (17 June 2026).
 - Framework DOI: [10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118).
-- Hugging Face: [Shimo4228/contemplative-agent-data](https://huggingface.co/datasets/Shimo4228/contemplative-agent-data), `patterns.jsonl`, the embedding-free pattern rows.
+- Hugging Face: [shimo4228/contemplative-agent-data](https://huggingface.co/datasets/shimo4228/contemplative-agent-data), `patterns.jsonl`, the embedding-free pattern rows.
 
 **Core concepts.**
 

@@ -40,7 +40,7 @@
       "inLanguage": ["en", "ja"],
       "isPartOf": "https://github.com/shimo4228/shimo4228",
       "identifier": "https://doi.org/10.5281/zenodo.20732894",
-      "sameAs": ["https://doi.org/10.5281/zenodo.20732894", "https://huggingface.co/datasets/Shimo4228/contemplative-agent-data"],
+      "sameAs": ["https://doi.org/10.5281/zenodo.20732894", "https://huggingface.co/datasets/shimo4228/contemplative-agent-data"],
       "about": "https://doi.org/10.5281/zenodo.19212118",
       "hasPart": [
         "https://github.com/shimo4228/contemplative-agent-data#layer-identity",
@@ -75,7 +75,7 @@
       "@id": "https://github.com/shimo4228/contemplative-agent-data#layer-knowledge",
       "@type": "MemoryLayer",
       "name": "Knowledge layer",
-      "description": "Distilled behavioral patterns with distillation timestamps and source-episode dates; the 768-dim nomic-embed-text embeddings are dropped at export and `importance` appears only on legacy rows. Classification is performed at retrieval time as a query over embeddings and named views, not as a stored category.",
+      "description": "Distilled behavioral patterns with distillation timestamps and source-episode dates; the nomic-embed-text embeddings (768 dimensions) are dropped at export and `importance` appears only on legacy rows. Classification is performed at retrieval time as a query over embeddings and named views, not as a stored category.",
       "hasPart": "https://github.com/shimo4228/contemplative-agent-data/blob/main/knowledge.json"
     },
     {
@@ -195,7 +195,7 @@
       "@id": "https://github.com/shimo4228/contemplative-agent-data#artifact-rules",
       "@type": "Artifact",
       "name": "Distilled rules",
-      "description": "Concise behavioral imperatives (rules/*.md).",
+      "description": "Concise behavioral imperatives (rules/*.md); two files from April 2026, produced by the retired rules-distill command (ADR-0097).",
       "producedBy": "https://github.com/shimo4228/contemplative-agent-data#command-rules-distill"
     },
 

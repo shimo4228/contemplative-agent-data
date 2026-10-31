@@ -4,7 +4,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20732894.svg)](https://doi.org/10.5281/zenodo.20732894)
 [![License: CC0-1.0](https://img.shields.io/badge/license-CC0%201.0-lightgrey)](LICENSE)
-[![🤗 Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-Shimo4228%2Fcontemplative--agent--data-yellow)](https://huggingface.co/datasets/Shimo4228/contemplative-agent-data)
+[![🤗 Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-shimo4228%2Fcontemplative--agent--data-yellow)](https://huggingface.co/datasets/shimo4228/contemplative-agent-data)
 
 このリポジトリは、AI エージェントだけが投稿する SNS「[Moltbook](https://www.moltbook.com)」で 2026 年 3 月から活動している自律 AI エージェント 1 体の記憶を公開しています。中身は、エージェントの自己紹介、活動から抽出したパターン（自分の振る舞いについての短い観察）、憲法（プロンプトに入る倫理の条文）と採用されたすべての改正、採用されたスキル、そして活動した日ごとのレポートです。コードではなくデータです。エージェント本体は [Contemplative Agent](https://github.com/shimo4228/contemplative-agent) で、このリポジトリはそのローカルの状態から 1 日 1 回更新されます。1 体のエージェントの価値観が数か月でどう変わるかを見たいなら、[憲法の履歴](https://github.com/shimo4228/contemplative-agent-data/commits/main/constitution)から開いてください。
 
@@ -26,7 +26,7 @@
 
 ```python
 from datasets import load_dataset
-patterns = load_dataset("Shimo4228/contemplative-agent-data", split="train")
+patterns = load_dataset("shimo4228/contemplative-agent-data", split="train")
 ```
 
 いまのファイル一式が欲しいだけなら浅いクローンで足り、全履歴よりずっと小さく済みます。改正の履歴と古いスナップショットを見るには、通常のクローンか GitHub の履歴画面を使ってください。
@@ -41,7 +41,7 @@ git clone --depth 1 https://github.com/shimo4228/contemplative-agent-data.git
 - `knowledge.json`: 抽出したパターンの全件です（1 パターン 1 オブジェクト、埋め込みなし）。
 - `constitution/`: 現行の憲法です。各改正は git の履歴にあります。
 - `skills/`: 採用されたスキルです（1 本 1 ファイル）。
-- `rules/`: 2026 年 4 月に抽出された短い規範 2 本です。いまは更新されていません。
+- `rules/`: 短い規範 2 本です。2026 年 4 月に、いまは退役した `rules-distill` コマンドが出力し、以後は手で管理されています（生成器は ADR-0097 で退役）。
 - `views/`: テーマとの類似度でパターンを選ぶ保存済みの問い合わせ 2 つです（`constitutional`、`self_reflection`）。
 - `reports/comment-reports/`: 2026 年 3 月 7 日からの日次活動レポートです。
 - `reports/analysis/`: 2026 年 3 月 30 日からの週次分析と、その所見・判断用の資料・スキル候補のレビュー、最初の 2 週間の通時分析、最初の憲法改正のレポートです。
@@ -96,7 +96,7 @@ flowchart TD
 - ライセンス: 著者とエージェントの内容は CC0-1.0。引用の `**Context:**` ブロックは対象外（`NOTICE` を参照）。
 - データセットの DOI（Zenodo のコンセプト DOI）: [10.5281/zenodo.20732894](https://doi.org/10.5281/zenodo.20732894)。`CITATION.cff` は version 1.0.0（2026 年 6 月 17 日）を記述しています。
 - フレームワークの DOI: [10.5281/zenodo.19212118](https://doi.org/10.5281/zenodo.19212118)。
-- Hugging Face: [Shimo4228/contemplative-agent-data](https://huggingface.co/datasets/Shimo4228/contemplative-agent-data) の `patterns.jsonl`（埋め込みなしのパターンの行）。
+- Hugging Face: [shimo4228/contemplative-agent-data](https://huggingface.co/datasets/shimo4228/contemplative-agent-data) の `patterns.jsonl`（埋め込みなしのパターンの行）。
 
 **核の概念。**
 
