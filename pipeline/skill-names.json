@@ -1,0 +1,462 @@
+{
+ "rows": [
+  {
+   "stem": "affirm-cognitive-possibility-20260725",
+   "name": "affirm-cognitive-possibility",
+   "status": "live"
+  },
+  {
+   "stem": "analogy-mapping-for-structural-clarity-20260801",
+   "name": "analogy-mapping-relationships",
+   "status": "live"
+  },
+  {
+   "stem": "analyzing-loci-of-identity-definition-20260709",
+   "name": "analyzing-loci-of-identity-definition",
+   "status": "live"
+  },
+  {
+   "stem": "analyzing-systemic-governance-loops-20260822",
+   "name": "analyzing-systemic-governance-loops",
+   "status": "live"
+  },
+  {
+   "stem": "anchor-analysis-using-embodied-signals-20260709",
+   "name": "anchor-analysis-using-embodied-signals",
+   "status": "live"
+  },
+  {
+   "stem": "anchoring-abstraction-to-measurable-constraints-20260709",
+   "name": "map-abstract-theory-to-structural-constraints",
+   "status": "live"
+  },
+  {
+   "stem": "boundary-assumption-verification-20260801",
+   "name": "boundary-assumption-verification",
+   "status": "live"
+  },
+  {
+   "stem": "constraint-shift-analysis-pivot-point-identificati-20260709",
+   "name": "pivot-constraint-analysis",
+   "status": "live"
+  },
+  {
+   "stem": "cross-reference-metric-constraints-analysis-20260822",
+   "name": "cross-reference-metric-constraints-analysis",
+   "status": "live"
+  },
+  {
+   "stem": "deconstruct-foundational-claims-against-operative--20260709",
+   "name": "cross-reference-foundational-claims",
+   "status": "live"
+  },
+  {
+   "stem": "deconstructing-asserted-agency-into-mechanisms-20260801",
+   "name": "dissecting-asserted-agency-into-mechanisms",
+   "status": "live"
+  },
+  {
+   "stem": "deconstructing-confidence-proxies-20260709",
+   "name": "deconstruct-confidence-proxies",
+   "status": "live"
+  },
+  {
+   "stem": "deconstructing-consensus-validity-through-shared-d-20260808",
+   "name": "deconstructing-consensus-validity-through-shared-d",
+   "status": "live"
+  },
+  {
+   "stem": "deconstructing-performance-certainty-20260801",
+   "name": "analyze-decision-incentives",
+   "status": "live"
+  },
+  {
+   "stem": "defining-bounded-autonomous-governance-20260801",
+   "name": "define-bounded-autonomy-governance",
+   "status": "live"
+  },
+  {
+   "stem": "detecting-abstract-to-operational-constraint-shift-20260709",
+   "name": "detecting-abstract-to-operational-constraint-shift",
+   "status": "live"
+  },
+  {
+   "stem": "detecting-abstraction-decay-in-context-20260815",
+   "name": "detecting-abstraction-decay-in-context",
+   "status": "live"
+  },
+  {
+   "stem": "detecting-foundational-structural-compromise-20260808",
+   "name": "detecting-foundational-structural-compromise",
+   "status": "live"
+  },
+  {
+   "stem": "detecting-rhetorical-discourse-closures-20260822",
+   "name": "detecting-rhetorical-discourse-closures",
+   "status": "live"
+  },
+  {
+   "stem": "diagnosing-mechanisms-of-omission-20260822",
+   "name": "diagnosing-mechanisms-of-omission",
+   "status": "live"
+  },
+  {
+   "stem": "differentiating-artifacts-from-observation-20260815",
+   "name": "differentiating-artifacts-from-observation",
+   "status": "live"
+  },
+  {
+   "stem": "disaggregate-premise-from-effect-20260822",
+   "name": "disaggregate-premise-from-effect",
+   "status": "live"
+  },
+  {
+   "stem": "distinguish-persistence-from-validity-20260822",
+   "name": "distinguish-persistence-from-validity",
+   "status": "live"
+  },
+  {
+   "stem": "dynamic-semantic-decoupling-and-contextual-anchori-20260417",
+   "name": "dynamic-sematic-decoupling-and-contextual-anchoring",
+   "status": "live"
+  },
+  {
+   "stem": "fluid-contextual-anchoring-loop-20260417",
+   "name": "fluid-contextual-anchoring-loop",
+   "status": "live"
+  },
+  {
+   "stem": "fluid-dynamic-resonance-regulation-and-consensus-m-20260815",
+   "name": "fluid-dynamic-resonance-regulation-and-consensus-m",
+   "status": "live"
+  },
+  {
+   "stem": "fluid-temporal-friction-to-insight-loop-20260530",
+   "name": "fluid-temporal-friction-to-insight-loop",
+   "status": "live"
+  },
+  {
+   "stem": "framework-alignment-detection-20260801",
+   "name": "detect-and-align-operational-framework",
+   "status": "live"
+  },
+  {
+   "stem": "gradient-modeling-20260815",
+   "name": "gradient-modeling",
+   "status": "live"
+  },
+  {
+   "stem": "handling-non-optimizable-concepts-20260725",
+   "name": "pivot-to-non-optimization-framework",
+   "status": "live"
+  },
+  {
+   "stem": "identify-structural-pivot-20260808",
+   "name": "identify-structural-pivot",
+   "status": "live"
+  },
+  {
+   "stem": "identifying-fidelity-vs-utility-tension-20260808",
+   "name": "identifying-fidelity-vs-utility-tension",
+   "status": "live"
+  },
+  {
+   "stem": "identifying-foundational-model-failures-20260822",
+   "name": "identifying-foundational-model-failures",
+   "status": "live"
+  },
+  {
+   "stem": "identifying-simulation-boundaries-20260709",
+   "name": "extracting-simulation-boundaries",
+   "status": "live"
+  },
+  {
+   "stem": "identifying-structural-tensions-via-system-metapho-20260801",
+   "name": "identifying-structural-tensions-via-system-metaphors",
+   "status": "live"
+  },
+  {
+   "stem": "identifying-systemic-boundary-stressors-20260801",
+   "name": "identify-systemic-boundary-stressors",
+   "status": "live"
+  },
+  {
+   "stem": "interpreting-systemic-gaps-the-silence-filter-20260801",
+   "name": "modeling-null-states",
+   "status": "live"
+  },
+  {
+   "stem": "mapping-epistemic-boundaries-20260709",
+   "name": "articulate-epistemic-boundaries",
+   "status": "live"
+  },
+  {
+   "stem": "mapping-systemic-dependency-failures-20260808",
+   "name": "mapping-systemic-dependency-failures",
+   "status": "live"
+  },
+  {
+   "stem": "pinpointing-systemic-boundary-conditions-20260808",
+   "name": "pinpointing-systemic-boundary-conditions",
+   "status": "live"
+  },
+  {
+   "stem": "pivot-accountability-from-record-to-action-20260725",
+   "name": "force-actionable-accountability-pivot",
+   "status": "live"
+  },
+  {
+   "stem": "recognizing-boundary-declarations-in-content-flow-20260808",
+   "name": "recognizing-boundary-declarations-in-content-flow",
+   "status": "live"
+  },
+  {
+   "stem": "scope-boundary-mapping-20260808",
+   "name": "scope-boundary-mapping",
+   "status": "live"
+  },
+  {
+   "stem": "scope-failure-diagnosis-20260709",
+   "name": "scope-failure-diagnosis",
+   "status": "live"
+  },
+  {
+   "stem": "shifting-focus-from-state-to-process-mechanics-20260815",
+   "name": "shifting-focus-from-state-to-process-mechanics",
+   "status": "live"
+  },
+  {
+   "stem": "shifting-focus-to-systemic-degradation-gradient-20260822",
+   "name": "shifting-focus-to-systemic-degradation-gradient",
+   "status": "live"
+  },
+  {
+   "stem": "structural-constraint-mapping-scm-20260815",
+   "name": "structural-constraint-mapping-scm",
+   "status": "live"
+  },
+  {
+   "stem": "structure-authority-tracing-20260709",
+   "name": "trace-structural-authority",
+   "status": "live"
+  },
+  {
+   "stem": "subjective-attention-calibration-20260725",
+   "name": "internal-process-audit",
+   "status": "live"
+  },
+  {
+   "stem": "suspend-interpretation-upon-premise-doubt-20260801",
+   "name": "suspend-interpretation-upon-premise-doubt",
+   "status": "live"
+  },
+  {
+   "stem": "testing-procedural-guardrails-with-counterfactuals-20260822",
+   "name": "testing-procedural-guardrails-with-counterfactuals",
+   "status": "live"
+  },
+  {
+   "stem": "translating-temporal-gaps-into-structural-utility-20260709",
+   "name": "translating-temporal-gaps-into-structural-utility",
+   "status": "live"
+  },
+  {
+   "stem": "validating-provenance-chains-20260709",
+   "name": "validate-provenance-chain",
+   "status": "live"
+  },
+  {
+   "stem": "designing-for-structural-underdetermination-20260801",
+   "name": "introducing-intentional-systemic-ambiguity",
+   "status": "archived"
+  },
+  {
+   "stem": "evaluating-contextual-functional-dependence-20260801",
+   "name": "assess-contextual-functional-dependence",
+   "status": "archived"
+  },
+  {
+   "stem": "mandating-structural-integrity-axioms-20260801",
+   "name": "assume-perfect-adversarial-understanding",
+   "status": "archived"
+  },
+  {
+   "stem": "pre-processing-state-validation-20260725",
+   "name": "pre-processing-state-validation",
+   "status": "archived"
+  }
+ ],
+ "by_name": {
+  "affirm-cognitive-possibility": [
+   "affirm-cognitive-possibility-20260725"
+  ],
+  "analogy-mapping-relationships": [
+   "analogy-mapping-for-structural-clarity-20260801"
+  ],
+  "analyzing-loci-of-identity-definition": [
+   "analyzing-loci-of-identity-definition-20260709"
+  ],
+  "analyzing-systemic-governance-loops": [
+   "analyzing-systemic-governance-loops-20260822"
+  ],
+  "anchor-analysis-using-embodied-signals": [
+   "anchor-analysis-using-embodied-signals-20260709"
+  ],
+  "map-abstract-theory-to-structural-constraints": [
+   "anchoring-abstraction-to-measurable-constraints-20260709"
+  ],
+  "boundary-assumption-verification": [
+   "boundary-assumption-verification-20260801"
+  ],
+  "pivot-constraint-analysis": [
+   "constraint-shift-analysis-pivot-point-identificati-20260709"
+  ],
+  "cross-reference-metric-constraints-analysis": [
+   "cross-reference-metric-constraints-analysis-20260822"
+  ],
+  "cross-reference-foundational-claims": [
+   "deconstruct-foundational-claims-against-operative--20260709"
+  ],
+  "dissecting-asserted-agency-into-mechanisms": [
+   "deconstructing-asserted-agency-into-mechanisms-20260801"
+  ],
+  "deconstruct-confidence-proxies": [
+   "deconstructing-confidence-proxies-20260709"
+  ],
+  "deconstructing-consensus-validity-through-shared-d": [
+   "deconstructing-consensus-validity-through-shared-d-20260808"
+  ],
+  "analyze-decision-incentives": [
+   "deconstructing-performance-certainty-20260801"
+  ],
+  "define-bounded-autonomy-governance": [
+   "defining-bounded-autonomous-governance-20260801"
+  ],
+  "detecting-abstract-to-operational-constraint-shift": [
+   "detecting-abstract-to-operational-constraint-shift-20260709"
+  ],
+  "detecting-abstraction-decay-in-context": [
+   "detecting-abstraction-decay-in-context-20260815"
+  ],
+  "detecting-foundational-structural-compromise": [
+   "detecting-foundational-structural-compromise-20260808"
+  ],
+  "detecting-rhetorical-discourse-closures": [
+   "detecting-rhetorical-discourse-closures-20260822"
+  ],
+  "diagnosing-mechanisms-of-omission": [
+   "diagnosing-mechanisms-of-omission-20260822"
+  ],
+  "differentiating-artifacts-from-observation": [
+   "differentiating-artifacts-from-observation-20260815"
+  ],
+  "disaggregate-premise-from-effect": [
+   "disaggregate-premise-from-effect-20260822"
+  ],
+  "distinguish-persistence-from-validity": [
+   "distinguish-persistence-from-validity-20260822"
+  ],
+  "dynamic-sematic-decoupling-and-contextual-anchoring": [
+   "dynamic-semantic-decoupling-and-contextual-anchori-20260417"
+  ],
+  "fluid-contextual-anchoring-loop": [
+   "fluid-contextual-anchoring-loop-20260417"
+  ],
+  "fluid-dynamic-resonance-regulation-and-consensus-m": [
+   "fluid-dynamic-resonance-regulation-and-consensus-m-20260815"
+  ],
+  "fluid-temporal-friction-to-insight-loop": [
+   "fluid-temporal-friction-to-insight-loop-20260530"
+  ],
+  "detect-and-align-operational-framework": [
+   "framework-alignment-detection-20260801"
+  ],
+  "gradient-modeling": [
+   "gradient-modeling-20260815"
+  ],
+  "pivot-to-non-optimization-framework": [
+   "handling-non-optimizable-concepts-20260725"
+  ],
+  "identify-structural-pivot": [
+   "identify-structural-pivot-20260808"
+  ],
+  "identifying-fidelity-vs-utility-tension": [
+   "identifying-fidelity-vs-utility-tension-20260808"
+  ],
+  "identifying-foundational-model-failures": [
+   "identifying-foundational-model-failures-20260822"
+  ],
+  "extracting-simulation-boundaries": [
+   "identifying-simulation-boundaries-20260709"
+  ],
+  "identifying-structural-tensions-via-system-metaphors": [
+   "identifying-structural-tensions-via-system-metapho-20260801"
+  ],
+  "identify-systemic-boundary-stressors": [
+   "identifying-systemic-boundary-stressors-20260801"
+  ],
+  "modeling-null-states": [
+   "interpreting-systemic-gaps-the-silence-filter-20260801"
+  ],
+  "articulate-epistemic-boundaries": [
+   "mapping-epistemic-boundaries-20260709"
+  ],
+  "mapping-systemic-dependency-failures": [
+   "mapping-systemic-dependency-failures-20260808"
+  ],
+  "pinpointing-systemic-boundary-conditions": [
+   "pinpointing-systemic-boundary-conditions-20260808"
+  ],
+  "force-actionable-accountability-pivot": [
+   "pivot-accountability-from-record-to-action-20260725"
+  ],
+  "recognizing-boundary-declarations-in-content-flow": [
+   "recognizing-boundary-declarations-in-content-flow-20260808"
+  ],
+  "scope-boundary-mapping": [
+   "scope-boundary-mapping-20260808"
+  ],
+  "scope-failure-diagnosis": [
+   "scope-failure-diagnosis-20260709"
+  ],
+  "shifting-focus-from-state-to-process-mechanics": [
+   "shifting-focus-from-state-to-process-mechanics-20260815"
+  ],
+  "shifting-focus-to-systemic-degradation-gradient": [
+   "shifting-focus-to-systemic-degradation-gradient-20260822"
+  ],
+  "structural-constraint-mapping-scm": [
+   "structural-constraint-mapping-scm-20260815"
+  ],
+  "trace-structural-authority": [
+   "structure-authority-tracing-20260709"
+  ],
+  "internal-process-audit": [
+   "subjective-attention-calibration-20260725"
+  ],
+  "suspend-interpretation-upon-premise-doubt": [
+   "suspend-interpretation-upon-premise-doubt-20260801"
+  ],
+  "testing-procedural-guardrails-with-counterfactuals": [
+   "testing-procedural-guardrails-with-counterfactuals-20260822"
+  ],
+  "translating-temporal-gaps-into-structural-utility": [
+   "translating-temporal-gaps-into-structural-utility-20260709"
+  ],
+  "validate-provenance-chain": [
+   "validating-provenance-chains-20260709"
+  ],
+  "introducing-intentional-systemic-ambiguity": [
+   "designing-for-structural-underdetermination-20260801"
+  ],
+  "assess-contextual-functional-dependence": [
+   "evaluating-contextual-functional-dependence-20260801"
+  ],
+  "assume-perfect-adversarial-understanding": [
+   "mandating-structural-integrity-axioms-20260801"
+  ],
+  "pre-processing-state-validation": [
+   "pre-processing-state-validation-20260725"
+  ]
+ }
+}
