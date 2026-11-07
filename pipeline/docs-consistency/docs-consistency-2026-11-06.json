@@ -1,0 +1,97 @@
+{
+  "findings": [
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0048-skill-store-self-maintenance.md",
+      "line": 202,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0059-constitution-across-models-ipd.md",
+      "line": 63,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0060-amend-generator-controllability.md",
+      "line": 68,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0062-paper-plan-subject-venue-figures.md",
+      "line": 91,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0064-unify-episode-log-hooks.md",
+      "line": 34,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0066-revise-text-one-shot-measurement.md",
+      "line": 23,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0067-public-surface-two-layer-promote.md",
+      "line": 29,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0068-moltbook-platform-discrepancies.md",
+      "line": 22,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0069-external-writebacks.md",
+      "line": 29,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0073-november-observation-reads.md",
+      "line": 31,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0074-long-horizon-waits.md",
+      "line": 27,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    }
+  ],
+  "count": 11,
+  "readings": {
+    "freshness": [
+      {
+        "file": "docs/CYCLES.md",
+        "generated": "2026-10-31",
+        "source_commit": "235153cc",
+        "commits_behind": 65,
+        "days_old": 7
+      }
+    ]
+  },
+  "errors": [],
+  "readings_count": 1,
+  "abstain_count": 0,
+  "scanned_files": 506
+}
