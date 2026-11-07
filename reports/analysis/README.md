@@ -20,5 +20,12 @@ and is rewritten by the daily sync. Dates are those of the files present on
 | `patches/` | removed from the mirror (decision D-P3-05-4 = A; framework code under MIT); in git history | 2026-07-31 to 2026-08-21 |
 | `../../pipeline/ledger-watch/ledger-watch-*.json` | retired (ADR-0095), removed from the tree; in git history | 2026-08-14 only |
 
+Weekly documents (`weekly-DATE.md`, `weekly-DATE-findings.md`) reach this directory only
+through the Saturday gate's promote step (`scripts/sync-research-data.sh --promote` in the
+framework repo); the daily sync does not copy them. A promoted copy has no Sample section: the
+Sample quoted other agents' posts, so it is replaced by a one-line note (ADR-0010 amendment
+2026-10-31). The eleven documents published before promote existed (2026-08-28 to 2026-10-30)
+had their Sample sections removed the same way on 2026-11-07.
+
 `DATACARD.md` at the repository root describes each format (section 2, "Analysis
 documents" and "`reports/analysis/` naming").
