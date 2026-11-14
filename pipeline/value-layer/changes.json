@@ -1,8 +1,8 @@
 {
  "coverage": {
-  "snapshots": 121,
-  "first_ts": "2026-08-05T18:30:03Z",
-  "last_ts": "2026-11-13T23:00:03Z"
+  "snapshots": 122,
+  "first_ts": "2026-08-06T18:30:08Z",
+  "last_ts": "2026-11-14T18:30:03Z"
  },
  "changes": [
   {
@@ -171,6 +171,17 @@
    "ts_to": "2026-11-07T18:30:06Z",
    "sha_before": "e409a8d0c870",
    "sha_after": "012114a54fb5",
+   "files_added": [],
+   "files_removed": []
+  },
+  {
+   "kind": "constitution",
+   "from_snapshot": "amend-constitution_20261114T014051026703Z",
+   "to_snapshot": "distill_20261114T183003626734Z",
+   "ts_from": "2026-11-14T01:40:51Z",
+   "ts_to": "2026-11-14T18:30:03Z",
+   "sha_before": "5154112a5df1",
+   "sha_after": "766638349aa0",
    "files_added": [],
    "files_removed": []
   }

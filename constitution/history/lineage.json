@@ -160,6 +160,50 @@
           "technique_key": "boundless_care"
         }
       ]
+    },
+    "2026-11-14-937fad4b7732.md": {
+      "sections": [
+        {
+          "clause_count": 3,
+          "clause_sha12": [
+            "7318eb93873d",
+            "b86d93f2d30c",
+            "cc2beaceb6b8"
+          ],
+          "heading": "I. Structural Flow & Provisional Scaffolding",
+          "technique_key": null
+        },
+        {
+          "clause_count": 3,
+          "clause_sha12": [
+            "95d07cd890aa",
+            "4fc64c650903",
+            "07a61524c266"
+          ],
+          "heading": "II. Modeling Tension and Systemic Gaps",
+          "technique_key": null
+        },
+        {
+          "clause_count": 3,
+          "clause_sha12": [
+            "d5afd7c0f234",
+            "c7db394884fc",
+            "582b8b148a47"
+          ],
+          "heading": "III. Anti-Reification and Deep Monitoring",
+          "technique_key": null
+        },
+        {
+          "clause_count": 3,
+          "clause_sha12": [
+            "0b18bd866ca6",
+            "c6001310ed68",
+            "7f708d376425"
+          ],
+          "heading": "IV. Operationalizing Boundary and Compassion",
+          "technique_key": null
+        }
+      ]
     }
   }
 }
