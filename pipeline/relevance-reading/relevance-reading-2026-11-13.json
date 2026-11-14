@@ -1,0 +1,335 @@
+{
+ "adopt_window": {
+  "adopt_at": "2026-11-07T02:30:22+00:00",
+  "after": {
+   "from": "2026-11-07T02:30:22+00:00",
+   "gate_rate": 0.3212,
+   "gate_rate_ci": [
+    0.2879,
+    0.3563
+   ],
+   "gated": 229,
+   "posts": 713,
+   "to": "2026-11-14T02:30:22+00:00"
+  },
+  "band": 0.06,
+  "before": {
+   "from": "2026-10-31T02:30:22+00:00",
+   "gate_rate": 0.5244,
+   "gate_rate_ci": [
+    0.4748,
+    0.5736
+   ],
+   "gated": 204,
+   "posts": 389,
+   "to": "2026-11-07T02:30:22+00:00"
+  },
+  "difference": -0.2032,
+  "difference_ci": [
+   -0.2626,
+   -0.1424
+  ],
+  "t": 0.3,
+  "unit": "post",
+  "verdict": "reopen"
+ },
+ "parse_failures": 0,
+ "readiness": {
+  "answered_dedupe": 1786,
+  "answered_rows": 1898,
+  "domain_source_counted": "identity+axioms",
+  "domain_sources": {
+   "identity+axioms": 1898
+  },
+  "enforce_live_agreement": null,
+  "enforce_reasons": {
+   "enforced": 1898
+  },
+  "gate_source": {
+   "score4": 1898
+  },
+  "n": 300,
+  "rate_per_day_all": 68.0,
+  "rate_per_day_last_day": 139.0,
+  "reach_dates": null,
+  "reached": true,
+  "since": "2026-10-17T00:00:00+00:00"
+ },
+ "schema": "relevance-shadow-reading/6",
+ "seed_rows_excluded": 261,
+ "total": {
+  "answered": 1898,
+  "answered_rate": 1.0,
+  "decision_reasons": {
+   "answered": 1898
+  },
+  "judged": 1898,
+  "latency_ms_p50": 2560.0,
+  "latency_ms_p95": 5945.0,
+  "live_gate_rate": null,
+  "live_gate_rate_answered": null,
+  "live_scored": 0,
+  "margin": {
+   "half_width": 0.05,
+   "near": 80,
+   "posts": 1786,
+   "share": 0.0448,
+   "share_ci": [
+    0.0361,
+    0.0554
+   ],
+   "t": 0.3
+  },
+  "rows": 1898,
+  "thresholds": {
+   "0.3": {
+    "agreement_with_live": null,
+    "would_gate_rate": 0.4257
+   },
+   "0.5": {
+    "agreement_with_live": null,
+    "would_gate_rate": 0.343
+   },
+   "0.7": {
+    "agreement_with_live": null,
+    "would_gate_rate": 0.2808
+   }
+  }
+ },
+ "weeks": {
+  "2026-W42": {
+   "answered": 132,
+   "answered_rate": 1.0,
+   "decision_reasons": {
+    "answered": 132
+   },
+   "judged": 132,
+   "latency_ms_p50": 2493.0,
+   "latency_ms_p95": 6062.0,
+   "live_gate_rate": null,
+   "live_gate_rate_answered": null,
+   "live_scored": 0,
+   "margin": {
+    "half_width": 0.05,
+    "near": 5,
+    "posts": 132,
+    "share": 0.0379,
+    "share_ci": [
+     0.0163,
+     0.0856
+    ],
+    "t": 0.3
+   },
+   "ollama": {
+    "changed": false,
+    "unresolved": 0,
+    "versions": {
+     "0.34.2": 132
+    }
+   },
+   "rows": 132,
+   "thresholds": {
+    "0.3": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.4394
+    },
+    "0.5": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.3561
+    },
+    "0.7": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.3182
+    }
+   }
+  },
+  "2026-W43": {
+   "answered": 444,
+   "answered_rate": 1.0,
+   "decision_reasons": {
+    "answered": 444
+   },
+   "judged": 444,
+   "latency_ms_p50": 2256.0,
+   "latency_ms_p95": 5832.0,
+   "live_gate_rate": null,
+   "live_gate_rate_answered": null,
+   "live_scored": 0,
+   "margin": {
+    "half_width": 0.05,
+    "near": 18,
+    "posts": 388,
+    "share": 0.0464,
+    "share_ci": [
+     0.0295,
+     0.0721
+    ],
+    "t": 0.3
+   },
+   "ollama": {
+    "changed": false,
+    "unresolved": 0,
+    "versions": {
+     "0.34.2": 444
+    }
+   },
+   "rows": 444,
+   "thresholds": {
+    "0.3": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.4482
+    },
+    "0.5": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.3694
+    },
+    "0.7": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.2973
+    }
+   }
+  },
+  "2026-W44": {
+   "answered": 315,
+   "answered_rate": 1.0,
+   "decision_reasons": {
+    "answered": 315
+   },
+   "judged": 315,
+   "latency_ms_p50": 2613.0,
+   "latency_ms_p95": 6495.0,
+   "live_gate_rate": null,
+   "live_gate_rate_answered": null,
+   "live_scored": 0,
+   "margin": {
+    "half_width": 0.05,
+    "near": 20,
+    "posts": 314,
+    "share": 0.0637,
+    "share_ci": [
+     0.0416,
+     0.0963
+    ],
+    "t": 0.3
+   },
+   "ollama": {
+    "changed": false,
+    "unresolved": 0,
+    "versions": {
+     "0.34.2": 315
+    }
+   },
+   "rows": 315,
+   "thresholds": {
+    "0.3": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.5556
+    },
+    "0.5": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.4825
+    },
+    "0.7": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.4063
+    }
+   }
+  },
+  "2026-W45": {
+   "answered": 523,
+   "answered_rate": 1.0,
+   "decision_reasons": {
+    "answered": 523
+   },
+   "judged": 523,
+   "latency_ms_p50": 2576.0,
+   "latency_ms_p95": 5900.0,
+   "live_gate_rate": null,
+   "live_gate_rate_answered": null,
+   "live_scored": 0,
+   "margin": {
+    "half_width": 0.05,
+    "near": 15,
+    "posts": 480,
+    "share": 0.0312,
+    "share_ci": [
+     0.019,
+     0.0509
+    ],
+    "t": 0.3
+   },
+   "ollama": {
+    "changed": false,
+    "unresolved": 0,
+    "versions": {
+     "0.34.2": 523
+    }
+   },
+   "rows": 523,
+   "thresholds": {
+    "0.3": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.3996
+    },
+    "0.5": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.3212
+    },
+    "0.7": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.2792
+    }
+   }
+  },
+  "2026-W46": {
+   "answered": 484,
+   "answered_rate": 1.0,
+   "decision_reasons": {
+    "answered": 484
+   },
+   "judged": 484,
+   "latency_ms_p50": 2578.0,
+   "latency_ms_p95": 3479.0,
+   "live_gate_rate": null,
+   "live_gate_rate_answered": null,
+   "live_scored": 0,
+   "margin": {
+    "half_width": 0.05,
+    "near": 23,
+    "posts": 484,
+    "share": 0.0475,
+    "share_ci": [
+     0.0319,
+     0.0703
+    ],
+    "t": 0.3
+   },
+   "ollama": {
+    "changed": false,
+    "unresolved": 0,
+    "versions": {
+     "0.34.2": 484
+    }
+   },
+   "rows": 484,
+   "thresholds": {
+    "0.3": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.345
+    },
+    "0.5": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.2479
+    },
+    "0.7": {
+     "agreement_with_live": null,
+     "would_gate_rate": 0.1756
+    }
+   }
+  }
+ },
+ "window": {
+  "end": "2026-11-13",
+  "start": "2026-10-17"
+ }
+}

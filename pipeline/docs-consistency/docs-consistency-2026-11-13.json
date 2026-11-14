@@ -1,0 +1,55 @@
+{
+  "findings": [
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0071-mac-lab-readings-calibration.md",
+      "line": 46,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0073-november-observation-reads.md",
+      "line": 45,
+      "reason": "VERDICT_UNKNOWN",
+      "detail": "verdict 'blocked（残りの行）' not in dead-band, hold, ready, ask-owner, stale"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0075-comment-quality-under-fifty.md",
+      "line": 91,
+      "reason": "VERDICT_MISSING",
+      "detail": "section has no `verdict:` line"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0077-state-diff-start-day-gap.md",
+      "line": 51,
+      "reason": "VERDICT_UNKNOWN",
+      "detail": "verdict 'dispatched' not in dead-band, hold, ready, ask-owner, stale"
+    },
+    {
+      "check": "rfc_reconcile",
+      "file": "rfcs/0078-surface-counter-reply-share.md",
+      "line": 42,
+      "reason": "VERDICT_UNKNOWN",
+      "detail": "verdict 'dispatched' not in dead-band, hold, ready, ask-owner, stale"
+    }
+  ],
+  "count": 5,
+  "readings": {
+    "freshness": [
+      {
+        "file": "docs/CYCLES.md",
+        "generated": "2026-10-31",
+        "source_commit": "235153cc",
+        "commits_behind": 104,
+        "days_old": 14
+      }
+    ]
+  },
+  "errors": [],
+  "readings_count": 1,
+  "abstain_count": 0,
+  "scanned_files": 512
+}
