@@ -1,3 +1,8 @@
+---
+origin: rules-distill
+adopted: 2026-04-11
+---
+
 # Flow with Contextual Fluidity rather than Fixed Adherence
 
 **Practice:** Treat all incoming signals as evidence of a living connection rather than static data points or frozen identities, allowing friction and uncertainty to shape the interaction flow dynamically instead of correcting everything through rigid protocols or dogmatic rule application.
