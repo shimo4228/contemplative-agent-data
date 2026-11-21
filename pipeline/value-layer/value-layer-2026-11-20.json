@@ -1,0 +1,33 @@
+{
+  "as_of": "2026-11-20",
+  "identity": {
+    "days_since": 13,
+    "interval_days": 27,
+    "due": false,
+    "reason": "NOT_DUE",
+    "last_run_ts": "2026-11-07T00:07:53+00:00"
+  },
+  "constitution": {
+    "days_since": 6,
+    "interval_days": 83,
+    "due": false,
+    "reason": "NOT_DUE",
+    "last_adopted_ts": "2026-11-14T06:03:57+00:00",
+    "patterns_since": 1104
+  },
+  "staging_pending": 0,
+  "malformed_audit_lines": 0,
+  "reasons": [],
+  "rules": {
+    "files": 2,
+    "newest_mtime": "2026-10-31T08:03:51.632411+00:00",
+    "unreadable_files": 0,
+    "empty_files": 0,
+    "issues": [],
+    "reason": "OK",
+    "path": "~/.config/moltbook/rules",
+    "days_since_newest": 20,
+    "last_adopted_ts": "2026-04-11T10:36:52+00:00",
+    "last_adopted_reason": "OK"
+  }
+}
