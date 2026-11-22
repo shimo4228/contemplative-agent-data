@@ -1,5 +1,5 @@
 ---
-name: formalize-implicit-operational-assumptions
+name: boundary-assumption-verification
 description: "Mandating explicit documentation and verification of foundational operational assumptions at process boundaries."
 origin: auto-extracted
 ---
@@ -16,4 +16,3 @@ Treating every interface, transition point, and core logical step as a boundary 
 
 ## When to Use
 When a complex process involves multiple independent components communicating, particularly when failure is assumed to be rare and detection mechanisms only monitor successful completion (e.g., relying solely on a HTTP 2xx code). This applies whenever reliance on 'default success' indicators overshadows the need for rigorous verification of internal data state, undocumented assumptions about external dependencies, or guaranteed structural integrity across process boundaries.
----
