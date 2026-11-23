@@ -2,7 +2,7 @@
  "coverage": {
   "snapshots": 123,
   "first_ts": "2026-08-07T23:00:03Z",
-  "last_ts": "2026-11-22T18:30:00Z"
+  "last_ts": "2026-11-23T18:30:02Z"
  },
  "changes": [
   {
@@ -28,9 +28,9 @@
   {
    "kind": "constitution",
    "from_snapshot": "amend-constitution_20260809T052952499578Z",
-   "to_snapshot": "distill_20260814T183007510345Z",
+   "to_snapshot": "insight_20260814T230000402258Z",
    "ts_from": "2026-08-09T05:29:52Z",
-   "ts_to": "2026-08-14T18:30:07Z",
+   "ts_to": "2026-08-14T23:00:00Z",
    "sha_before": "752c85503be8",
    "sha_after": "5154112a5df1",
    "files_added": [],
